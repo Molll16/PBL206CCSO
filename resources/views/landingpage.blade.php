@@ -6,6 +6,45 @@
   <title>landing page- Central Cyber Security Office</title>
   <link rel="stylesheet" href="../css/landingpage.css">
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes animasilp {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+html {
+    animation: animasilp 300ms ease-in-out;
+    scroll-behavior: smooth;
+}
+
+.reveal {
+    opacity: 0;
+    transition: all 0.8s ease;
+}
+
+.reveal-up {
+    transform: translateY(40px);
+}
+
+.reveal-left {
+    transform: translateX(-60px);
+}
+
+.reveal-right {
+    transform: translateX(60px);
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translate(0, 0);
+}
+  </style>
+
 
   <script>
     tailwind.config = {

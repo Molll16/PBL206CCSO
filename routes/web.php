@@ -2,8 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/landingpage', function () {
-    return view('/landingpage');
+Route::get('/', function () {
+    return view('landingpage');
 });
 
 Route::get('/daftar', function () {
