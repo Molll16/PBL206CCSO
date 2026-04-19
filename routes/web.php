@@ -1,9 +1,10 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('landingpage');
+    return view('create');
 });
 
 Route::get('/daftar', function () {
@@ -24,3 +25,6 @@ Route::get('/dashboard', function () {
 
 
 
+// kode Admin kelola akun customer
+Route::get('/customers/create', [CustomerController::class, 'create']);
+Route::post('/customers', [CustomerController::class, 'store']);
