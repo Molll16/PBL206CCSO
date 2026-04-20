@@ -18,6 +18,7 @@ class CustomerController extends Controller
     {
         User::create([
             'name' => $request->name,
+            'username' => $request->username,
             'email' => $request->email,
             'password' => $request->password,
             'no_telp' => $request->no_telp,
