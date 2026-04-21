@@ -5,7 +5,7 @@ use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('adduser-admin');
+    return view('landingpage');
 });
 
 Route::get('/daftar', function () {
@@ -24,20 +24,24 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 });
 
-Route::get('/admin/dashboard', function () {
-    return view('admin.dashboard');
+Route::get('/Admin/dashboard', function () {
+    return view('Admin.dashboard');
 })->name('dashboard-admin');
 
 Route::get('/usersadmin', function () {
-    return view('users-admin');
+    return view('Admin.users-admin');
 })->name('usersadmin');
 
-Route::get('/adduser-admin', function () {
-    return view('adduser-admin');
+Route::get('/Admin/adduser-admin', function () {
+    return view('Admin.adduser-admin');
 })->name('adduser');
 
+Route::get('/Customer/customisasi', function () {
+    return view('Customer.customisasi');
+})->name('customisasi');
+
 // kode Login 
-Route::get('/login', [AuthController::class, 'showLoginForm']);
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 
 // kode Admin kelola akun customer

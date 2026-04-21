@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #25282c; color: #e5e7eb; }
+        body { font-family: 'Inter', sans-serif; background-color: #2b2d34; color: #e5e7eb; }
         .bg-header { background-color: #1a1c1e; }
         .bg-card { background-color: #2b2d32; }
         .border-custom { border-color: #4a4e54; }
