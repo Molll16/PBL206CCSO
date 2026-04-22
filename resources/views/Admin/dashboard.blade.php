@@ -42,8 +42,12 @@
         .hover-scale { transition: transform 0.2s ease; }
         .hover-scale:hover { transform: scale(1.02); }
     </style>
+    
 </head>
 <body class="min-h-screen bg-[#2B2D34]">
+
+
+<!--sidebar totalitas-->
 
     <div id="sidebar-backdrop"
        onclick="closeSidebar()"
@@ -62,7 +66,10 @@
       </div>
       <button onclick="closeSidebar()"
               class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-700 transition text-gray-400 hover:text-white text-base">
-        ‹
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+
       </button>
     </div>
 
@@ -78,6 +85,7 @@
 
       <!-- Customization -->
       <div>
+
         <button onclick="toggleSubmenu('customization-menu', 'chevron-customization')"
                 class="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-300 hover:bg-[#2c2c2c] transition border-l-[3px] border-transparent">
           <div class="flex items-center gap-3">
@@ -90,33 +98,43 @@
             <path d="M19 9l-7 7-7-7"/>
           </svg>
         </button>
+
         <div id="customization-menu" class="hidden bg-[#161616]">
           <a href={{ route('adduser') }} class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Add User</a>
         </div>
+
       </div>
 
       <!-- Agent -->
       <div>
         <button onclick="toggleSubmenu('agent-menu', 'chevron-agent')"
                 class="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-300 hover:bg-[#2c2c2c] transition border-l-[3px] border-transparent">
+
           <div class="flex items-center gap-3">
             <img src="/db/agent.png" class="w-4" alt="">
             Agent
           </div>
+
           <svg id="chevron-agent"
                class="w-3.5 h-3.5 text-gray-500 transition-transform duration-300"
                fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7"/>
           </svg>
+
         </button>
+
         <div id="agent-menu" class="hidden bg-[#161616]">
           <a href="#" class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Information</a>
-          <a href="#" class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Deployment</a>
+          <a href={{ route('assignagent') }} class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Deployment</a>
         </div>
       </div>
 
     </nav>
   </aside>
+
+<!-- end sidebar -->
+
+<!-- navbar totalitas bagian atas pertama -->
 
   <!-- NAVBAR -->
   <header class="bg-[#212121] border-b-2 border-white sticky top-0 z-20">
@@ -147,28 +165,35 @@
 
         <!-- Manage Dropdown -->
         <div class="relative">
+
           <button onclick="toggleManage()"
                   class="flex items-center gap-2 border border-white rounded-md px-4 py-2 text-sm hover:bg-[#2c2c2c] transition">
             Manage
-            <img id="arrow-manage" src="/db/arrow.png" class="w-3 transition-transform duration-200">
+            <img src="/db/arrow.png" id="arrow-manage" class="w-3 transition-transform duration-200" alt="">
+
+            <svg id="chevron-manage"
+               class="w-3.5 h-3.5 text-gray-500 transition-transform duration-300"
+               fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path d="M19 9l-7 7-7-7"/>
+          </svg>
+
           </button>
 
           <!-- Dropdown Menu -->
           <div id="manage-menu"
                class="hidden absolute right-0 mt-2 w-32 bg-[#1e1e1e] border rounded-md shadow-xl overflow-hidden">
             <a href="#" class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Profile Settings</a>
-            <a href="#" class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Logout</a>
+            <a href="{{ route('login') }}" class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Logout</a>
           </div>
+
         </div>
-
-        <button class="flex items-center justify-center w-9 h-9 border border-white rounded-md text-lg hover:bg-[#2c2c2c] transition">
-          +
-        </button>
       </div>
-
     </div>
   </header>
 
+<!-- penutup navbar totalitas bagian atas pertama -->
+
+<!-- navbar kedua -->
     <div class="bg-[#2B2D34] px-6 flex items-center justify-between border-b-2 border-white animate-fade-in delay-1">
         <div class="flex gap-8">
             <a href="#" class="py-3 text-cyan-400 border-b-2 border-blue-400 font-medium text-sm">Dashboard</a>
@@ -176,6 +201,7 @@
         </div>
         <a href="#" class="text-white/60 hover:text-white transition text-sm">Profile Settings</a>
     </div>
+<!-- penutup navbar kedua -->
 
     <div class="p-6 max-w-[1400px] mx-auto">
         <div class="grid grid-cols-4 gap-4 mb-8 text-center">
@@ -293,7 +319,7 @@
     </div>
 
     <script>
-
+// Buat fungsi untuk navbar pertama
         //sidebar toggle
         
     function openSidebar() {
@@ -309,6 +335,7 @@
       document.getElementById('sidebar-backdrop').classList.add('opacity-0', 'pointer-events-none');
       document.getElementById('sidebar-backdrop').classList.remove('opacity-100');
     }
+// end sidebar
 
     function toggleSubmenu(menuId, chevronId) {
       document.getElementById(menuId).classList.toggle('hidden');
@@ -318,8 +345,10 @@
     function toggleManage() {
       const menu = document.getElementById('manage-menu');
       const arrow = document.getElementById('arrow-manage');
-      menu.classList.toggle('hidden');
-      arrow.classList.toggle('rotate-180');
+      const chevron = document.getElementById('chevron-manage');
+        menu.classList.toggle('hidden');
+        arrow.classList.toggle('rotate-180');
+        chevron.classList.toggle('rotate-180');
     }
 
     // Tutup dropdown Manage jika klik di luar
@@ -329,9 +358,11 @@
       if (!btn.contains(e.target) && !menu.contains(e.target)) {
         menu.classList.add('hidden');
         document.getElementById('arrow-manage').classList.remove('rotate-180');
+        document.getElementById('chevron-manage').classList.remove('rotate-180');
       }
     });
-        // end sidebar
+// penutup fungsi untuk navbar pertama
+
 
         // Data dikosongkan sesuai permintaan
         let agentsData = [];

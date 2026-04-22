@@ -15,14 +15,28 @@ class CustomerController extends Controller
 
     // Nerima data dari form
     public function store(Request $request)
-    {
-        User::create([
-            'name' => $request->name,
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => $request->password,
-            'no_telp' => $request->no_telp,
-            'role' => 'customer'
-        ]);
-    }
+{
+    $request->validate([
+        'email' => 'required',
+        'name' => 'required',
+        'username' => 'required',
+        'password' => 'required',
+        'no_telp' => 'required',
+    ], [
+        'email.required' => 'Email tidak boleh kosong',
+        'name.required' => 'Nama tidak boleh kosong',
+        'username.required' => 'Username tidak boleh kosong',
+        'password.required' => 'Password tidak boleh kosong',
+        'no_telp.required' => 'Nomor HP tidak boleh kosong',
+    ]);
+
+    User::create([
+        'name' => $request->name,
+        'username' => $request->username,
+        'email' => $request->email,
+        'password' => $request->password,
+        'no_telp' => $request->no_telp,
+        'role' => 'customer'
+    ]);
+}
 }

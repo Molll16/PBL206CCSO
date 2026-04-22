@@ -49,6 +49,11 @@
       <img src="/logindark/logo.png" width="100" height="100">
       <br>
 
+    @if(session('error'))
+    <div class="bg-red-500 text-white text-sm p-2 rounded mb-3 text-center">
+        {{ session('error') }}
+    </div>
+    @endif
     
     <form action="/login" method="POST" class="w-full">
       @csrf
@@ -82,7 +87,7 @@
       <br>
 
       <!-- Tombol Login -->
-      <div class="flex gap-3 w-32 mb-4">
+      <div class="flex gap-3 w-40 mb-4 mx-auto">
         <button class="flex-1 py-2 rounded-md text-white text-sm font-tahoma" style="background:#2a7db5;">Login</button>
       </div>
     </form>

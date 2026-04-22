@@ -16,14 +16,15 @@ Route::get('/login', function () {
     return view('login');
     })->name('login');
 
-Route::get('/onboarding', function () {
-    return view('onboarding');
-});
-
 Route::get('/dashboard', function () {
     return view('dashboard');
 });
 
+Route::get('/Customer/customisasi', function () {
+    return view('Customer.customisasi');
+})->name('customisasi');
+
+// rute untuk admin
 Route::get('/Admin/dashboard', function () {
     return view('Admin.dashboard');
 })->name('dashboard-admin');
@@ -36,9 +37,11 @@ Route::get('/Admin/adduser-admin', function () {
     return view('Admin.adduser-admin');
 })->name('adduser');
 
-Route::get('/Customer/customisasi', function () {
-    return view('Customer.customisasi');
-})->name('customisasi');
+Route::get('/Admin/assignagent', function () {
+    return view('Admin.assignagent');
+})->name('assignagent');
+// penutup rute untuk admin
+
 
 // kode Login 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
