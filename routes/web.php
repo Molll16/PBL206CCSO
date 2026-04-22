@@ -20,9 +20,35 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 });
 
+// rute untuk customer
 Route::get('/Customer/customisasi', function () {
     return view('Customer.customisasi');
 })->name('customisasi');
+
+Route::get('/profileset', function () {
+    return view('Customer.profileset');
+})->name('profile-setting');
+
+Route::get('/profileserver', function () {
+    return view('Customer.profileserver');
+})->name('profile-server');
+
+Route::get('/profilecostume', function () {
+    return view('Customer.profilecostume');
+})->name('profile-costume');
+
+Route::get('/profile', function () {
+    return view('Customer.profile');
+})->name('profile-overview');
+
+Route::get('/dashboarddft', function () {
+    return view('Customer.dashboarddft');
+})->name('dashboard-default');
+
+Route::get('/changepw', function () {
+    return view('Customer.changepw');
+})->name('dashboard-changepw');
+// penutup rute untuk customer
 
 // rute untuk admin
 Route::get('/Admin/dashboard', function () {
