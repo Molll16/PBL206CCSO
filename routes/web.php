@@ -48,6 +48,10 @@ Route::get('/dashboarddft', function () {
 Route::get('/changepw', function () {
     return view('Customer.changepw');
 })->name('dashboard-changepw');
+
+Route::get('/kustom', function () {
+    return view('Customer.kustom');
+})->name('kustom-default');
 // penutup rute untuk customer
 
 // rute untuk admin

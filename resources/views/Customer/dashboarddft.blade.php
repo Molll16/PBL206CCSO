@@ -240,9 +240,8 @@
       const alert = document.getElementById('pwd-alert');
       alert.style.display = 'none';
     }
-  </script>
 
-    <script>
+    //SIDEBAR AND MANAGE
     function openSidebar() {
       document.getElementById('sidebar').classList.remove('-translate-x-full');
       document.getElementById('sidebar').classList.add('translate-x-0');
