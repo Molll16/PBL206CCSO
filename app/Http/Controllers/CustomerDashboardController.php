@@ -12,30 +12,32 @@ class CustomerDashboardController extends Controller
     public function save(Request $request)
     {
         if ($request->dashboard_id) {
-    
-            $dashboard = DasborKustom::findOrFail($request->dashboard_id);
-    
+
+            $dashboard = DasborKustom::where('id', $request->dashboard_id)
+                ->where('user_id', auth()->id())
+                ->firstOrFail();
+
             $dashboard->update([
                 'nama_dasbor' => $request->nama_dashboard,
             ]);
-    
+
             HasilKustom::where(
                 'dasbor_kustom_id',
                 $dashboard->id
             )->delete();
-    
+
         } else {
-    
+
             $dashboard = DasborKustom::create([
                 'user_id' => auth()->id(),
                 'nama_dasbor' => $request->nama_dashboard,
                 'status_dasbor' => 'aktif',
             ]);
         }
-    
-    
+
+
         foreach ($request->fitur as $item) {
-    
+
             HasilKustom::create([
                 'dasbor_kustom_id' => $dashboard->id,
                 'fitur_id' => $item['fitur_id'],
@@ -44,7 +46,7 @@ class CustomerDashboardController extends Controller
                 'status_fitur' => 'aktif',
             ]);
         }
-    
+
         return response()->json([
             'success' => true
         ]);
@@ -53,12 +55,14 @@ class CustomerDashboardController extends Controller
 
     public function edit($id)
     {
-        $dashboard = DasborKustom::findOrFail($id);
+        $dashboard = DasborKustom::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
 
         $fitur = Fitur::all();
 
         $hasil = HasilKustom::with('fitur')
-            ->where('dasbor_kustom_id', $id)
+            ->where('dasbor_kustom_id', $dashboard->id)
             ->get()
             ->map(function ($item) {
                 return [
@@ -77,12 +81,36 @@ class CustomerDashboardController extends Controller
         ));
     }
 
+
     public function destroy($id)
     {
-        HasilKustom::where('dasbor_kustom_id', $id) ->delete();
-    
-        DasborKustom::where('id', $id)->delete();
-    
+        $dashboard = DasborKustom::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        HasilKustom::where(
+            'dasbor_kustom_id',
+            $dashboard->id
+        )->delete();
+
+        $dashboard->delete();
+
         return redirect('/choosedashboard');
+    }
+
+    public function useDashboard($id)
+    {
+        DasborKustom::where('user_id', auth()->id())
+            ->update([
+                'status_dasbor' => 'nonaktif'
+            ]);
+    
+        DasborKustom::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->update([
+                'status_dasbor' => 'aktif'
+            ]);
+    
+        return back();
     }
 }

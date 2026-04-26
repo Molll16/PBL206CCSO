@@ -13,7 +13,6 @@
 
 @include('components.header')
 
-<!-- Content -->
 <div class="flex-1 px-5 py-5">
 
     <!-- Judul -->
@@ -21,38 +20,14 @@
         OpenSource Dashboard
     </h1>
 
-    <!-- Grid Card -->
+    <!-- Grid -->
     <div class="grid grid-cols-4 gap-6">
 
-        <!-- Default -->
-        <div class="border border-white rounded-md h-52 p-4 flex flex-col justify-between">
-
-            <div class="flex justify-center items-center flex-1 text-xl font-medium">
-                Default
-            </div>
-
-            <div class="flex justify-center gap-2">
-
-                <a href="/dashboard"
-                   class="border border-white px-4 py-1 rounded text-sm hover:bg-white hover:text-black transition">
-                    View
-                </a>
-
-                <button class="bg-green-600 px-4 py-1 rounded text-sm hover:bg-green-700 transition">
-                    In Use
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <!-- Dashboard Dari Database -->
         @foreach($dashboard as $item)
 
         <div class="border border-white rounded-md h-52 p-4 flex flex-col justify-between">
 
-            <!-- Nama -->
+            <!-- Nama Dashboard -->
             <div class="flex justify-center items-center flex-1 text-center text-lg font-medium px-2">
                 {{ $item->nama_dasbor }}
             </div>
@@ -66,25 +41,49 @@
                     View
                 </a>
 
-                <!-- Use -->
-                <button class="bg-blue-500 px-4 py-1 rounded text-sm hover:bg-blue-600 transition">
-                    Use
-                </button>
+                <!-- Status Aktif / Use -->
+                @if($item->status_dasbor == 'aktif')
 
-                <!-- Delete -->
-                <form action="{{ route('dashboard.delete', $item->id) }}"
-                      method="POST"
-                      onsubmit="return confirm('Hapus dashboard ini?')">
-
-                    @csrf
-                    @method('DELETE')
-
-                    <button type="submit"
-                        class="bg-red-600 px-4 py-1 rounded text-sm hover:bg-red-700 transition">
-                        Delete
+                    <button
+                        class="bg-green-600 px-4 py-1 rounded text-sm cursor-default">
+                        In Use
                     </button>
 
-                </form>
+                @else
+
+                    <form action="{{ route('dashboard.use', $item->id) }}"
+                          method="POST">
+
+                        @csrf
+
+                        <button type="submit"
+                            class="bg-blue-500 px-4 py-1 rounded text-sm hover:bg-blue-600 transition">
+                            Use
+                        </button>
+
+                    </form>
+
+                @endif
+
+
+                <!-- Delete hanya custom -->
+                @if($item->jenis_dasbor == 'custom')
+
+                    <form action="{{ route('dashboard.delete', $item->id) }}"
+                          method="POST"
+                          onsubmit="return confirm('Hapus dashboard ini?')">
+
+                        @csrf
+                        @method('DELETE')
+
+                        <button type="submit"
+                            class="bg-red-600 px-4 py-1 rounded text-sm hover:bg-red-700 transition">
+                            Delete
+                        </button>
+
+                    </form>
+
+                @endif
 
             </div>
 

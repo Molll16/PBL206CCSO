@@ -7,15 +7,18 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // nampilin UI login
     public function showLoginForm()
     {
         return view('login');
     }
 
-    // proses login
     public function login(Request $request)
     {
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required'
+        ]);
+
         $credentials = [
             'username' => $request->username,
             'password' => $request->password
@@ -23,14 +26,28 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
 
+            $request->session()->regenerate();
+
             if (Auth::user()->role == 'admin') {
                 return redirect()->route('dashboard-admin');
-            } else {
-                return redirect()->route('dashboard-customer');
             }
+
+            return redirect()->route('dashboard-customer');
         }
 
-        // Login failed
-        return back()->with('error', 'Login Gagal, pastikan username dan password benar!');
+        return back()->with(
+            'error',
+            'Login gagal, username / password salah.'
+        );
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/login');
     }
 }

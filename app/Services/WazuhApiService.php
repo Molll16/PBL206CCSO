@@ -12,7 +12,7 @@ class WazuhApiService
 
     public function __construct()
     {
-        $this->url = config('services.wazuh.url');
+        $this->url  = config('services.wazuh.url');
         $this->user = config('services.wazuh.user');
         $this->pass = config('services.wazuh.pass');
     }
@@ -20,6 +20,7 @@ class WazuhApiService
     public function token()
     {
         $response = Http::withoutVerifying()
+            ->timeout(30)
             ->withBasicAuth($this->user, $this->pass)
             ->get($this->url . '/security/user/authenticate?raw=true');
 
@@ -31,6 +32,7 @@ class WazuhApiService
         $token = $this->token();
 
         return Http::withoutVerifying()
+            ->timeout(30)
             ->withToken($token)
             ->get($this->url . '/agents')
             ->json();
@@ -41,8 +43,9 @@ class WazuhApiService
         $token = $this->token();
 
         return Http::withoutVerifying()
+            ->timeout(30)
             ->withToken($token)
-            ->get($this->url . '/manager/logs')
+            ->get($this->url . '/manager/logs?limit=500')
             ->json();
     }
 
@@ -51,6 +54,7 @@ class WazuhApiService
         $token = $this->token();
 
         return Http::withoutVerifying()
+            ->timeout(30)
             ->withToken($token)
             ->get($this->url . '/security/events')
             ->json();
@@ -63,6 +67,7 @@ class WazuhApiService
         $pass = config('services.indexer.pass');
 
         return Http::withoutVerifying()
+            ->timeout(30)
             ->withBasicAuth($user, $pass)
             ->post($url . '/wazuh-alerts-*/_search', [
                 'size' => 1000

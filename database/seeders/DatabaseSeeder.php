@@ -23,6 +23,16 @@ class DatabaseSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
+        DB::table('users')->insert([
+            'name' => 'Customer',
+            'username' => 'customer',
+            'email' => 'customer@gmail.com',
+            'password' => Hash::make('123'),
+            'role' => 'customer',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         $this->call(FiturSeeder::class);
 
         User::firstOrCreate(['email' => 'test@example.com'],

@@ -16,13 +16,21 @@ class HasilKustom extends Model
         'status_fitur'
     ];
 
+
     public function fitur()
     {
-        return $this->belongsTo(Fitur::class);
+        return $this->belongsTo(
+            Fitur::class,
+            'fitur_id'
+        );
     }
+
 
     public function dashboard()
     {
-        return $this->belongsTo(DasborKustom::class, 'dasbor_kustom_id');
+        return $this->belongsTo(
+            DasborKustom::class,
+            'dasbor_kustom_id'
+        );
     }
 }
