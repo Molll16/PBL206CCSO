@@ -41,4 +41,10 @@ return [
         'pass' => env('WAZUH_PASS'),
     ],
 
+    'indexer' => [
+        'url' => env('INDEXER_URL'),
+        'user' => env('INDEXER_USER'),
+        'pass' => env('INDEXER_PASS'),
+    ],
+
 ];

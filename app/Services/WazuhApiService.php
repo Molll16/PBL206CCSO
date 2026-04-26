@@ -52,7 +52,21 @@ class WazuhApiService
 
         return Http::withoutVerifying()
             ->withToken($token)
-            ->get($this->url . '/alerts')
+            ->get($this->url . '/security/events')
+            ->json();
+    }
+
+    public function alertsFromIndexer()
+    {
+        $url  = config('services.indexer.url');
+        $user = config('services.indexer.user');
+        $pass = config('services.indexer.pass');
+
+        return Http::withoutVerifying()
+            ->withBasicAuth($user, $pass)
+            ->post($url . '/wazuh-alerts-*/_search', [
+                'size' => 1000
+            ])
             ->json();
     }
 }

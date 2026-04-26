@@ -12,9 +12,8 @@ class AdminDashboardController extends Controller
 
         $items = $agents['data']['affected_items'] ?? [];
 
-        $alerts = $wazuh->alerts();
+        $alerts = $wazuh->logs();
         $alertItems = $alerts['data']['affected_items'] ?? [];
-
         $active = collect($items)->where('status', 'active')->count();
         $pending = collect($items)->where('status', 'pending')->count();
         $disconnected = collect($items)->where('status', 'disconnected')->count();
