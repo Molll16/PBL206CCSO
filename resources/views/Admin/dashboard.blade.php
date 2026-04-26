@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    @vite('resources/js/app.js')
     <style>
         body { font-family: 'Inter', sans-serif; background-color: ##2b2d34; color: #e5e7eb; overflow-x: hidden; }
         .bg-card { background-color: #2b2d32; }
@@ -203,79 +205,160 @@
     </div>
 <!-- penutup navbar kedua -->
 
+
     <div class="p-6 max-w-[1400px] mx-auto">
-        <div class="grid grid-cols-4 gap-4 mb-8 text-center">
-            <div class="group cursor-default animate-fade-in delay-1">
-                <p class="text-sm text-white group-hover:text-blue-400 transition-colors">All Agent Active</p>
-                <h2 class="text-4xl font-bold mt-1" id="stat-active">00</h2>
-            </div>
-            <div class="group cursor-default animate-fade-in delay-1">
-                <p class="text-sm text-white group-hover:text-yellow-400 transition-colors">All Agent Pending</p>
-                <h2 class="text-4xl font-bold mt-1" id="stat-pending">00</h2>
-            </div>
-            <div class="group cursor-default animate-fade-in delay-2">
-                <p class="text-sm text-white group-hover:text-red-400 transition-colors">All Agent Disconnected</p>
-                <h2 class="text-4xl font-bold mt-1" id="stat-disconnected">00</h2>
-            </div>
-            <div class="group cursor-default animate-fade-in delay-2">
-                <p class="text-sm text-white">All Agent Never Connected</p>
-                <h2 class="text-4xl font-bold mt-1 text-gray-500">00</h2>
+
+    {{-- Statistik Atas --}}
+    <div class="grid grid-cols-4 gap-4 mb-8 text-center">
+
+        <div class="group cursor-default animate-fade-in delay-1">
+            <p class="text-sm text-white group-hover:text-blue-400 transition-colors">
+                All Agent Active
+            </p>
+            <h2 class="text-4xl font-bold mt-1 text-green-400">
+                {{ $active }}
+            </h2>
+        </div>
+
+        <div class="group cursor-default animate-fade-in delay-1">
+            <p class="text-sm text-white group-hover:text-yellow-400 transition-colors">
+                All Agent Pending
+            </p>
+            <h2 class="text-4xl font-bold mt-1 text-yellow-400">
+                {{ $pending }}
+            </h2>
+        </div>
+
+        <div class="group cursor-default animate-fade-in delay-2">
+            <p class="text-sm text-white group-hover:text-red-400 transition-colors">
+                All Agent Disconnected
+            </p>
+            <h2 class="text-4xl font-bold mt-1 text-red-400">
+                {{ $disconnected }}
+            </h2>
+        </div>
+
+        <div class="group cursor-default animate-fade-in delay-2">
+            <p class="text-sm text-white">
+                All Agent Never Connected
+            </p>
+            <h2 class="text-4xl font-bold mt-1 text-gray-400">
+                {{ $never }}
+            </h2>
+        </div>
+
+    </div>
+
+    {{-- Agent By Status --}}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+        <div class="border border-white p-4 rounded bg-transparent hover-scale animate-fade-in delay-1">
+            <h3 class="text-sm mb-4 text-white">Agent by status</h3>
+
+            <div class="grid grid-cols-2 grid-rows-2 h-40 border-l border-t border-custom">
+
+                <div class="border-r border-b border-custom flex flex-col items-center justify-center p-2 hover:bg-green-500/10 transition-all">
+                    <i data-lucide="user-check" class="w-5 h-5 text-green-400 mb-1"></i>
+                    <span class="text-[10px] text-gray-400 uppercase">Active</span>
+                    <span class="font-bold text-green-400">{{ $active }}</span>
+                </div>
+
+                <div class="border-r border-b border-custom flex flex-col items-center justify-center p-2 hover:bg-yellow-500/10 transition-all">
+                    <i data-lucide="user-minus" class="w-5 h-5 text-yellow-400 mb-1"></i>
+                    <span class="text-[10px] text-gray-400 uppercase">Pending</span>
+                    <span class="font-bold text-yellow-400">{{ $pending }}</span>
+                </div>
+
+                <div class="border-r border-b border-custom flex flex-col items-center justify-center p-2 hover:bg-red-500/10 transition-all">
+                    <i data-lucide="user-x" class="w-5 h-5 text-red-400 mb-1"></i>
+                    <span class="text-[10px] text-gray-400 uppercase">Disconnected</span>
+                    <span class="font-bold text-red-400">{{ $disconnected }}</span>
+                </div>
+
+                <div class="border-r border-b border-custom flex flex-col items-center justify-center p-2 hover:bg-gray-500/10 transition-all">
+                    <i data-lucide="user" class="w-5 h-5 text-gray-500 mb-1"></i>
+                    <span class="text-[10px] text-gray-400 uppercase">Never</span>
+                    <span class="font-bold text-gray-400">{{ $never }}</span>
+                </div>
+
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="border border-white p-4 rounded bg-transparent hover-scale animate-fade-in delay-1">
-                <h3 class="text-sm mb-4 text-white">Agent by status</h3>
-                <div class="grid grid-cols-2 grid-rows-2 h-40 border-l border-t border-custom">
-                    <div class="border-r border-b border-custom flex flex-col items-center justify-center p-2 hover:bg-green-500/10 transition-all">
-                        <i data-lucide="user-check" class="w-5 h-5 text-green-400 mb-1"></i>
-                        <span class="text-[10px] text-gray-400 uppercase">Active</span>
-                        <span class="font-bold">0</span>
-                    </div>
-                    <div class="border-r border-b border-custom flex flex-col items-center justify-center p-2 hover:bg-yellow-500/10 transition-all">
-                        <i data-lucide="user-minus" class="w-5 h-5 text-yellow-400 mb-1"></i>
-                        <span class="text-[10px] text-gray-400 uppercase">Pending</span>
-                        <span class="font-bold">0</span>
-                    </div>
-                    <div class="border-r border-b border-custom flex flex-col items-center justify-center p-2 hover:bg-red-500/10 transition-all">
-                        <i data-lucide="user-x" class="w-5 h-5 text-red-400 mb-1"></i>
-                        <span class="text-[10px] text-gray-400 uppercase">Disconnected</span>
-                        <span class="font-bold">0</span>
-                    </div>
-                    <div class="border-r border-b border-custom flex flex-col items-center justify-center p-2 hover:bg-gray-500/10 transition-all">
-                        <i data-lucide="user" class="w-5 h-5 text-gray-500 mb-1"></i>
-                        <span class="text-[10px] text-gray-400 uppercase">Never</span>
-                        <span class="font-bold">0</span>
-                    </div>
-                </div>
+
+    <!-- Overview Agent -->
+        <div class="border border-white p-4 rounded bg-transparent flex flex-col items-center justify-center relative hover-scale animate-fade-in delay-2 overflow-hidden">
+
+            <h3 class="text-sm absolute top-4 left-4 text-white">
+                Overview Agent
+            </h3>
+
+            @php
+                $totalAgent = $active + $pending + $disconnected + $never;
+                $activePercent = $totalAgent > 0 ? ($active / $totalAgent) * 100 : 0;
+            @endphp
+
+            <div class="w-32 h-32 rounded-full relative flex items-center justify-center"
+                style="background:
+                conic-gradient(
+                #22c55e 0% {{ $activePercent }}%,
+                #1f2937 {{ $activePercent }}% 100%
+                );">
+
+                <div class="w-20 h-20 bg-[#111315] rounded-full"></div>
+
             </div>
 
-            <div class="border border-white p-4 rounded bg-transparent flex flex-col items-center justify-center relative hover-scale animate-fade-in delay-2 overflow-hidden">
-                <h3 class="text-sm absolute top-4 left-4 text-white">Overview Agent</h3>
-                <div class="w-32 h-32 rounded-full border-[16px] border-[#111315] relative transition-transform duration-1000 hover:rotate-180" 
-                     style="border-top-color: #333; border-right-color: #333; border-bottom-color: #333; border-left-color: #333;">
-                </div>
-                <p class="mt-4 text-sm font-medium tracking-widest text-gray-500 animate-pulse">NO AGENT DETECTED</p>
-            </div>
+            @if($totalAgent > 0)
+                <p class="mt-4 text-sm font-medium tracking-widest text-green-400 animate-pulse">
+                    {{ $totalAgent }} AGENT DETECTED
+                </p>
+            @else
+                <p class="mt-4 text-sm font-medium tracking-widest text-gray-500 animate-pulse">
+                    NO AGENT DETECTED
+                </p>
+            @endif
 
-            <div class="border border-white p-4 rounded bg-transparent hover-scale animate-fade-in delay-3">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-sm text-white">Statistic</h3>
-                    <span class="text-[10px] bg-blue-500/20 text-blue-400 px-2 rounded pulse-soft">Live Scanning</span>
-                </div>
-                <div class="h-40 w-full relative">
-                    <svg id="live-chart" viewBox="0 0 100 50" class="w-full h-full">
-                        <path d="M 0 50 L 100 50 M 0 40 L 100 40 M 0 30 L 100 30 M 0 20 L 100 20 M 0 10 L 100 10" stroke="#333" stroke-width="0.2"/>
-                        <polyline id="chart-line" points="0,50 100,50" fill="none" stroke="#60a5fa" stroke-width="1" class="transition-all duration-1000" />
-                    </svg>
-                </div>
-            </div>
         </div>
 
-        <div class="border border-white rounded overflow-hidden shadow-2xl animate-fade-in delay-3">
+
+
+    <!-- Live Scanning -->
+        <div class="border border-white p-4 rounded bg-transparent hover-scale animate-fade-in delay-3">
+
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h3 class="text-sm text-white">
+                        Threat Trend (7 Days)
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Total Alerts:
+                        <span class="text-red-400 font-bold">
+                            {{ $totalAlerts }}
+                        </span>
+                    </p>
+                </div>
+                <span class="text-[10px] bg-blue-500/20 text-blue-400 px-2 rounded pulse-soft">
+                    Live Analytics
+                </span>
+            </div>
+
+            <div class="h-40">
+                <canvas id="alertChart"></canvas>
+            </div>
+
+        </div>
+
+
+
+    <!-- Table Agent -->
+
+        <div class="md:col-span-3 border border-white rounded overflow-hidden shadow-2xl animate-fade-in delay-3">
             <div class="p-4 flex items-center justify-between border-b border-custom bg-[#2B2D34]">
                 <h3 class="font-medium flex items-center gap-2">
-                    Agents <span id="agent-count" class="text-xs bg-gray-700 px-2 py-0.5 rounded text-gray-300">0</span>
+                    Agents 
+                        <span id="agent-count" class="text-xs bg-gray-700 px-2 py-0.5 rounded text-gray-300">
+                            {{ count($items) }}
+                        </span>
                 </h3>
                 <div class="flex items-center gap-6 text-sm">
                     <button onclick="addRandomAgent()" class="flex items-center gap-2 text-white hover:text-blue-400 transition-all hover:translate-x-1">
@@ -307,157 +390,149 @@
                             <th class="p-3 font-medium text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="agent-table-body" class="divide-y divide-custom bg-[#212121]/30">
-                        </tbody>
+
+                <tbody class="divide-y divide-custom bg-[#212121]/30">
+                    @forelse($items as $agent)
+                    <tr class="hover:bg-white/5 transition">
+
+                        <td class="p-3">
+                            <input type="checkbox" class="accent-blue-500">
+                        </td>
+                    
+                        <td class="p-3 text-gray-400">
+                            {{ $agent['id'] }}
+                        </td>
+                    
+                        <td class="p-3 font-medium text-white">
+                            {{ $agent['name'] }}
+                        </td>
+                    
+                        <td class="p-3 text-gray-300">
+                            {{ $agent['ip'] }}
+                        </td>
+                    
+                        <td class="p-3 text-gray-300">
+                            {{ $agent['os']['name'] ?? '-' }}
+                        </td>
+                    
+                        <td class="p-3">
+                            @if($agent['status'] == 'active')
+                                <span class="text-green-400 font-semibold">Active</span>
+                            @elseif($agent['status'] == 'pending')
+                                <span class="text-yellow-400 font-semibold">Pending</span>
+                            @elseif($agent['status'] == 'disconnected')
+                                <span class="text-red-400 font-semibold">Disconnected</span>
+                            @else
+                                <span class="text-gray-400 font-semibold">
+                                    {{ $agent['status'] }}
+                                </span>
+                            @endif
+                        </td>
+                    
+                        <td class="p-3 text-right">
+                            <button class="text-blue-400 hover:underline">
+                                View
+                            </button>
+                        </td>
+                    
+                    </tr>
+                    
+                    @empty
+                    
+                    <tr>
+                        <td colspan="7" class="text-center p-8 text-gray-400">
+                            No Agent Found
+                        </td>
+                    </tr>
+                    
+                    @endforelse
+                    
+                    </tbody>
                 </table>
             </div>
 
             <div class="p-3 flex items-center justify-between text-xs text-white border-t border-white bg-[#2B2D34]">
-                <span>Showing <span id="current-rows">0</span> of 0 entries</span>
+                <span>
+                    Showing {{ count($items) }} of {{ count($items) }} entries
+                </span>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-// Buat fungsi untuk navbar pertama
-        //sidebar toggle
-        
-    function openSidebar() {
-      document.getElementById('sidebar').classList.remove('-translate-x-full');
-      document.getElementById('sidebar').classList.add('translate-x-0');
-      document.getElementById('sidebar-backdrop').classList.remove('opacity-0', 'pointer-events-none');
-      document.getElementById('sidebar-backdrop').classList.add('opacity-100');
+    /* =========================
+       TABLE BUTTON ACTION
+    ========================= */
+    
+    function refreshData() {
+        location.reload();
     }
-
-    function closeSidebar() {
-      document.getElementById('sidebar').classList.add('-translate-x-full');
-      document.getElementById('sidebar').classList.remove('translate-x-0');
-      document.getElementById('sidebar-backdrop').classList.add('opacity-0', 'pointer-events-none');
-      document.getElementById('sidebar-backdrop').classList.remove('opacity-100');
+    
+    function addRandomAgent() {
+        alert('Gunakan menu Deploy Agent untuk menambahkan agent baru.');
     }
-// end sidebar
-
-    function toggleSubmenu(menuId, chevronId) {
-      document.getElementById(menuId).classList.toggle('hidden');
-      document.getElementById(chevronId).classList.toggle('rotate-180');
-    }
-
-    function toggleManage() {
-      const menu = document.getElementById('manage-menu');
-      const arrow = document.getElementById('arrow-manage');
-      const chevron = document.getElementById('chevron-manage');
-        menu.classList.toggle('hidden');
-        arrow.classList.toggle('rotate-180');
-        chevron.classList.toggle('rotate-180');
-    }
-
-    // Tutup dropdown Manage jika klik di luar
-    document.addEventListener('click', function(e) {
-      const menu = document.getElementById('manage-menu');
-      const btn = menu.previousElementSibling;
-      if (!btn.contains(e.target) && !menu.contains(e.target)) {
-        menu.classList.add('hidden');
-        document.getElementById('arrow-manage').classList.remove('rotate-180');
-        document.getElementById('chevron-manage').classList.remove('rotate-180');
-      }
-    });
-// penutup fungsi untuk navbar pertama
-
-
-        // Data dikosongkan sesuai permintaan
-        let agentsData = [];
-
-        function renderTable(data) {
-            const tbody = document.getElementById('agent-table-body');
-            tbody.innerHTML = '';
-            
-            if (data.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="p-12 text-center">
-                            <div class="flex flex-col items-center justify-center opacity-40 animate-pulse">
-                                <i data-lucide="search-x" class="w-12 h-12 mb-3"></i>
-                                <p class="text-lg font-medium">Agent not found</p>
-                                <p class="text-xs">No active security agents detected in this sector.</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            } else {
-                data.forEach((agent, index) => {
-                    const statusColor = agent.status === 'active' ? 'bg-green-500' : 'bg-red-500';
-                    const row = `
-                        <tr class="table-row-hover group/row animate-fade-in" style="animation-delay: ${index * 0.05}s">
-                            <td class="p-3"><input type="checkbox" class="accent-blue-500"></td>
-                            <td class="p-3 text-gray-500 font-mono">${agent.id}</td>
-                            <td class="p-3 font-medium text-blue-100">${agent.name}</td>
-                            <td class="p-3 font-mono text-xs text-gray-400">${agent.ip}</td>
-                            <td class="p-3 flex items-center gap-2">
-                                <i data-lucide="${agent.osIcon}" class="w-4 h-4 text-gray-500"></i> ${agent.os}
-                            </td>
-                            <td class="p-3">
-                                <span class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full ${statusColor} shadow-[0_0_8px_rgba(34,197,94,0.4)] animate-pulse"></span> 
-                                    ${agent.status}
-                                </span>
-                            </td>
-                            <td class="p-3 text-right">
-                                <div class="flex justify-end gap-3 text-gray-500 opacity-0 group-hover/row:opacity-100 transition-opacity">
-                                    <button class="hover:text-blue-400"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                                    <button class="hover:text-white"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                    tbody.insertAdjacentHTML('beforeend', row);
-                });
+    
+    
+    /* =========================
+       ALERT CHART (7 DAYS)
+    ========================= */
+    
+    const ctx = document.getElementById('alertChart');
+    
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: @json($chartLabels),
+                datasets: [{
+                    label: 'Total Alerts',
+                    data: @json($chartData),
+                    borderColor: '#60a5fa',
+                    backgroundColor: 'rgba(96,165,250,0.15)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+    
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#ffffff'
+                        }
+                    }
+                },
+    
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#d1d5db'
+                        },
+                        grid: {
+                            color: 'rgba(255,255,255,0.05)'
+                        }
+                    },
+    
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#d1d5db'
+                        },
+                        grid: {
+                            color: 'rgba(255,255,255,0.05)'
+                        }
+                    }
+                }
             }
-            lucide.createIcons();
-            document.getElementById('current-rows').innerText = data.length;
-            document.getElementById('agent-count').innerText = data.length;
-        }
-
-        function updateLiveChart() {
-            const polyline = document.getElementById('chart-line');
-            if(agentsData.length === 0) {
-                polyline.setAttribute('points', '0,50 100,50');
-                return;
-            }
-            let points = "";
-            for (let i = 0; i <= 10; i++) {
-                const y = Math.floor(Math.random() * 30) + 10;
-                points += `${i * 10},${y} `;
-            }
-            polyline.setAttribute('points', points);
-        }
-
-        function refreshData() {
-            const icon = document.getElementById('refresh-icon');
-            icon.classList.add('animate-spin');
-            setTimeout(() => {
-                updateLiveChart();
-                icon.classList.remove('animate-spin');
-            }, 800);
-        }
-
-        function addRandomAgent() {
-            const newId = (agentsData.length + 1).toString().padStart(3, '0');
-            agentsData.push({
-                id: newId,
-                name: "New-Agent-" + newId,
-                ip: `192.168.1.${Math.floor(Math.random() * 254)}`,
-                os: "Linux Kernel 6.x",
-                osIcon: "terminal",
-                status: "active"
-            });
-            renderTable(agentsData);
-            updateLiveChart();
-        }
-
-        window.onload = () => {
-            renderTable(agentsData);
-            setInterval(updateLiveChart, 3000);
-        };
+        });
+    }
     </script>
 </body>
 </html>

@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'wazuh' => [
+        'url' => env('WAZUH_URL'),
+        'user' => env('WAZUH_USER'),
+        'pass' => env('WAZUH_PASS'),
+    ],
+
 ];

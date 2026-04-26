@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Company Overview</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  @vite('resources/js/app.js')
 </head>
 <body class="bg-[#2B2D34] text-gray-200 font-sans flex flex-col min-h-screen">
 
 <div id="sidebar-backdrop"
-       onclick="closeSidebar()"
-       class="fixed inset-0 bg-black/50 z-30 opacity-0 pointer-events-none transition-opacity duration-300">
-  </div>
+  onclick="closeSidebar()"
+  class="fixed inset-0 bg-black/50 z-30 opacity-0 pointer-events-none transition-opacity duration-300">
+</div>
 
   <!-- SIDEBAR -->
   <aside id="sidebar"
@@ -33,7 +35,7 @@
     <nav class="flex-1 py-2 overflow-y-auto">
 
       <!-- Dashboard -->
-      <a href="#"
+      <a href={{  Route('dashboard-customer') }}
          class="flex items-center gap-3 px-4 py-2.5 text-sm text-white hover:bg-[#2c2c2c] transition border-l-[3px] border-[#3282B8] bg-[#3282B8]/10">
         <img src="/db/layout.png" class="w-4" alt="">
         Dashboard
@@ -54,7 +56,7 @@
           </svg>
         </button>
         <div id="customization-menu" class="hidden bg-[#161616]">
-          <a href="#" class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Visualize</a>
+          <a href={{ Route('kustomisasi') }} class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Visualize</a>
           <a href="#" class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Discover</a>
         </div>
       </div>
@@ -112,18 +114,18 @@
         <!-- Manage Dropdown -->
         <div class="relative">
           <button onclick="toggleManage()"
-                  class="flex items-center gap-2 border border-white rounded-md px-4 py-2 text-sm hover:bg-[#2c2c2c] transition">
+              class="flex items-center gap-2 border border-white rounded-md px-4 py-2 text-sm hover:bg-[#2c2c2c] transition">
             Manage
             <img id="arrow-manage" src="/ob/arrowdown.png" class="w-3 transition-transform duration-200">
           </button>
 
           <!-- Dropdown Menu -->
           <div id="manage-menu"
-               class="hidden absolute right-0 mt-2 w-32 bg-[#1e1e1e] border rounded-md shadow-xl overflow-hidden">
-            <a href="#" class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Profile Settings</a>
+            class="hidden absolute right-0 mt-2 w-32 bg-[#1e1e1e] border rounded-md shadow-xl overflow-hidden">
+            <a href={{ Route('profile-overview') }} class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Profile</a>
             <a href="#" class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Agent</a>
-            <a href="#" class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Custom Dashboard</a>
-            <a href="/login" class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Logout</a>
+            <a href={{ Route('kustomisasi') }} class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Custom Dashboard</a>
+            <a href={{ Route('login') }} class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Logout</a>
           </div>
         </div>
 
@@ -243,44 +245,6 @@
         icon.src = '/logindark/logomata.png';
       }
     }
-
-    //sidebar dan manage
-    function openSidebar() {
-      document.getElementById('sidebar').classList.remove('-translate-x-full');
-      document.getElementById('sidebar').classList.add('translate-x-0');
-      document.getElementById('sidebar-backdrop').classList.remove('opacity-0', 'pointer-events-none');
-      document.getElementById('sidebar-backdrop').classList.add('opacity-100');
-    }
-
-    function closeSidebar() {
-      document.getElementById('sidebar').classList.add('-translate-x-full');
-      document.getElementById('sidebar').classList.remove('translate-x-0');
-      document.getElementById('sidebar-backdrop').classList.add('opacity-0', 'pointer-events-none');
-      document.getElementById('sidebar-backdrop').classList.remove('opacity-100');
-    }
-
-    function toggleSubmenu(menuId, chevronId) {
-      document.getElementById(menuId).classList.toggle('hidden');
-      document.getElementById(chevronId).classList.toggle('rotate-180');
-    }
-
-    function toggleManage() {
-      const menu = document.getElementById('manage-menu');
-      const arrow = document.getElementById('arrow-manage');
-      menu.classList.toggle('hidden');
-      arrow.classList.toggle('rotate-180');
-    }
-
-    // Tutup dropdown Manage jika klik di luar
-    document.addEventListener('click', function(e) {
-      const menu = document.getElementById('manage-menu');
-      const btn = menu.previousElementSibling;
-      if (!btn.contains(e.target) && !menu.contains(e.target)) {
-        menu.classList.add('hidden');
-        document.getElementById('arrow-manage').classList.remove('rotate-180');
-      }
-    });
   </script>
-
 </body>
 </html>

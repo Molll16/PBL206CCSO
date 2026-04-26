@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profile Settings</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  @vite('resources/js/app.js')
 </head>
 <body class="bg-[#2B2D34] text-gray-200 font-sans flex flex-col min-h-screen">
 
@@ -33,7 +35,7 @@
     <nav class="flex-1 py-2 overflow-y-auto">
 
       <!-- Dashboard -->
-      <a href="#"
+      <a href={{ Route('dashboard-customer') }}
          class="flex items-center gap-3 px-4 py-2.5 text-sm text-white hover:bg-[#2c2c2c] transition border-l-[3px] border-[#3282B8] bg-[#3282B8]/10">
         <img src="/db/layout.png" class="w-4" alt="">
         Dashboard
@@ -120,16 +122,16 @@
           <!-- Dropdown Menu -->
           <div id="manage-menu"
                class="hidden absolute right-0 mt-2 w-32 bg-[#1e1e1e] border rounded-md shadow-xl overflow-hidden">
-            <a href="#" class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Profile Settings</a>
+            <a href={{ Route('profile-overview') }} class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Profile</a>
             <a href="#" class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Agent</a>
-            <a href="#" class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Custom Dashboard</a>
-            <a href="/login" class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Logout</a>
+            <a href={{ Route('kustomisasi') }} class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Custom Dashboard</a>
+            <a href={{ Route('login') }} class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Logout</a>
           </div>
         </div>
 
-        <button class="flex items-center justify-center w-9 h-9 border border-white rounded-md text-lg hover:bg-[#2c2c2c] transition">
+        <a href={{ Route('kustomisasi') }} class="flex items-center justify-center w-9 h-9 border border-white rounded-md text-lg hover:bg-[#2c2c2c] transition">
           +
-        </button>
+        </a>
       </div>
 
     </div>
@@ -163,10 +165,10 @@
 
     <!-- Menu tab halaman profil -->
     <div class="flex items-center gap-10 ml-[330px]">
-      <a href="/profile" class="text-sm cursor-pointer hover:text-blue-400">Overview</a>
-      <a href="/profileset" class="text-sm cursor-pointer hover:text-blue-400">Profile Settings</a>
-      <a href="/profileserver" class="text-sm cursor-pointer hover:text-blue-400">Server</a>
-      <a href="/profilecostume" class="text-sm cursor-pointer hover:text-blue-400">Customization Dashboard</a>
+      <a href={{ Route('profile-overview') }} class="text-sm cursor-pointer hover:text-blue-400">Overview</a>
+      <a href={{ Route('profile-setting') }} class="text-sm cursor-pointer hover:text-blue-400">Profile Settings</a>
+      <a href={{ Route('profile-server') }} class="text-sm cursor-pointer hover:text-blue-400">Server</a>
+      <a href={{ Route('profile-custom') }} class="text-sm cursor-pointer hover:text-blue-400">Customization Dashboard</a>
     </div>
 
     <!-- Tombol keluar akun -->
@@ -331,44 +333,6 @@
 
       reader.readAsDataURL(file)
     }
-
-
-    //sidebar and tombol manage
-    function openSidebar() {
-      document.getElementById('sidebar').classList.remove('-translate-x-full');
-      document.getElementById('sidebar').classList.add('translate-x-0');
-      document.getElementById('sidebar-backdrop').classList.remove('opacity-0', 'pointer-events-none');
-      document.getElementById('sidebar-backdrop').classList.add('opacity-100');
-    }
-
-    function closeSidebar() {
-      document.getElementById('sidebar').classList.add('-translate-x-full');
-      document.getElementById('sidebar').classList.remove('translate-x-0');
-      document.getElementById('sidebar-backdrop').classList.add('opacity-0', 'pointer-events-none');
-      document.getElementById('sidebar-backdrop').classList.remove('opacity-100');
-    }
-
-    function toggleSubmenu(menuId, chevronId) {
-      document.getElementById(menuId).classList.toggle('hidden');
-      document.getElementById(chevronId).classList.toggle('rotate-180');
-    }
-
-    function toggleManage() {
-      const menu = document.getElementById('manage-menu');
-      const arrow = document.getElementById('arrow-manage');
-      menu.classList.toggle('hidden');
-      arrow.classList.toggle('rotate-180');
-    }
-
-    // Tutup dropdown Manage jika klik di luar
-    document.addEventListener('click', function(e) {
-      const menu = document.getElementById('manage-menu');
-      const btn = menu.previousElementSibling;
-      if (!btn.contains(e.target) && !menu.contains(e.target)) {
-        menu.classList.add('hidden');
-        document.getElementById('arrow-manage').classList.remove('rotate-180');
-      }
-    });
   </script>
 
 
