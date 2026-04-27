@@ -38,26 +38,8 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth')->group(function () {
 
-    Route::get('/dashboard', function () {
-        
-        $dashboard = DasborKustom::where('user_id', auth()->id())
-            ->where('status_dasbor', 'aktif')
-            ->first();
-
-        $widgets = [];
-
-        if ($dashboard) {
-            $widgets = \App\Models\HasilKustom::with('fitur')
-                ->where('dasbor_kustom_id', $dashboard->id)
-                ->get();
-        }
-
-        return view(
-            'Customer.dashboard',
-            compact('dashboard', 'widgets')
-        );
-
-    })->name('dashboard-customer');
+    Route::get('/dashboard', [CustomerDashboardController::class, 'dashboard'])
+        ->name('dashboard-customer');
 
     Route::get('/kustom', function () {
 
@@ -93,6 +75,10 @@ Route::middleware('auth')->group(function () {
         [CustomerDashboardController::class, 'destroy']
     )->name('dashboard.delete');
 
+    Route::post('/dashboard/use/{id}',
+        [CustomerDashboardController::class, 'useDashboard']
+    )->name('dashboard.use');
+
     Route::get('/profileset', function () {
         return view('Customer.profileset');
     })->name('profile-setting');
@@ -113,9 +99,6 @@ Route::middleware('auth')->group(function () {
         return view('Customer.changepw');
     })->name('dashboard-changepw');
 
-    Route::post('/dashboard/use/{id}',
-        [CustomerDashboardController::class, 'useDashboard']
-    )->name('dashboard.use');
 });
 
 

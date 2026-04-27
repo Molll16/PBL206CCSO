@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -12,20 +10,19 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    #[Fillable([
+    protected $fillable = [
         'name',
         'username',
         'email',
         'no_telp',
         'password',
         'role'
-    ])]
+    ];
 
-    #[Hidden([
+    protected $hidden = [
         'password',
         'remember_token'
-    ])]
-
+    ];
 
     protected function casts(): array
     {
@@ -34,7 +31,6 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-
 
     public function dashboards()
     {

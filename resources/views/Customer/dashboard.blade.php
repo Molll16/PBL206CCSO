@@ -57,44 +57,52 @@
     </div>
 
 
-    <!-- Widget Area -->
-    <div class="grid grid-cols-12 gap-3">
+<!-- Widget Area -->
+<div class="grid grid-cols-12 gap-3">
 
-        @forelse($widgets as $item)
+@forelse($widgets as $item)
 
-            <div class="col-span-{{ $item->kolom }}">
+<div class="col-span-{{ $item->kolom }}">
 
-                <p class="text-sm mb-2 ml-1">
+    <!-- Judul -->
+    <p class="text-sm mb-2 ml-1">
+        {{ $item->fitur->nama_fitur }}
+    </p>
+
+    <!-- Card -->
+    <div class="border border-white rounded-lg h-48 p-4 hover:bg-white/5 transition">
+
+        @if($item->fitur->nama_fitur === 'Agent Status')
+
+            @include('Customer.widgets.agent-status')
+
+        @else
+
+            <div class="h-full flex items-center justify-center">
+                <span class="text-gray-400 font-medium text-center px-2">
                     {{ $item->fitur->nama_fitur }}
-                </p>
-
-                <div class="border border-white rounded-lg h-48 flex items-center justify-center hover:bg-white/5 transition">
-
-                    <span class="text-gray-400 font-medium text-center px-2">
-                        {{ $item->fitur->nama_fitur }}
-                    </span>
-
-                </div>
-
+                </span>
             </div>
 
-        @empty
-
-            <div class="col-span-12">
-
-                <div class="border border-white rounded-lg h-56 flex items-center justify-center">
-
-                    <span class="text-gray-500 text-lg">
-                        Belum ada dashboard aktif
-                    </span>
-
-                </div>
-
-            </div>
-
-        @endforelse
+        @endif
 
     </div>
+
+</div>
+
+@empty
+
+<div class="col-span-12">
+    <div class="border border-white rounded-lg h-56 flex items-center justify-center">
+        <span class="text-gray-500 text-lg">
+            Belum ada dashboard aktif
+        </span>
+    </div>
+</div>
+
+@endforelse
+
+</div>
 
 </main>
 

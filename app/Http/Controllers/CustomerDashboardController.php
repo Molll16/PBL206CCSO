@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\WazuhApiService;
 use Illuminate\Http\Request;
 use App\Models\DasborKustom;
 use App\Models\HasilKustom;
@@ -31,7 +32,7 @@ class CustomerDashboardController extends Controller
             $dashboard = DasborKustom::create([
                 'user_id' => auth()->id(),
                 'nama_dasbor' => $request->nama_dashboard,
-                'status_dasbor' => 'aktif',
+                'status_dasbor' => 'nonaktif',
             ]);
         }
 
@@ -104,13 +105,60 @@ class CustomerDashboardController extends Controller
             ->update([
                 'status_dasbor' => 'nonaktif'
             ]);
-    
+
         DasborKustom::where('id', $id)
             ->where('user_id', auth()->id())
             ->update([
                 'status_dasbor' => 'aktif'
             ]);
+
+        return redirect()->route('dashboard-customer')
+            ->with('success', 'Dashboard berhasil digunakan');
+    }
+
+    public function dashboard(WazuhApiService $wazuh)
+    {
+        $dashboard = DasborKustom::where('user_id', auth()->id())
+            ->where('status_dasbor', 'aktif')
+            ->first();
     
-        return back();
+        $widgets = [];
+    
+        if ($dashboard) {
+            $widgets = HasilKustom::with('fitur')
+                ->where('dasbor_kustom_id', $dashboard->id)
+                ->get();
+        }
+    
+        // Ambil data agent
+        $agents = $wazuh->agents();
+    
+        $agentOnline  = 0;
+        $agentOffline = 0;
+        $agentTotal   = 0;
+    
+        if (isset($agents['data']['affected_items'])) {
+    
+            $list = $agents['data']['affected_items'];
+    
+            $agentTotal = count($list);
+    
+            foreach ($list as $agent) {
+    
+                if ($agent['status'] == 'active') {
+                    $agentOnline++;
+                } else {
+                    $agentOffline++;
+                }
+            }
+        }
+    
+        return view('Customer.dashboard', compact(
+            'dashboard',
+            'widgets',
+            'agentOnline',
+            'agentOffline',
+            'agentTotal'
+        ));
     }
 }
