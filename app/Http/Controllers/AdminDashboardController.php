@@ -6,10 +6,13 @@ use App\Services\WazuhApiService;
 
 class AdminDashboardController extends Controller
 {
+    // Fungsi untuk menampilkan dashboard admin
     public function index(WazuhApiService $wazuh)
     {
+        // Ambil data agen dari Wazuh API
         $agents = $wazuh->agents();
 
+        // Ambil data log/alert dari Wazuh API
         $items = $agents['data']['affected_items'] ?? [];
 
         $alerts = $wazuh->logs();
@@ -22,6 +25,7 @@ class AdminDashboardController extends Controller
         $chartLabels = [];
         $chartData = [];
         
+        // Hitung jumlah log/alert per hari selama 7 hari terakhir
         for ($i = 6; $i >= 0; $i--) {
         
             $date = now()->subDays($i)->format('Y-m-d');

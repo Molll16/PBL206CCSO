@@ -7,11 +7,13 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    // Menampilkan form login
     public function showLoginForm()
     {
         return view('login');
     }
 
+    // Menangani proses login
     public function login(Request $request)
     {
         $request->validate([
@@ -24,10 +26,12 @@ class AuthController extends Controller
             'password' => $request->password
         ];
 
+        // Coba login dengan kredensial yang diberikan
         if (Auth::attempt($credentials)) {
 
             $request->session()->regenerate();
 
+            // Redirect ke dashboard sesuai dengan role user yang login
             if (Auth::user()->role == 'admin') {
                 return redirect()->route('dashboard-admin');
             }
@@ -41,6 +45,7 @@ class AuthController extends Controller
         );
     }
 
+    // Menangani proses logout
     public function logout(Request $request)
     {
         Auth::logout();

@@ -24,7 +24,7 @@
     <nav class="flex-1 py-2 overflow-y-auto">
 
       <!-- Dashboard -->
-      <a href="#"
+      <a href={{ Route('dashboard-customer') }}
          class="flex items-center gap-3 px-4 py-2.5 text-sm text-white hover:bg-[#2c2c2c] transition border-l-[3px] border-[#3282B8] bg-[#3282B8]/10">
         <img src="/db/layout.png" class="w-4" alt="">
         Dashboard
@@ -45,7 +45,7 @@
           </svg>
         </button>
         <div id="customization-menu" class="hidden bg-[#161616]">
-          <a href="#" class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Visualize</a>
+          <a href={{ Route('pilih-dasbor') }} class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Visualize</a>
           <a href="#" class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Discover</a>
         </div>
       </div>

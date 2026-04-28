@@ -10,12 +10,13 @@ use Illuminate\Support\Facades\Hash;
 
 class CustomerController extends Controller
 {
+    // Fungsi untuk menampilkan form pembuatan akun customer
     public function create()
     {
         return view('customers.create');
     }
 
-
+    // Fungsi untuk menyimpan data customer baru ke database
     public function store(Request $request)
     {
         $request->validate([
@@ -36,7 +37,7 @@ class CustomerController extends Controller
             'role' => 'customer'
         ]);
 
-
+    //Mentrigger event pembuatan dashboard default untuk customer baru
         // Buat dashboard default
         $dashboard = DasborKustom::create([
             'user_id' => $user->id,
