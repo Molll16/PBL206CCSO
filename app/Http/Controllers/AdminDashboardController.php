@@ -53,4 +53,13 @@ class AdminDashboardController extends Controller
             'totalAlerts'
         ));
     }
+
+    public function agents(WazuhApiService $wazuh)
+    {
+        $response = $wazuh->agents();
+
+        $agents = $response['data']['affected_items'] ?? [];
+
+        return view('Admin.agents-list', compact('agents'));
+    }
 }

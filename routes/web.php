@@ -134,4 +134,8 @@ Route::middleware('auth')->group(function () {
         [CustomerController::class, 'store']
     );
 
+    Route::get('/Admin/agents',
+        [AdminDashboardController::class, 'agents']
+    )->name('agents-list');
+
 });
