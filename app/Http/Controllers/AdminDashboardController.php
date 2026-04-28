@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+use App\Models\Agen;
+use App\Models\User;
 use App\Services\WazuhApiService;
 
 class AdminDashboardController extends Controller
@@ -61,5 +64,62 @@ class AdminDashboardController extends Controller
         $agents = $response['data']['affected_items'] ?? [];
 
         return view('Admin.agents-list', compact('agents'));
+    }
+
+    public function assignAgentPage(WazuhApiService $wazuh)
+    {
+        $response = $wazuh->agents();
+
+        $agents = $response['data']['affected_items'] ?? [];
+
+        $users = User::where('role', 'customer')->get();
+
+        $totalUsers = $users->count();
+
+        $userActive = $users->count(); // sementara
+
+        $totalAgents = count($agents);
+
+        $assignedAgents = 0; // nanti real setelah save assign
+
+        return view('Admin.assignagent', compact(
+            'agents',
+            'users',
+            'totalUsers',
+            'userActive',
+            'totalAgents',
+            'assignedAgents'
+        ));
+    }
+
+    public function saveAssignAgent(Request $request, WazuhApiService $wazuh)
+    {
+        $response = $wazuh->agents();
+        $items = $response['data']['affected_items'] ?? [];
+        $agent = collect($items)->firstWhere('id', $request->agent_id);
+        $namaAgen = $agent['name'] ?? 'Unknown';
+        $ipAgen   = $agent['ip'] ?? '-';
+
+        $request->validate([
+            'agent_id' => 'required',
+            'user_id' => 'required'
+        ]);          
+
+        $cek = Agen::where('id_wazuh_agen', $request->agent_id)->first();
+
+        if ($cek) {
+            return back()->with('error', 'Agent sudah diassign');
+        }
+
+        Agen::create([
+            'user_id'       => $request->user_id,
+            'id_wazuh_agen' => $request->agent_id,
+            'nama_agen'     => $namaAgen,
+            'ip_agen'       => $ipAgen,
+            'status'        => 'aktif'
+        ]);
+
+        return redirect()->route('assignagent')
+            ->with('success', 'Agent berhasil di-assign');
     }
 }

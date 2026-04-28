@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    @vite(resources/js/app.js)
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #2b2d34; color: #e5e7eb; }
         .bg-header { background-color: #1a1c1e; }

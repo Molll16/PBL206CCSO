@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    @vite(resources/js/app.js)
+    @vite('resources/js/app.js')
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #2b2d32; color: #e5e7eb; }
         .bg-header { background-color: #1a1c1e; }
@@ -50,44 +50,79 @@
 
     <main class="p-8 max-w-[1400px] mx-auto animate-fade-in">
         <div class="grid grid-cols-4 gap-4 mb-14 text-center">
-            <div>
-                <p class="text-lg text-gray-300">Total User</p>
-                <h2 class="text-4xl font-bold mt-2">08</h2>
-            </div>
-            <div>
-                <p class="text-lg text-gray-300">User Active</p>
-                <h2 class="text-4xl font-bold mt-2 text-white">0</h2>
-            </div>
-            <div>
-                <p class="text-lg text-gray-300">Total Company</p>
-                <h2 class="text-4xl font-bold mt-2">0</h2>
-            </div>
-            <div>
-                <p class="text-lg text-gray-300">Agent Assigned</p>
-                <h2 class="text-4xl font-bold mt-2">0</h2>
-            </div>
-        </div>
+          <div>
+              <p class="text-lg text-gray-300">Total User</p>
+              <h2 class="text-4xl font-bold mt-2">
+                  {{ $totalUsers }}
+              </h2>
+          </div>
+
+          <div>
+              <p class="text-lg text-gray-300">User Active</p>
+              <h2 class="text-4xl font-bold mt-2 text-white">
+                  {{ $userActive }}
+              </h2>
+          </div>
+
+          <div>
+              <p class="text-lg text-gray-300">Total Agent</p>
+              <h2 class="text-4xl font-bold mt-2">
+                  {{ $totalAgents }}
+              </h2>
+          </div>
+
+          <div>
+              <p class="text-lg text-gray-300">Agent Assigned</p>
+              <h2 class="text-4xl font-bold mt-2">
+                  {{ $assignedAgents }}
+              </h2>
+          </div>
+      </div>
 
         <div class="flex flex-col items-center">
             <h3 class="text-sm mb-4 font-medium">Assign An Agent</h3>
             
             <div class="w-full max-w-md border border-white rounded-sm p-10 bg-transparent">
-                <form class="space-y-6">
+              
+              @if(session('success'))
+                <div class="bg-green-600 text-white px-4 py-2 rounded mb-4">
+                    {{ session('success') }}
+                </div>
+              @endif
+
+              @if(session('error'))
+                <div class="bg-red-600 text-white px-4 py-2 rounded mb-4">
+                    {{ session('error') }}
+                </div>
+              @endif
+
+                <form action="{{ route('assignagent.save') }}" method="POST" class="space-y-6">
+                  @csrf
                     <div class="flex flex-col gap-1.5">
                         <label class="text-xs text-gray-300">Agent name <span class="text-red-500">*</span></label>
-                        <select class="select-dark px-3 py-2 rounded-sm w-full text-sm">
-                            <option value="" disabled selected>Agent name</option>
-                            <option value="agent-001">Agent 001</option>
-                            <option value="agent-002">Agent 002</option>
+                        <select name="agent_id" class="select-dark px-3 py-2 rounded-sm w-full text-sm">
+                          <option value="" disabled selected>Select Agent</option>
+
+                            @foreach($agents as $agent)
+                                <option value="{{ $agent['id'] }}">
+                                    {{ $agent['name'] }} ({{ $agent['id'] }})
+                                </option>
+                            @endforeach
+
                         </select>
                     </div>
 
                     <div class="flex flex-col gap-1.5">
-                        <label class="text-xs text-gray-300">Assigned to <span class="text-red-500">*</span></label>
-                        <select class="select-dark px-3 py-2 rounded-sm w-full text-sm">
-                            <option value="" disabled selected>Assigned to</option>
-                            <option value="user-mirjak">Mirjak</option>
-                            <option value="user-maulana">Maulana</option>
+                      <label class="text-xs text-gray-300">Assigned to <span class="text-red-500">*</span></label>
+                        <select name="user_id" class="select-dark px-3 py-2 rounded-sm w-full text-sm">
+                          <option value="" disabled selected>Select Customer</option>
+
+                          @foreach($users as $user)
+                              <option value="{{ $user->id }}">
+                                  {{ $user->name }}
+                              </option>
+                          @endforeach
+
                         </select>
                     </div>
 
@@ -102,48 +137,6 @@
     </main>
 
     <script>
-
-// Buat fungsi untuk navbar pertama
-        //sidebar toggle
-        
-    function openSidebar() {
-      document.getElementById('sidebar').classList.remove('-translate-x-full');
-      document.getElementById('sidebar').classList.add('translate-x-0');
-      document.getElementById('sidebar-backdrop').classList.remove('opacity-0', 'pointer-events-none');
-      document.getElementById('sidebar-backdrop').classList.add('opacity-100');
-    }
-
-    function closeSidebar() {
-      document.getElementById('sidebar').classList.add('-translate-x-full');
-      document.getElementById('sidebar').classList.remove('translate-x-0');
-      document.getElementById('sidebar-backdrop').classList.add('opacity-0', 'pointer-events-none');
-      document.getElementById('sidebar-backdrop').classList.remove('opacity-100');
-    }
-// end sidebar
-
-    function toggleSubmenu(menuId, chevronId) {
-      document.getElementById(menuId).classList.toggle('hidden');
-      document.getElementById(chevronId).classList.toggle('rotate-180');
-    }
-
-    function toggleManage() {
-      const menu = document.getElementById('manage-menu');
-      const arrow = document.getElementById('arrow-manage');
-      menu.classList.toggle('hidden');
-      arrow.classList.toggle('rotate-180');
-    }
-
-    // Tutup dropdown Manage jika klik di luar
-    document.addEventListener('click', function(e) {
-      const menu = document.getElementById('manage-menu');
-      const btn = menu.previousElementSibling;
-      if (!btn.contains(e.target) && !menu.contains(e.target)) {
-        menu.classList.add('hidden');
-        document.getElementById('arrow-manage').classList.remove('rotate-180');
-      }
-    });
-// penutup fungsi untuk navbar pertama
-
         // Inisialisasi icon lucide
         lucide.createIcons();
     </script>

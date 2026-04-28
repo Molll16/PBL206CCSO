@@ -8,45 +8,12 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    @vite('resources/css/app.css')
     @vite('resources/js/app.js')
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: ##2b2d34; color: #e5e7eb; overflow-x: hidden; }
-        .bg-card { background-color: #2b2d32; }
-        .border-custom { border-color: #4a4e54; }
-        .table-row-hover:hover { background-color: rgba(255, 255, 255, 0.05); transition: all 0.2s; }
-        
-        /* Animasi Baru */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes pulse-soft {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        .animate-slide-in { animation: slideIn 0.5s ease-out forwards; }
-        .delay-1 { animation-delay: 0.1s; opacity: 0; }
-        .delay-2 { animation-delay: 0.2s; opacity: 0; }
-        .delay-3 { animation-delay: 0.3s; opacity: 0; }
-        
-        .cursor-blink { animation: blink 1s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
-        /* Smooth Transition untuk Hover */
-        .hover-scale { transition: transform 0.2s ease; }
-        .hover-scale:hover { transform: scale(1.02); }
-    </style>
-    
 </head>
 <body class="min-h-screen bg-[#2B2D34]">
+
+@include('components.header-admin')
 
 <!-- navbar kedua -->
     <div class="bg-[#2B2D34] px-6 flex items-center justify-between border-b-2 border-white animate-fade-in delay-1">

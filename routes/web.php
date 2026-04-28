@@ -118,9 +118,14 @@ Route::middleware('auth')->group(function () {
         return view('Admin.adduser-admin');
     })->name('adduser');
 
-    Route::get('/Admin/assignagent', function () {
-        return view('Admin.assignagent');
-    })->name('assignagent');
+    // untuk permasalahan route assign agent
+    Route::get('/Admin/assignagent',
+        [AdminDashboardController::class, 'assignAgentPage']
+    )->name('assignagent');
+
+    Route::post('/Admin/assignagent/save',
+        [AdminDashboardController::class, 'saveAssignAgent']
+    )->name('assignagent.save');
 
     Route::get('/Admin/dashboard',
         [AdminDashboardController::class, 'index']
