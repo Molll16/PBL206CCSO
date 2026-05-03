@@ -13,7 +13,7 @@
 </head>
 <body class="min-h-screen bg-[#2B2D34]">
 
-@include('components.header-admin')
+@include('Admin.components.header-admin')
 
 <!-- navbar kedua -->
     <div class="bg-[#2B2D34] px-6 flex items-center justify-between border-b-2 border-white animate-fade-in delay-1">
@@ -21,7 +21,6 @@
             <a href="#" class="py-3 text-cyan-400 border-b-2 border-blue-400 font-medium text-sm">Dashboard</a>
             <a href="#" class="py-3 text-white/60 hover:text-white transition text-sm">Events</a>
         </div>
-        <a href="#" class="text-white/60 hover:text-white transition text-sm">Profile Settings</a>
     </div>
 <!-- penutup navbar kedua -->
 
@@ -177,7 +176,7 @@
                 <h3 class="font-medium flex items-center gap-2">
                     Agents 
                         <span id="agent-count" class="text-xs bg-gray-700 px-2 py-0.5 rounded text-gray-300">
-                            {{ count($items) }}
+                            {{ count($agents) }}
                         </span>
                 </h3>
                 <div class="flex items-center gap-6 text-sm">
@@ -212,7 +211,7 @@
                     </thead>
 
                 <tbody class="divide-y divide-custom bg-[#212121]/30">
-                    @forelse($items as $agent)
+                    @forelse($agents as $agent)
                     <tr class="hover:bg-white/5 transition">
 
                         <td class="p-3">
@@ -273,7 +272,7 @@
 
             <div class="p-3 flex items-center justify-between text-xs text-white border-t border-white bg-[#2B2D34]">
                 <span>
-                    Showing {{ count($items) }} of {{ count($items) }} entries
+                    Showing {{ count($agents) }} of {{ count($agents) }} entries
                 </span>
             </div>
         </div>

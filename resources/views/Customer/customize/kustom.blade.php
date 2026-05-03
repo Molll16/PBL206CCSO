@@ -38,8 +38,7 @@
   </style>
   </head>
   
-@component('components.header') 
-@endcomponent
+@component('Customisasi.components.header') 
 
   <body class="bg-deep text-white flex flex-col h-screen overflow-hidden">
 

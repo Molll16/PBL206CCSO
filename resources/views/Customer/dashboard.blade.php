@@ -11,7 +11,7 @@
 
 <body class="bg-[#2B2D34] text-gray-200 font-sans flex flex-col min-h-screen">
 
-@include('components.header')
+@include('Customer.components.header')
 
 <main class="flex-1 p-4 relative">
 
@@ -106,7 +106,7 @@
 
 </main>
 
-@include('components.footer')
+@include('Customer.components.footer')
 
 <script>
 function dismissAlert() {

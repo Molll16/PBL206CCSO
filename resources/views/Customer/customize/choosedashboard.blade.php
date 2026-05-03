@@ -11,7 +11,7 @@
 
 <body class="bg-[#2B2D34] text-white min-h-screen flex flex-col">
 
-@include('components.header')
+@include('Customer.components.header')
 
 <div class="flex-1 px-5 py-5">
 
@@ -105,7 +105,7 @@
 
 </div>
 
-@include('components.footer')
+@include('Customer.components.footer')
 
 </body>
 </html>

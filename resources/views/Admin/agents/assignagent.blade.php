@@ -37,15 +37,13 @@
 </head>
 <body class="min-h-screen">
 
-@include('components.header-admin')
+@include('Admin.components.header-admin')
         
-        <div class="bg-[#2B2D34] px-6 flex items-center justify-between border-b-2 border-white animate-fade-in delay-1">
+    <div class="bg-[#2B2D34] px-6 flex items-center justify-between border-b-2 border-white animate-fade-in delay-1">
         <div class="flex gap-8">
-            <a href="{{ route('usersadmin') }}" class="py-3 text-gray-400 text-sm hover:text-white transition">Users</a>
-            <a href="{{ route('adduser') }}" class="py-3 text-gray-400 text-sm hover:text-white transition">Add User</a>
+            <a href="{{ route('agents-list') }}" class="py-3 text-gray-400 text-sm hover:text-white transition">Agents List</a>
             <a href="{{ route('assignagent') }}" class="py-3 text-cyan-400 text-sm border-b-2 border-cyan-400 font-medium">Assign Agent</a>
         </div>
-        <a href="#" class="text-white/60 hover:text-white transition text-sm">Profile Settings</a>
     </div>
 
     <main class="p-8 max-w-[1400px] mx-auto animate-fade-in">

@@ -9,44 +9,48 @@ use App\Services\WazuhApiService;
 
 class AdminDashboardController extends Controller
 {
-    // Fungsi untuk menampilkan dashboard admin
+    // ================================
+    // DASHBOARD ADMIN
+    // ================================
     public function index(WazuhApiService $wazuh)
     {
-        // Ambil data agen dari Wazuh API
-        $agents = $wazuh->agents();
+        // ===== AMBIL DATA =====
+        $agentsResponse = $wazuh->agents();
+        $alertsResponse = $wazuh->logs();
 
-        // Ambil data log/alert dari Wazuh API
-        $items = $agents['data']['affected_items'] ?? [];
+        $agents = $agentsResponse['data']['affected_items'] ?? [];
+        $alerts = $alertsResponse['data']['affected_items'] ?? [];
 
-        $alerts = $wazuh->logs();
-        $alertItems = $alerts['data']['affected_items'] ?? [];
-        $active = collect($items)->where('status', 'active')->count();
-        $pending = collect($items)->where('status', 'pending')->count();
-        $disconnected = collect($items)->where('status', 'disconnected')->count();
-        $never = collect($items)->where('status', 'never_connected')->count();
+        $collection = collect($agents);
 
+        // ===== STATISTIK AGENT =====
+        $active        = $collection->where('status', 'active')->count();
+        $pending       = $collection->where('status', 'pending')->count();
+        $disconnected  = $collection->where('status', 'disconnected')->count();
+        $never         = $collection->where('status', 'never_connected')->count();
+
+        // ===== CHART ALERT (7 HARI) =====
         $chartLabels = [];
-        $chartData = [];
-        
-        // Hitung jumlah log/alert per hari selama 7 hari terakhir
+        $chartData   = [];
+
         for ($i = 6; $i >= 0; $i--) {
-        
-            $date = now()->subDays($i)->format('Y-m-d');
+            $date  = now()->subDays($i)->format('Y-m-d');
             $label = now()->subDays($i)->format('D');
-        
-            $total = collect($alertItems)->filter(function ($item) use ($date) {
+
+            $total = collect($alerts)->filter(function ($item) use ($date) {
                 return isset($item['timestamp']) &&
                        str_contains($item['timestamp'], $date);
             })->count();
-        
+
             $chartLabels[] = $label;
-            $chartData[] = $total;
+            $chartData[]   = $total;
         }
-        
+
         $totalAlerts = array_sum($chartData);
 
+        // ===== RETURN VIEW =====
         return view('Admin.dashboard', compact(
-            'items',
+            'agents',
             'active',
             'pending',
             'disconnected',
@@ -55,71 +59,5 @@ class AdminDashboardController extends Controller
             'chartData',
             'totalAlerts'
         ));
-    }
-
-    public function agents(WazuhApiService $wazuh)
-    {
-        $response = $wazuh->agents();
-
-        $agents = $response['data']['affected_items'] ?? [];
-
-        return view('Admin.agents-list', compact('agents'));
-    }
-
-    public function assignAgentPage(WazuhApiService $wazuh)
-    {
-        $response = $wazuh->agents();
-
-        $agents = $response['data']['affected_items'] ?? [];
-
-        $users = User::where('role', 'customer')->get();
-
-        $totalUsers = $users->count();
-
-        $userActive = $users->count(); // sementara
-
-        $totalAgents = count($agents);
-
-        $assignedAgents = 0; // nanti real setelah save assign
-
-        return view('Admin.assignagent', compact(
-            'agents',
-            'users',
-            'totalUsers',
-            'userActive',
-            'totalAgents',
-            'assignedAgents'
-        ));
-    }
-
-    public function saveAssignAgent(Request $request, WazuhApiService $wazuh)
-    {
-        $response = $wazuh->agents();
-        $items = $response['data']['affected_items'] ?? [];
-        $agent = collect($items)->firstWhere('id', $request->agent_id);
-        $namaAgen = $agent['name'] ?? 'Unknown';
-        $ipAgen   = $agent['ip'] ?? '-';
-
-        $request->validate([
-            'agent_id' => 'required',
-            'user_id' => 'required'
-        ]);          
-
-        $cek = Agen::where('id_wazuh_agen', $request->agent_id)->first();
-
-        if ($cek) {
-            return back()->with('error', 'Agent sudah diassign');
-        }
-
-        Agen::create([
-            'user_id'       => $request->user_id,
-            'id_wazuh_agen' => $request->agent_id,
-            'nama_agen'     => $namaAgen,
-            'ip_agen'       => $ipAgen,
-            'status'        => 'aktif'
-        ]);
-
-        return redirect()->route('assignagent')
-            ->with('success', 'Agent berhasil di-assign');
     }
 }

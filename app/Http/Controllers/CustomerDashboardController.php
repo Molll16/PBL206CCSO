@@ -81,7 +81,7 @@ class CustomerDashboardController extends Controller
             });
 
         // Return response JSON untuk frontend (biasanya AJAX)
-        return view('Customer.kustom', compact(
+        return view('Customer.customize.kustom', compact(
             'dashboard',
             'fitur',
             'hasil'

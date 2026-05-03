@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\CustomerDashboardController;
+use App\Http\Controllers\AgentController;
 
 
 /*
@@ -19,10 +20,6 @@ use App\Http\Controllers\CustomerDashboardController;
 Route::get('/', function () {
     return view('landingpage');
 });
-
-Route::get('/daftar', function () {
-    return view('daftar');
-})->name('daftar');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])
     ->name('login');
@@ -45,7 +42,7 @@ Route::middleware('auth')->group(function () {
 
         $fitur = Fitur::all();
 
-        return view('Customer.kustom', compact('fitur'));
+        return view('Customer.customize.kustom', compact('fitur'));
 
     })->name('kustomisasi');
 
@@ -61,7 +58,7 @@ Route::middleware('auth')->group(function () {
         )->get();
 
         return view(
-            'Customer.choosedashboard',
+            'Customer.customize.choosedashboard',
             compact('dashboard')
         );
 
@@ -80,24 +77,28 @@ Route::middleware('auth')->group(function () {
     )->name('dashboard.use');
 
     Route::get('/profileset', function () {
-        return view('Customer.profileset');
+        return view('Customer.profile.profileset');
     })->name('profile-setting');
 
     Route::get('/profileserver', function () {
-        return view('Customer.profileserver');
+        return view('Customer.profile.profileserver');
     })->name('profile-server');
 
     Route::get('/profilecustom', function () {
-        return view('Customer.profilecustom');
+        return view('Customer.profile.profilecustom');
     })->name('profile-custom');
 
     Route::get('/profileover', function () {
-        return view('Customer.profileover');
+        return view('Customer.profile.profileover');
     })->name('profile-overview');
 
     Route::get('/changepw', function () {
-        return view('Customer.changepw');
-    })->name('dashboard-changepw');
+        return view('Customer.profile.changepw');
+    })->name('changepw');
+
+    Route::get('/daftarlog', function () {
+        return view('Customer.logs.daftarlog');
+    })->name('daftarlog');
 
 });
 
@@ -111,20 +112,20 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
 
     Route::get('/usersadmin', function () {
-        return view('Admin.users-admin');
+        return view('Admin.users.users-admin');
     })->name('usersadmin');
 
     Route::get('/Admin/adduser-admin', function () {
-        return view('Admin.adduser-admin');
+        return view('Admin.users.adduser-admin');
     })->name('adduser');
 
     // untuk permasalahan route assign agent
     Route::get('/Admin/assignagent',
-        [AdminDashboardController::class, 'assignAgentPage']
+        [AgentController::class, 'assignAgentPage']
     )->name('assignagent');
 
     Route::post('/Admin/assignagent/save',
-        [AdminDashboardController::class, 'saveAssignAgent']
+        [AgentController::class, 'saveAssignAgent']
     )->name('assignagent.save');
 
     Route::get('/Admin/dashboard',
@@ -140,7 +141,19 @@ Route::middleware('auth')->group(function () {
     );
 
     Route::get('/Admin/agents',
-        [AdminDashboardController::class, 'agents']
+        [AgentController::class, 'agents']
     )->name('agents-list');
+
+    Route::get('/profile-agent', function () {
+        return view('Admin.profile.profile-agent');
+    })->name('profile-agent');
+    
+        Route::get('/profile-overview', function () {
+        return view('Admin.profile.profile-overview');
+    })->name('profile-overview-admin');
+
+        Route::get('/profile-setting', function () {
+        return view('Admin.profile.profileset-admin');
+    })->name('profile-setting-admin');
 
 });
