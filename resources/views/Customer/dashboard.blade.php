@@ -76,8 +76,12 @@
 
             @include('Customer.widgets.agent-status')
 
-        @else
+        @elseif($item->fitur->nama_fitur === 'Security Alerts')
 
+            @include('Customer.widgets.security-alerts')
+
+        @else
+        
             <div class="h-full flex items-center justify-center">
                 <span class="text-gray-400 font-medium text-center px-2">
                     {{ $item->fitur->nama_fitur }}

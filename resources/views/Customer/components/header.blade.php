@@ -83,9 +83,9 @@
         </div>
       </button>
 
-      <button class="flex items-center justify-center w-16 h-16 hover:bg-[#2c2c2c] transition">
+      <a href="{{ route('dashboard-customer') }}" class="flex items-center justify-center w-16 h-16 hover:bg-[#2c2c2c] transition">
         <img src="/ob/home.png" class="w-8" alt="">
-      </button>
+      </a>
 
       <div class="flex items-center gap-3 px-2">
         <img src="/ob/logo.png" class="w-6" alt="">

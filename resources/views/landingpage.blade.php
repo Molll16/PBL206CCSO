@@ -72,7 +72,7 @@ html {
 
     <div class="flex gap-3">
       <a href="{{ route('login') }}"> <button class="border px-5 py-2 text-xs rounded hover:bg-white hover:text-black">Login</button> </a>
-      <a href="{{ route('daftar') }}"> <button class="border px-5 py-2 text-xs rounded hover:bg-white hover:text-black">Sign Up</button> </a>
+      <a href="#footer"> <button class="border px-5 py-2 text-xs rounded hover:bg-white hover:text-black">Contact Us</button> </a>
     </div>
     
   </header>
@@ -85,7 +85,7 @@ html {
         <h2 class="text-3xl mb-4">Central Cyber Security Office</h2>
         <p>Unified XDR and SIEM protection for endpoints and cloud workloads.</p>
         <div class="flex gap-4 mt-28">
-          <a href="{{ route('daftar') }}"> <button class="bg-[#3282B8] px-5 py-2 rounded hover:bg-blue-600">Sign Up</button> </a>
+          <a href="{{ route('login') }}"> <button class="bg-[#3282B8] px-5 py-2 rounded hover:bg-blue-600">Login</button> </a>
           <a href="#footer"><button class="bg-[#3282B8] px-5 py-2 rounded hover:bg-blue-500">Contact Us</button>
         </div>
       </div>

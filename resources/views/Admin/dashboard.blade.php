@@ -27,6 +27,13 @@
 
     <div class="p-6 max-w-[1400px] mx-auto">
 
+<!-- tempat menampilkan pesan jika suatu waktu server API down atau off -->
+    @if(isset($error))
+        <div class="bg-red-500/20 text-red-400 border border-red-500/30 p-3 rounded mb-6">
+            {{ $error }}
+        </div>
+    @endif
+
     {{-- Statistik Atas --}}
     <div class="grid grid-cols-4 gap-4 mb-8 text-center">
 
@@ -180,12 +187,19 @@
                         </span>
                 </h3>
                 <div class="flex items-center gap-6 text-sm">
-                    <button onclick="addRandomAgent()" class="flex items-center gap-2 text-white hover:text-blue-400 transition-all hover:translate-x-1">
-                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Deploy new agent
-                    </button>
-                    <button onclick="refreshData()" class="flex items-center gap-2 text-white hover:text-blue-400 transition-all">
-                        <i data-lucide="refresh-cw" class="w-4 h-4" id="refresh-icon"></i> Refresh
-                    </button>
+                    <button onclick="window.location.reload()"
+                            class="mr-auto flex items-center gap-2 px-4 py-2 
+                                   bg-[#1f2937] hover:bg-cyan-500 
+                                   border border-gray-600 hover:border-cyan-400
+                                   rounded-lg text-sm text-white 
+                                   transition duration-200 shadow-sm">
+                    
+                        <i data-lucide="refresh-cw"
+                           class="w-4 h-4 group-hover:rotate-180 transition duration-500">
+                        </i>
+                    
+                        Refresh
+                    </button> 
                 </div>
             </div>
 
@@ -281,18 +295,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-    /* =========================
-       TABLE BUTTON ACTION
-    ========================= */
-    
-    function refreshData() {
-        location.reload();
-    }
-    
-    function addRandomAgent() {
-        alert('Gunakan menu Deploy Agent untuk menambahkan agent baru.');
-    }
-    
+        
+    lucide.createIcons();
+
     
     /* =========================
        ALERT CHART (7 DAYS)

@@ -16,7 +16,6 @@ class WazuhApiService
 
     public function __construct()
     {
-        // Ambil konfigurasi dari config/services.php
         $this->url  = config('services.wazuh.url');
         $this->user = config('services.wazuh.user');
         $this->pass = config('services.wazuh.pass');
@@ -31,24 +30,36 @@ class WazuhApiService
             return Http::withoutVerifying()
                 ->timeout(30)
                 ->withBasicAuth($this->user, $this->pass)
-                ->get($this->url . '/security/user/authenticate?raw=true')
+                ->get("{$this->url}/security/user/authenticate?raw=true")
                 ->body();
         });
     }
 
     // ================================
-    // HELPER: REQUEST DENGAN TOKEN
+    // HELPER: REQUEST KE WAZUH API
     // ================================
-    private function request($endpoint)
+    private function request(string $endpoint)
     {
-        $token = $this->token();
-
-        return Http::withoutVerifying()
-            ->timeout(30)
-            ->withToken($token)
-            ->get($this->url . $endpoint)
-            ->json();
+        try {
+            $token = $this->token();
+    
+            return Http::withoutVerifying()
+                ->timeout(10)
+                ->withToken($token)
+                ->get("{$this->url}{$endpoint}")
+                ->json();
+    
+        } catch (\Exception $e) {
+            return [
+                'error' => true,
+                'message' => 'Tidak dapat terhubung ke server Wazuh'
+            ];
+        }
     }
+
+    // ============================================== //
+    //      DATA DARI PORT 55000 (WAZUH-MANAGER)      //
+    // ============================================== //
 
     // ================================
     // DATA AGENTS
@@ -74,10 +85,14 @@ class WazuhApiService
         return $this->request('/security/events');
     }
 
+    // =============================================== //
+    //  DATA DARI PORT 9200 (WAZUH-INDEXER/OPENSEARCH) //
+    // =============================================== //
+
     // ================================
-    // DATA ALERTS (INDEXER)
+    // RAW ALERTS (INDEXER 9200)
     // ================================
-    public function alertsFromIndexer()
+    public function getRawAlerts()
     {
         $url  = config('services.indexer.url');
         $user = config('services.indexer.user');
@@ -86,9 +101,51 @@ class WazuhApiService
         return Http::withoutVerifying()
             ->timeout(30)
             ->withBasicAuth($user, $pass)
-            ->post($url . '/wazuh-alerts-*/_search', [
-                'size' => 1000
+            ->post("{$url}/wazuh-alerts-*/_search", [
+                'size' => 50,
+                'sort' => [
+                    ['@timestamp' => ['order' => 'desc']]
+                ]
             ])
             ->json();
+    }
+
+    // ================================
+    // MAPPING ALERTS
+    // ================================
+    private function mapAlerts($data)
+    {
+        $results = [];
+
+        if (!isset($data['hits']['hits'])) {
+            return [];
+        }
+
+        foreach ($data['hits']['hits'] as $item) {
+            $source = $item['_source'];
+
+            $results[] = [
+                'description' => $source['rule']['description'] ?? '-',
+                'level' => $source['rule']['level'] ?? 0,
+                'agent' => $source['agent']['name'] ?? 'unknown',
+                'time' => $source['@timestamp'] ?? null,
+
+                // fallback user
+                'user' => $source['data']['srcuser']
+                    ?? $source['data']['dstuser']
+                    ?? 'unknown',
+            ];
+        }
+
+        return $results;
+    }
+
+    // ================================
+    // FINAL ALERTS (SIAP FRONTEND)
+    // ================================
+    public function getAlerts()
+    {
+        $raw = $this->getRawAlerts();
+        return $this->mapAlerts($raw);
     }
 }

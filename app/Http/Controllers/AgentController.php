@@ -5,56 +5,65 @@ namespace App\Http\Controllers;
 use App\Models\Agen;
 use App\Models\User;
 use App\Services\WazuhApiService;
+use App\Services\AgentService;
 use Illuminate\Http\Request;
 
 class AgentController extends Controller
 {
     // ================================
-    // HELPER: AMBIL DATA AGENT
-    // ================================
-    private function getAgents(WazuhApiService $wazuh)
-    {
-        $response = $wazuh->agents();
-        return $response['data']['affected_items'] ?? [];
-    }
-
-    // ================================
     // LIST AGENT
     // ================================
-    public function agents(WazuhApiService $wazuh)
+    public function agents(
+        WazuhApiService $wazuh,
+        AgentService $agentService
+    )
     {
-        // ===== AMBIL DATA =====
-        $agents = $this->getAgents($wazuh);
-
-        // ===== RETURN VIEW =====
-        return view('Admin.agents.agents-list', compact('agents'));
+        $agents = $agentService->getAgents($wazuh);
+    
+        $stats = $agentService->getCustomerStats();
+    
+        return view('Admin.agents.agents-list', [
+            'agents'               => $agents,
+            'totalUsers'           => $stats['totalUsers'],
+            'totalAgents'          => count($agents),
+            'totalAssignedAgents'  => $stats['totalAssignedAgents'],
+        ]);
     }
 
     // ================================
     // HALAMAN ASSIGN AGENT
     // ================================
-    public function assignAgentPage(WazuhApiService $wazuh)
+    public function assignAgentPage(
+        WazuhApiService $wazuh,
+        AgentService $agentService
+    )
+
     {
         // ===== AMBIL DATA =====
-        $agents = $this->getAgents($wazuh);
+        $agents = $agentService->getAgents($wazuh);
+        $stats = $agentService->getCustomerStats();
 
-        $users = User::where('role', 'customer')->get();
+        $totalAssignedAgents = $users->sum('agents_count');
 
         // ===== RETURN VIEW =====
         return view('Admin.agents.assignagent', [
-            'agents'         => $agents,
-            'users'          => $users,
-            'totalUsers'     => $users->count(),
-            'userActive'     => $users->count(),
-            'totalAgents'    => count($agents),
-            'assignedAgents' => 0,
+            'agents'               => $agents,
+            'users'                => $users,
+            'totalUsers'           => $users->count(),
+            'totalAgents'          => count($agents),
+            'totalAssignedAgents'  => $totalAssignedAgents,
         ]);
     }
 
     // ================================
     // SIMPAN ASSIGN AGENT
     // ================================
-    public function saveAssignAgent(Request $request, WazuhApiService $wazuh)
+    public function saveAssignAgent(
+        Request $request, 
+        WazuhApiService $wazuh,
+        AgentService $agentService
+    )
+
     {
         // ===== VALIDASI =====
         $request->validate([
@@ -63,7 +72,7 @@ class AgentController extends Controller
         ]);
 
         // ===== AMBIL DATA AGENT =====
-        $agents = $this->getAgents($wazuh);
+        $agents = $agentService->getAgents($wazuh);
         $agent = collect($agents)->firstWhere('id', $request->agent_id);
         if (!$agent) {
             return back()->with('error', 'Agent tidak ditemukan');

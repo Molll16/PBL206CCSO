@@ -38,7 +38,8 @@
   </style>
   </head>
   
-@component('Customisasi.components.header') 
+@component('Customer.components.header') 
+@endcomponent
 
   <body class="bg-deep text-white flex flex-col h-screen overflow-hidden">
 
@@ -381,7 +382,7 @@ function saveLayout(){
     const dashboardId =
         document.getElementById('dashboard-id').value;
 
-    fetch('/dashboard/save', {
+    fetch('/customer/dashboard/save', {
         method: 'POST',
 
         headers: {
@@ -409,7 +410,7 @@ function saveLayout(){
     showToast('Dashboard berhasil disimpan!');
 
     setTimeout(() => {
-        window.location.href = '/choosedashboard';
+        window.location.href = '/customer/choosedashboard';
     }, 800);
 
 })

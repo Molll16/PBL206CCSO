@@ -3,79 +3,130 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\DasborKustom;
-use App\Models\HasilKustom;
+use App\Models\Agen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class CustomerController extends Controller
 {
-    // Fungsi untuk menampilkan form pembuatan akun customer
-    public function create()
+    // ================================
+    // LIST CUSTOMER
+    // ================================
+    public function index()
     {
-        return view('customers.create');
+        $users = User::where('role', 'customer')
+            ->withCount('agents')
+            ->get();
+
+        $totalAssignedAgents = Agen::count();
+
+        return view('Admin.users.users-admin', [
+            'users'                => $users,
+            'totalUsers'           => $users->count(),
+            'totalAssignedAgents'  => $totalAssignedAgents,
+        ]);
     }
 
-    // Fungsi untuk menyimpan data customer baru ke database
+    // ================================
+    // FORM CREATE CUSTOMER
+    // ================================
+    public function create()
+    {
+        $users = User::where('role', 'customer')
+            ->withCount('agents')
+            ->get();
+    
+        $userActive = User::where('role', 'customer')
+            ->count();
+    
+        $totalAssignedAgents = $users->sum('agents_count');
+    
+        return view('Admin.users.adduser-admin', [
+            'totalUsers' => $users->count(),
+            'totalAssignedAgents' => $totalAssignedAgents,
+        ]);
+    }
+
+    // ================================
+    // SIMPAN CUSTOMER
+    // ================================
     public function store(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:users,email',
-            'name' => 'required',
+            'email'    => 'required|email|unique:users,email',
+            'name'     => 'required',
             'username' => 'required|unique:users,username',
             'password' => 'required|min:6',
-            'no_telp' => 'required',
+            'no_telp'  => 'required',
         ]);
 
-        // Buat akun customer
-        $user = User::create([
-            'name' => $request->name,
+        // buat akun customer
+        User::create([
+            'name'      => $request->name,
+            'username'  => $request->username,
+            'email'     => $request->email,
+            'password'  => Hash::make($request->password),
+            'no_telp'   => $request->no_telp,
+            'role'      => 'customer',
+        ]);
+
+        return redirect()
+            ->route('usersadmin')
+            ->with('success', 'Akun customer berhasil dibuat.');
+    }
+
+    // ================================
+    // FORM EDIT CUSTOMER
+    // ================================
+    public function edit($id)
+    {
+        $user = User::where('role', 'customer')
+            ->findOrFail($id);
+
+        return view('Admin.users.edit-customer', [
+            'user' => $user
+        ]);
+    }
+
+    // ================================
+    // UPDATE CUSTOMER
+    // ================================
+    public function update(Request $request, $id)
+    {
+        $user = User::where('role', 'customer')
+            ->findOrFail($id);
+
+        $request->validate([
+            'email'    => 'required|email|unique:users,email,' . $user->id,
+            'name'     => 'required',
+            'username' => 'required|unique:users,username,' . $user->id,
+            'no_telp'  => 'required',
+        ]);
+
+        $user->update([
+            'name'     => $request->name,
             'username' => $request->username,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'no_telp' => $request->no_telp,
-            'role' => 'customer'
+            'email'    => $request->email,
+            'no_telp'  => $request->no_telp,
         ]);
 
-    //Mentrigger event pembuatan dashboard default untuk customer baru
-        // Buat dashboard default
-        $dashboard = DasborKustom::create([
-            'user_id' => $user->id,
-            'nama_dasbor' => 'Default',
-            'jenis_dasbor' => 'default',
-            'status_dasbor' => 'aktif'
-        ]);
+        return redirect()
+            ->route('usersadmin')
+            ->with('success', 'Customer berhasil diupdate');
+    }
 
+    // ================================
+    // HAPUS CUSTOMER
+    // ================================
+    public function destroy($id)
+    {
+        $user = User::where('role', 'customer')
+            ->findOrFail($id);
 
-        // Isi widget default
-        HasilKustom::insert([
-            [
-                'dasbor_kustom_id' => $dashboard->id,
-                'fitur_id' => 1,
-                'kolom' => 6,
-                'baris' => 2,
-                'status_fitur' => 'aktif'
-            ],
-            [
-                'dasbor_kustom_id' => $dashboard->id,
-                'fitur_id' => 2,
-                'kolom' => 6,
-                'baris' => 2,
-                'status_fitur' => 'aktif'
-            ],
-            [
-                'dasbor_kustom_id' => $dashboard->id,
-                'fitur_id' => 3,
-                'kolom' => 12,
-                'baris' => 4,
-                'status_fitur' => 'aktif'
-            ]
-        ]);
+        $user->delete();
 
-
-        return back()->with(
-            'success',
-            'Akun customer berhasil dibuat.'
-        );
+        return redirect()
+            ->route('usersadmin')
+            ->with('success', 'Customer berhasil dihapus');
     }
 }

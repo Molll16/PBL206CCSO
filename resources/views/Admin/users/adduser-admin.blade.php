@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Central Cyber Security Office - Add User</title>
+    <title>Add User</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -38,28 +38,20 @@
 
     <div class="bg-[#2B2D34] px-6 flex items-center justify-between border-b-2 border-white animate-fade-in delay-1">
       <div class="flex gap-8">
-            <a href="/usersadmin" class="py-3 text-gray-400 text-sm hover:text-white transition">Users</a>
-            <a href="/adduseradmin" class="py-3 text-cyan-400 text-sm border-b-2 border-cyan-400 font-medium">Add User</a>
+            <a href={{ route('usersadmin') }} class="py-3 text-gray-400 text-sm hover:text-white transition">Users</a>
+            <a href={{ route('adduser') }} class="py-3 text-cyan-400 text-sm border-b-2 border-cyan-400 font-medium">Add User</a>
       </div>
     </div>
 
     <main class="p-8 max-w-[1400px] mx-auto animate-fade-in">
-        <div class="grid grid-cols-4 gap-4 mb-10 text-center">
+        <div class="grid grid-cols-2 gap-4 mb-10 text-center">
             <div>
                 <p class="text-lg text-gray-300">Total User</p>
-                <h2 class="text-4xl font-bold mt-2">08</h2>
-            </div>
-            <div>
-                <p class="text-lg text-gray-300">User Active</p>
-                <h2 class="text-4xl font-bold mt-2 text-white">0</h2>
-            </div>
-            <div>
-                <p class="text-lg text-gray-300">Total Company</p>
-                <h2 class="text-4xl font-bold mt-2">0</h2>
+                <h2 class="text-4xl font-bold mt-2">{{ $totalUsers }}</h2>
             </div>
             <div>
                 <p class="text-lg text-gray-300">Agent Assigned</p>
-                <h2 class="text-4xl font-bold mt-2">0</h2>
+                <h2 class="text-4xl font-bold mt-2">{{ $totalAssignedAgents }}</h2>
             </div>
         </div>
 
@@ -77,7 +69,7 @@
               </div>
           @endif
 
-                <form action="/customers" method="POST" class="space-y-4">
+                <form action="{{ route('customers.store') }}" method="POST" class="space-y-4">
                     @csrf
 
                     <div class="grid grid-cols-2 gap-6">
@@ -125,48 +117,6 @@
     <script>
         // Inisialisasi icon lucide
         lucide.createIcons();
-
-// Buat fungsi untuk navbar pertama
-        //sidebar toggle
-        
-    function openSidebar() {
-      document.getElementById('sidebar').classList.remove('-translate-x-full');
-      document.getElementById('sidebar').classList.add('translate-x-0');
-      document.getElementById('sidebar-backdrop').classList.remove('opacity-0', 'pointer-events-none');
-      document.getElementById('sidebar-backdrop').classList.add('opacity-100');
-    }
-
-    function closeSidebar() {
-      document.getElementById('sidebar').classList.add('-translate-x-full');
-      document.getElementById('sidebar').classList.remove('translate-x-0');
-      document.getElementById('sidebar-backdrop').classList.add('opacity-0', 'pointer-events-none');
-      document.getElementById('sidebar-backdrop').classList.remove('opacity-100');
-    }
-// end sidebar
-
-    function toggleSubmenu(menuId, chevronId) {
-      document.getElementById(menuId).classList.toggle('hidden');
-      document.getElementById(chevronId).classList.toggle('rotate-180');
-    }
-
-    function toggleManage() {
-      const menu = document.getElementById('manage-menu');
-      const arrow = document.getElementById('arrow-manage');
-      menu.classList.toggle('hidden');
-      arrow.classList.toggle('rotate-180');
-    }
-
-    // Tutup dropdown Manage jika klik di luar
-    document.addEventListener('click', function(e) {
-      const menu = document.getElementById('manage-menu');
-      const btn = menu.previousElementSibling;
-      if (!btn.contains(e.target) && !menu.contains(e.target)) {
-        menu.classList.add('hidden');
-        document.getElementById('arrow-manage').classList.remove('rotate-180');
-      }
-    });
-// penutup fungsi untuk navbar pertama
-
     </script>
 </body>
 </html>

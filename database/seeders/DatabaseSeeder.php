@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,6 +20,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@gmail.com',
             'password' => Hash::make('123'),
             'role' => 'admin',
+            'no_telp' => '081234567890',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -29,6 +31,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'customer@gmail.com',
             'password' => Hash::make('123'),
             'role' => 'customer',
+            'no_telp' => '086677889900',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -39,7 +42,7 @@ class DatabaseSeeder extends Seeder
         [
             'name' => 'Test User',
             'username' => 'testuser',
-            'no_telp' => '08123456789',
+            'no_telp' => '081122334455',
             'password' => Hash::make('password123'),
         ]);
     }

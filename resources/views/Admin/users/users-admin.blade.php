@@ -35,22 +35,14 @@
     </div>
 
     <main class="p-8 max-w-[1400px] mx-auto animate-fade-in">
-        <div class="grid grid-cols-4 gap-4 mb-10 text-center">
+        <div class="grid grid-cols-2 gap-4 mb-10 text-center">
             <div>
                 <p class="text-lg text-gray-300">Total User</p>
-                <h2 class="text-4xl font-bold mt-2">08</h2>
-            </div>
-            <div>
-                <p class="text-lg text-gray-300">User Active</p>
-                <h2 class="text-4xl font-bold mt-2 text-white">0</h2>
-            </div>
-            <div>
-                <p class="text-lg text-gray-300">Total Company</p>
-                <h2 class="text-4xl font-bold mt-2">0</h2>
+                <h2 class="text-4xl font-bold mt-2">{{ $totalUsers }}</h2>
             </div>
             <div>
                 <p class="text-lg text-gray-300">Agent Assigned</p>
-                <h2 class="text-4xl font-bold mt-2">0</h2>
+                <h2 class="text-4xl font-bold mt-2">{{ $totalAssignedAgents }}</h2>
             </div>
         </div>
 
@@ -58,21 +50,32 @@
             <div class="p-3 flex items-center justify-between border-b border-gray-600">
                 <div class="text-sm font-medium">Users</div>
                 <div class="flex items-center gap-5 text-xs">
-                    <button class="flex items-center gap-1 hover:text-cyan-400 transition">
-                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Add New User
-                    </button>
-                    <button class="flex items-center gap-1 hover:text-cyan-400 transition">
-                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh
-                    </button>
-                    <button class="flex items-center gap-1 hover:text-cyan-400 transition">
-                        <i data-lucide="upload" class="w-4 h-4"></i> Export formatted
-                    </button>
-                    <button class="flex items-center gap-1 hover:text-cyan-400 transition">
-                        More <i data-lucide="chevron-down" class="w-3 h-3"></i>
-                    </button>
-                    <button class="hover:text-cyan-400">
-                        <i data-lucide="settings" class="w-4 h-4"></i>
-                    </button>
+                    <a href="{{ route('adduser') }}"
+                       class="flex items-center gap-2 px-4 py-2
+                              bg-[#1f2937] hover:bg-cyan-500
+                              border border-gray-600 hover:border-cyan-400
+                              rounded-lg text-sm text-white
+                              transition duration-200 shadow-sm">
+                    
+                        <i data-lucide="plus-circle"
+                           class="w-4 h-4 transition duration-300">
+                        </i>
+                    
+                        Add New User
+                    </a>
+                    <button onclick="window.location.reload()"
+                            class="mr-auto flex items-center gap-2 px-4 py-2 
+                                   bg-[#1f2937] hover:bg-cyan-500 
+                                   border border-gray-600 hover:border-cyan-400
+                                   rounded-lg text-sm text-white 
+                                   transition duration-200 shadow-sm">
+                    
+                        <i data-lucide="refresh-cw"
+                           class="w-4 h-4 group-hover:rotate-180 transition duration-500">
+                        </i>
+                    
+                        Refresh
+                    </button> 
                 </div>
             </div>
 
@@ -90,113 +93,90 @@
                                 <input type="checkbox" class="accent-cyan-500">
                             </th>
             
-                            <th class="p-3 font-semibold">ID</th>
                             <th class="p-3 font-semibold">User</th>
                             <th class="p-3 font-semibold">Email</th>
                             <th class="p-3 font-semibold">Role</th>
-                            <th class="p-3 font-semibold">Company</th>
                             <th class="p-3 font-semibold">Agents</th>
                             <th class="p-3 font-semibold">Status</th>
                             <th class="p-3 font-semibold">Joined</th>
-                            <th class="p-3 font-semibold text-right">Actions</th>
+                            <th class="p-3 font-semibold">Actions</th>
                         </tr>
                     </thead>
             
-                    <tbody class="divide-y divide-gray-700/50">
-            
+                    <tbody class="divide-y divide-gray-700/50">  
+                        @foreach ($users as $user)
+
                         <tr class="table-row-hover">
+
                             <td class="p-3">
                                 <input type="checkbox" class="accent-cyan-500">
                             </td>
-            
-                            <td class="p-3 text-gray-400">001</td>
-            
+
                             <td class="p-3">
-                                <div class="font-medium text-white">Mirjak</div>
-                                <div class="text-xs text-gray-400">+62 81234567890</div>
+                                <div class="font-medium text-white">
+                                    {{ $user->name }}
+                                </div>
+
+                                <div class="text-xs text-gray-400">
+                                    {{ $user->no_telp ?? '-' }}
+                                </div>
                             </td>
-            
-                            <td class="p-3">jake123@company.com</td>
-            
+
                             <td class="p-3">
+                                {{ $user->email }}
+                            </td>
+
+                            <td class="p-3">
+
                                 <span class="px-2 py-1 rounded bg-cyan-500/10 text-cyan-400 text-xs">
-                                    Customer
+                                    {{ ucfirst($user->role) }}
                                 </span>
+
                             </td>
-            
-                            <td class="p-3">PT Alpha Tech</td>
-            
-                            <td class="p-3">
-                                <span class="text-cyan-400 font-medium">2 Assigned</span>
+
+                            <td class="p-3 text-gray-400">
+                                {{ $user->agents_count }} Assigned
                             </td>
-            
+
                             <td class="p-3">
                                 <span class="flex items-center gap-2">
+
                                     <span class="w-2 h-2 rounded-full bg-green-500"></span>
+
                                     Active
                                 </span>
                             </td>
-            
-                            <td class="p-3 text-gray-400">26 Apr 2026</td>
-            
-                            <td class="p-3 text-right">
-                                <button class="hover:text-cyan-400 mx-1">
-                                    <i data-lucide="eye" class="w-4 h-4"></i>
-                                </button>
-                                <button class="hover:text-cyan-400 mx-1">
-                                    <i data-lucide="square-pen" class="w-4 h-4"></i>
-                                </button>
-                                <button class="hover:text-red-400 mx-1">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
+
+                            <td class="p-3 text-gray-400">
+                                {{ $user->created_at->format('d M Y') }}
                             </td>
+
+                            <td class="p-3">
+
+                                <a href="{{ route('customers.edit', $user->id) }}"
+                                   class="bg-cyan-500 hover:bg-cyan-600 text-white px-3 py-1 rounded text-sm inline-block">
+                                    Edit
+                                </a>
+
+                                <form action="{{ route('customers.destroy', $user->id) }}"
+                                      method="POST"
+                                      class="inline">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="submit"
+                                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm ml-2">
+                                        Hapus
+                                    </button>
+
+                                </form>
+
+                            </td>
+
                         </tr>
-            
-            
-                        <tr class="table-row-hover">
-                            <td class="p-3"><input type="checkbox" class="accent-cyan-500"></td>
-            
-                            <td class="p-3 text-gray-400">002</td>
-            
-                            <td class="p-3">
-                                <div class="font-medium text-white">Maulana</div>
-                                <div class="text-xs text-gray-400">+62 89876543210</div>
-                            </td>
-            
-                            <td class="p-3">moll16@gmail.com</td>
-            
-                            <td class="p-3">
-                                <span class="px-2 py-1 rounded bg-purple-500/10 text-purple-400 text-xs">
-                                    Admin
-                                </span>
-                            </td>
-            
-                            <td class="p-3">CCSO Internal</td>
-            
-                            <td class="p-3 text-gray-400">0 Assigned</td>
-            
-                            <td class="p-3">
-                                <span class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
-                                    Inactive
-                                </span>
-                            </td>
-            
-                            <td class="p-3 text-gray-400">12 Jan 2026</td>
-            
-                            <td class="p-3 text-right">
-                                <button class="hover:text-cyan-400 mx-1">
-                                    <i data-lucide="eye" class="w-4 h-4"></i>
-                                </button>
-                                <button class="hover:text-cyan-400 mx-1">
-                                    <i data-lucide="square-pen" class="w-4 h-4"></i>
-                                </button>
-                                <button class="hover:text-red-400 mx-1">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
-                            </td>
-                        </tr>
-            
+
+                        @endforeach 
                     </tbody>
                 </table>
             </div>

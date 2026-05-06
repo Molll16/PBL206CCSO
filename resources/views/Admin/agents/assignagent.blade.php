@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Central Cyber Security Office - Assign Agent</title>
+    <title>Assign Agent</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -47,18 +47,11 @@
     </div>
 
     <main class="p-8 max-w-[1400px] mx-auto animate-fade-in">
-        <div class="grid grid-cols-4 gap-4 mb-14 text-center">
+        <div class="grid grid-cols-3 gap-4 mb-14 text-center">
           <div>
               <p class="text-lg text-gray-300">Total User</p>
               <h2 class="text-4xl font-bold mt-2">
                   {{ $totalUsers }}
-              </h2>
-          </div>
-
-          <div>
-              <p class="text-lg text-gray-300">User Active</p>
-              <h2 class="text-4xl font-bold mt-2 text-white">
-                  {{ $userActive }}
               </h2>
           </div>
 
@@ -72,10 +65,10 @@
           <div>
               <p class="text-lg text-gray-300">Agent Assigned</p>
               <h2 class="text-4xl font-bold mt-2">
-                  {{ $assignedAgents }}
+                  {{ $totalAssignedAgents }}
               </h2>
           </div>
-      </div>
+        </div>
 
         <div class="flex flex-col items-center">
             <h3 class="text-sm mb-4 font-medium">Assign An Agent</h3>
