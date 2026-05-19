@@ -70,14 +70,6 @@ class WazuhApiService
     }
 
     // ================================
-    // DATA LOGS
-    // ================================
-    public function logs()
-    {
-        return $this->request('/manager/logs?limit=500');
-    }
-
-    // ================================
     // DATA ALERTS (WAZUH API)
     // ================================
     public function alerts()

@@ -50,13 +50,13 @@
         </div>
       </div>
 
-      <!-- Logs -->
+      <!-- Alerts -->
       <div>
         <button onclick="toggleSubmenu('agent-menu', 'chevron-agent')"
                 class="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-300 hover:bg-[#2c2c2c] transition border-l-[3px] border-transparent">
           <div class="flex items-center gap-3">
             <img src="/db/agent.png" class="w-4" alt="">
-            Logs
+            Alerts
           </div>
           <svg id="chevron-agent"
                class="w-3.5 h-3.5 text-gray-500 transition-transform duration-300"
@@ -65,7 +65,7 @@
           </svg>
         </button>
         <div id="agent-menu" class="hidden bg-[#161616]">
-          <a href={{ route('daftarlog') }} class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Log</a>
+          <a href={{ route('daftarlog') }} class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">List Alerts</a>
         </div>
       </div>
 

@@ -2,24 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Services\WazuhApiService;
 
 class AdminDashboardController extends Controller
 {
-    // ================================
+    // =========================================
     // DASHBOARD ADMIN
-    // ================================
+    // =========================================
     public function index(WazuhApiService $wazuh)
     {
-        // ===== AMBIL DATA DARI API =====
-        $agentsResponse = $wazuh->agents();
-        $alertsResponse = $wazuh->alerts();
+        // =========================================
+        // AMBIL DATA DARI WAZUH
+        // =========================================
 
-        // ===== CEK ERROR API =====
-        if (!empty($agentsResponse['error']) || !empty($alertsResponse['error'])) {
+        // data semua agent
+        $agentsResponse = $wazuh->agents();
+
+        // data alert dari OpenSearch
+        $alerts = $wazuh->getAlerts();
+
+
+        // =========================================
+        // CEK ERROR KONEKSI API
+        // =========================================
+        if (!empty($agentsResponse['error'])) {
+
             return view('Admin.dashboard', [
                 'error'        => 'Server monitoring sedang tidak tersedia',
+
+                // fallback data kosong
                 'agents'       => [],
                 'active'       => 0,
                 'pending'      => 0,
@@ -31,39 +42,94 @@ class AdminDashboardController extends Controller
             ]);
         }
 
-        // ===== AMBIL DATA =====
-        $agents = $agentsResponse['data']['affected_items'] ?? [];
-        $alerts = $alertsResponse['data']['affected_items'] ?? [];
 
+        // =========================================
+        // AMBIL LIST AGENT
+        // =========================================
+        $agents = $agentsResponse['data']['affected_items'] ?? [];
+
+
+        // =========================================
+        // UBAH MENJADI COLLECTION
+        // =========================================
         $collection = collect($agents);
 
-        // ===== STATISTIK AGENT =====
-        $active        = $collection->where('status', 'active')->count();
-        $pending       = $collection->where('status', 'pending')->count();
-        $disconnected  = $collection->where('status', 'disconnected')->count();
-        $never         = $collection->where('status', 'never_connected')->count();
 
-        // ===== CHART ALERT (7 HARI) =====
+        // =========================================
+        // HITUNG STATUS AGENT
+        // =========================================
+
+        // agent online
+        $active = $collection
+            ->where('status', 'active')
+            ->count();
+
+        // agent pending
+        $pending = $collection
+            ->where('status', 'pending')
+            ->count();
+
+        // agent disconnected
+        $disconnected = $collection
+            ->where('status', 'disconnected')
+            ->count();
+
+        // agent never connected
+        $never = $collection
+            ->where('status', 'never_connected')
+            ->count();
+
+
+        // =========================================
+        // DATA CHART ALERT 7 HARI
+        // =========================================
         $chartLabels = [];
         $chartData   = [];
 
+
+        // looping 7 hari terakhir
         for ($i = 6; $i >= 0; $i--) {
 
-            $date  = now()->subDays($i)->format('Y-m-d');
-            $label = now()->subDays($i)->format('D');
+            // format tanggal
+            $date = now()
+                ->subDays($i)
+                ->format('Y-m-d');
 
-            $total = collect($alerts)->filter(function ($item) use ($date) {
-                return isset($item['timestamp']) || isset($item['@timestamp']) &&
-                       str_contains($item['timestamp'], $date);
-            })->count();
+            // format label chart
+            $label = now()
+                ->subDays($i)
+                ->format('D');
 
+
+            // hitung total alert per hari
+            $total = collect($alerts)
+
+                ->filter(function ($item) use ($date) {
+
+                    return isset($item['time']) &&
+                           str_contains($item['time'], $date);
+                })
+
+                ->count();
+
+
+            // masukkan label chart
             $chartLabels[] = $label;
-            $chartData[]   = $total;
+
+            // masukkan jumlah alert
+            $chartData[] = $total;
         }
 
+
+        // =========================================
+        // TOTAL SELURUH ALERT
+        // =========================================
         $totalAlerts = array_sum($chartData);
 
-        // ===== RETURN VIEW =====
+
+        // =========================================
+        // KIRIM DATA KE VIEW
+        // =========================================
         return view('Admin.dashboard', compact(
             'agents',
             'active',

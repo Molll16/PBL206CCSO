@@ -2,12 +2,15 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
+use App\Models\Agen;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class AgentService
 {
-    // ambil semua agent dari wazuh
+    // =========================================
+    // AMBIL SEMUA AGENT DARI WAZUH
+    // =========================================
     public function getAgents(WazuhApiService $wazuh)
     {
         $response = $wazuh->agents();
@@ -15,49 +18,55 @@ class AgentService
         return $response['data']['affected_items'] ?? [];
     }
 
-    // statistik agent customer
+    // =========================================
+    // AMBIL AGENT YANG BELUM DIASSIGN
+    // =========================================
+    public function getAvailableAgents(WazuhApiService $wazuh)
+    {
+        // semua agent
+        $agents = $this->getAgents($wazuh);
+
+        // agent yang sudah dipakai
+        $assignedAgents = Agen::pluck('id_wazuh_agen')->toArray();
+
+        // filter agent yang belum diassign
+        return collect($agents)
+            ->whereNotIn('id', $assignedAgents)
+            ->values()
+            ->toArray();
+    }
+
+    // =========================================
+    // STATISTIK AGENT CUSTOMER
+    // =========================================
     public function getStats(WazuhApiService $wazuh)
     {
-        // ambil agent milik user
-        $myAgents = DB::table('agen')
-            ->where('user_id', auth()->id())
+        // agent milik user login
+        $myAgents = Agen::where('user_id', auth()->id())
             ->pluck('id_wazuh_agen')
             ->toArray();
 
-        // ambil semua agent dari wazuh
-        $agents = $wazuh->agents();
+        // semua agent dari wazuh
+        $agents = $this->getAgents($wazuh);
 
-        $agentOnline = 0;
-        $agentOffline = 0;
-        $agentTotal = 0;
+        // filter agent user
+        $list = collect($agents)
+            ->whereIn('id', $myAgents);
 
-        // cek apakah ada data agent
-        if (isset($agents['data']['affected_items'])) {
-
-            $list = collect($agents['data']['affected_items']);
-
-            // filter agent milik user
-            $list = $list->whereIn('id', $myAgents);
-
-            $agentTotal = $list->count();
-
-            foreach ($list as $agent) {
-
-                if ($agent['status'] == 'active') {
-                    $agentOnline++;
-                } else {
-                    $agentOffline++;
-                }
-            }
-        }
+        // hitung statistik
+        $online = $list->where('status', 'active')->count();
+        $offline = $list->where('status', '!=', 'active')->count();
 
         return [
-            'online' => $agentOnline,
-            'offline' => $agentOffline,
-            'total' => $agentTotal,
+            'online' => $online,
+            'offline' => $offline,
+            'total' => $list->count(),
         ];
     }
 
+    // =========================================
+    // STATISTIK CUSTOMER
+    // =========================================
     public function getCustomerStats()
     {
         $users = User::where('role', 'customer')
