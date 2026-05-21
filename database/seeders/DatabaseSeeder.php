@@ -25,25 +25,6 @@ class DatabaseSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        DB::table('users')->insert([
-            'name' => 'Customer',
-            'username' => 'customer',
-            'email' => 'customer@gmail.com',
-            'password' => Hash::make('123'),
-            'role' => 'customer',
-            'no_telp' => '086677889900',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
         $this->call(FiturSeeder::class);
-
-        User::firstOrCreate(['email' => 'test@example.com'],
-        [
-            'name' => 'Test User',
-            'username' => 'testuser',
-            'no_telp' => '081122334455',
-            'password' => Hash::make('password123'),
-        ]);
     }
 }

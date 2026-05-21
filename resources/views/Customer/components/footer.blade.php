@@ -19,7 +19,6 @@
 
         <!-- Media Sosial -->
         <div class="flex items-center gap-6 ml-2">
-          <img src="/lp/tt.png" class="h-5 cursor-pointer" alt="">
           <img src="/lp/ig.png" class="h-5 cursor-pointer" alt="">
           <img src="/lp/wa.png" class="h-5 cursor-pointer" alt="">
           <img src="/lp/email.png" class="h-5 cursor-pointer" alt="">

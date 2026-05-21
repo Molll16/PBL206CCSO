@@ -119,7 +119,10 @@ class WazuhApiService
             $results[] = [
                 'description' => $source['rule']['description'] ?? '-',
                 'level' => $source['rule']['level'] ?? 0,
-                'agent' => $source['agent']['name'] ?? 'unknown',
+                'agent' => [
+                    'name' => $source['agent']['name'] ?? 'unknown',
+                    'id' => $source['agent']['id'] ?? null
+                ],
                 'time' => $source['@timestamp'] ?? null,
 
                 // fallback user
