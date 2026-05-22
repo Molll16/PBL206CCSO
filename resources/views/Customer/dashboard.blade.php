@@ -71,15 +71,28 @@
     </p>
 
     <!-- Card -->
-    <div class="border border-white rounded-lg h-48 p-4 hover:bg-white/5 transition">
+    <div class="border border-white rounded-lg h-48 p-4 hover:bg-white/5 transition ">
 
         @if($item->fitur->nama_fitur === 'Agent Status')
 
             @include('Customer.widgets.agent-status')
 
-        @elseif($item->fitur->nama_fitur === 'Security Alerts')
+            @elseif($item->fitur->nama_fitur === 'Network Traffic')
+            @include('Customer.widgets.network-traffic')
 
+            @elseif($item->fitur->nama_fitur === 'Service Status')
+            @include('Customer.widgets.service-status')
+
+            @elseif($item->fitur->nama_fitur === 'File Integrity Monitoring')
+            @include('Customer.widgets.file-integrity')
+
+            @elseif($item->fitur->nama_fitur === 'Security Alerts')
             @include('Customer.widgets.security-alerts')
+
+            @elseif($item->fitur->nama_fitur === 'Threat Summary')
+            @include('Customer.widgets.threat-summary')
+
+            
 
         @else
         
