@@ -2,27 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\WazuhApiService;
+use App\services\WazuhApiService;
+use App\Services\AlertService;
 use App\Models\Agen;
 
 class AlertController extends Controller
 {
-    public function getAlerts(WazuhApiService $wazuh)
+    public function getAlerts(
+        AlertService $alertService
+    )
     {
-        // ambil id agent milik user login
-        $myAgents = Agen::where('user_id', auth()->id())
-            ->pluck('id_wazuh_agen')
-            ->toArray();
+        return $alertService->getLatestAlerts();
+    }
 
-        // ambil semua alerts
-        $alerts = collect($wazuh->getAlerts());
+    public function index(
+        AlertService $alertService
+    ) {
+        $alerts = $alertService->getTodayAlerts();
 
-        // filter alerts berdasarkan agent user
-        $filterAlerts = $alerts->filter(function ($alert) use ($myAgents) {
-            return in_array($alert['agent']['id'] ?? null, $myAgents);
-        });
+        return view(
+            'Customer.logs.daftarlog',
+            [
 
-        // ambil 5 terbaru
-        return $filterAlerts->take(5);
+                'alerts' => $alerts,
+
+                'totalAlerts' => $alerts->count(),
+
+                'criticalAlerts' =>
+                    $alerts->where('level', '>=', 13)->count(),
+
+                'highAlerts' =>
+                    $alerts->whereBetween('level', [10, 12])->count(),
+
+                'mediumAlerts' =>
+                    $alerts->whereBetween('level', [5, 9])->count(),
+
+                'lowAlerts' =>
+                    $alerts->where('level', '<', 5)->count(),
+            ]
+        );
     }
 }

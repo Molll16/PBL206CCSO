@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Services\WazuhApiService;
+use App\Services\AlertService;
 
 class AdminDashboardController extends Controller
 {
     // =========================================
     // DASHBOARD ADMIN
     // =========================================
-    public function index(WazuhApiService $wazuh)
-    {
+    public function index(
+        WazuhApiService $wazuh,
+        AlertService $alertService
+    ) {
         // =========================================
         // AMBIL DATA DARI WAZUH
         // =========================================
@@ -19,26 +22,31 @@ class AdminDashboardController extends Controller
         $agentsResponse = $wazuh->agents();
 
         // data alert dari OpenSearch
-        $alerts = $wazuh->getAlerts();
+        $alerts = $alertService->getAlerts();
 
 
         // =========================================
         // CEK ERROR KONEKSI API
         // =========================================
-        if (!empty($agentsResponse['error'])) {
-
+        if (
+            !empty($agentsResponse['error']) ||
+            empty($agentsResponse['data'])
+        ) {
             return view('Admin.dashboard', [
-                'error'        => 'Server monitoring sedang tidak tersedia',
+                'error' => 'Server monitoring sedang tidak tersedia',
 
                 // fallback data kosong
-                'agents'       => [],
-                'active'       => 0,
-                'pending'      => 0,
+                'agents' => [],
+                'active' => 0,
+                'pending' => 0,
                 'disconnected' => 0,
-                'never'        => 0,
-                'chartLabels'  => [],
-                'chartData'    => [],
-                'totalAlerts'  => 0,
+                'never' => 0,
+                'chartLabels' => [],
+                'chartData' => [],
+                'totalAlerts' => 0,
+
+                // TAMBAHAN
+                'wazuhOffline' => true,
             ]);
         }
 
@@ -139,6 +147,8 @@ class AdminDashboardController extends Controller
             'chartLabels',
             'chartData',
             'totalAlerts'
-        ));
+        ))->with([
+                    'wazuhOffline' => false
+                ]);
     }
 }

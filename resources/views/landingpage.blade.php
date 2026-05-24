@@ -62,7 +62,7 @@ html {
 <body class="bg-[#2B2D34] text-white font-tahoma overflow-x-hidden">
 
   <!-- Navbar -->
-  <header class="flex justify-between items-center px-5 py-2 bg-[#212121]">
+  <header class="flex justify-between items-center px-7 py-4 bg-[#212121]">
     <div class="flex items-center gap-2">
       <div class="w-10 h-10">
         <img src="/lp/logo.png">
@@ -86,7 +86,7 @@ html {
         <p>Unified XDR and SIEM protection for endpoints and cloud workloads.</p>
         <div class="flex gap-4 mt-28">
           <a href="{{ route('login') }}"> <button class="bg-[#3282B8] px-5 py-2 rounded hover:bg-blue-600">Login</button> </a>
-          <a href="#footer"><button class="bg-[#3282B8] px-5 py-2 rounded hover:bg-blue-500">Contact Us</button>
+          <a href="#footer"><button class="bg-[#3282B8] px-5 py-2 rounded hover:bg-blue-500">Contact Us</button></a>
         </div>
       </div>
 

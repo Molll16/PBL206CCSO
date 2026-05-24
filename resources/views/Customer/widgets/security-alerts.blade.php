@@ -39,8 +39,3 @@
         @endforeach
     </div>
 </div>
-
-Catat jalur (*path*) file yang ingin kamu push.
-  
-  
-    Jangan gunakan git add . (karena itu akan mengambil semua file). Masukkan nama atau *path* file satu per satu dipisahkan dengan spasi:

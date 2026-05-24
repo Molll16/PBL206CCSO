@@ -44,7 +44,7 @@ class WazuhApiService
             $token = $this->token();
     
             return Http::withoutVerifying()
-                ->timeout(10)
+                ->timeout(3)
                 ->withToken($token)
                 ->get("{$this->url}{$endpoint}")
                 ->json();
@@ -86,61 +86,29 @@ class WazuhApiService
     // ================================
     public function getRawAlerts()
     {
-        $url  = config('services.indexer.url');
-        $user = config('services.indexer.user');
-        $pass = config('services.indexer.pass');
+        try {
 
-        return Http::withoutVerifying()
-            ->timeout(30)
-            ->withBasicAuth($user, $pass)
-            ->post("{$url}/wazuh-alerts-*/_search", [
-                'size' => 50,
-                'sort' => [
-                    ['@timestamp' => ['order' => 'desc']]
-                ]
-            ])
-            ->json();
-    }
+            $url = config('services.indexer.url');
+            $user = config('services.indexer.user');
+            $pass = config('services.indexer.pass');
 
-    // ================================
-    // MAPPING ALERTS
-    // ================================
-    private function mapAlerts($data)
-    {
-        $results = [];
+            return Http::withoutVerifying()
+                ->timeout(3)
+                ->withBasicAuth($user, $pass)
+                ->post("{$url}/wazuh-alerts-*/_search", [
+                    'size' => 50,
+                    'sort' => [
+                        ['@timestamp' => ['order' => 'desc']]
+                    ]
+                ])
+                ->json();
 
-        if (!isset($data['hits']['hits'])) {
-            return [];
-        }
+        } catch (\Throwable $e) {
 
-        foreach ($data['hits']['hits'] as $item) {
-            $source = $item['_source'];
-
-            $results[] = [
-                'description' => $source['rule']['description'] ?? '-',
-                'level' => $source['rule']['level'] ?? 0,
-                'agent' => [
-                    'name' => $source['agent']['name'] ?? 'unknown',
-                    'id' => $source['agent']['id'] ?? null
-                ],
-                'time' => $source['@timestamp'] ?? null,
-
-                // fallback user
-                'user' => $source['data']['srcuser']
-                    ?? $source['data']['dstuser']
-                    ?? 'unknown',
+            return [
+                'error' => true,
+                'message' => 'Indexer Wazuh offline'
             ];
         }
-
-        return $results;
-    }
-
-    // ================================
-    // FINAL ALERTS (SIAP FRONTEND)
-    // ================================
-    public function getAlerts()
-    {
-        $raw = $this->getRawAlerts();
-        return $this->mapAlerts($raw);
     }
 }

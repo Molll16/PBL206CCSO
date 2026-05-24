@@ -60,8 +60,8 @@ Route::prefix('customer')->middleware('auth')->group(function () {
     });
 
     // LOGS
-    Route::get('/logs', fn() => view('Customer.logs.daftarlog'))->name('daftarlog');
-
-    // ALERTS
-    Route::get('/alerts', [AlertController::class, 'alerts']);
+    Route::get('/logs', [
+        AlertController::class,
+        'index'
+    ])->name('daftarlog');
 });

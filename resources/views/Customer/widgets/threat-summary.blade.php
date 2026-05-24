@@ -1,8 +1,4 @@
 @php
-    // =========================================================================
-    // DUMMY DATA FOR FRONTEND PREVIEW ONLY
-    // (Jika nanti orang backend mau pakai data asli, mereka tinggal menghapus block @php ini)
-    // =========================================================================
     $summary = [
         'active' => 18,
         'pending' => 7,

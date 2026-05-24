@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Central Cyber Security Office - Admin</title>
+    <title>Alerts List</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -113,14 +113,88 @@
         <div class="border border-white rounded-sm bg-transparent overflow-hidden">
             <div class="p-3 flex items-center justify-between border-b border-white">
                 <div class="text-sm font-medium flex items-center gap-1">Alerts = {{ $totalAlerts ?? 0 }}</div>
-                <div class="flex items-center gap-5 text-xs">
-                    <button class="flex items-center gap-1 hover:text-cyan-400 transition">
-                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh
-                    </button>
-                    <button class="hover:text-cyan-400">
-                        <i data-lucide="settings" class="w-4 h-4"></i>
-                    </button>
+            </div>
+
+            <!-- FILTER & SEARCH -->
+            <div class="p-4 border-b border-white flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
+            
+                <!-- LEFT -->
+                <div class="flex flex-col md:flex-row gap-3">
+            
+                    <!-- FILTER SEVERITY -->
+                    <select class="bg-[#2B2D32]
+                               border border-gray-600
+                               rounded-lg
+                               px-3 py-2
+                               text-sm text-white
+                               focus:outline-none
+                               focus:border-cyan-400">
+            
+                        <option>
+                            All Severity
+                        </option>
+            
+                        <option>
+                            Critical
+                        </option>
+            
+                        <option>
+                            High
+                        </option>
+            
+                        <option>
+                            Medium
+                        </option>
+            
+                        <option>
+                            Low
+                        </option>
+            
+                    </select>
+            
+                    <!-- FILTER DATE -->
+                    <input type="date" class="bg-[#2B2D32]
+                               border border-gray-600
+                               rounded-lg
+                               px-3 py-2
+                               text-sm text-white
+                               focus:outline-none
+                               focus:border-cyan-400">
+            
                 </div>
+            
+                <!-- RIGHT -->
+                <div class="flex gap-3">
+            
+                    <!-- SEARCH -->
+                    <input type="text" placeholder="Search alerts..." class="bg-[#2B2D32]
+                               border border-gray-600
+                               rounded-lg
+                               px-3 py-2
+                               text-sm text-white
+                               placeholder-gray-400
+                               focus:outline-none
+                               focus:border-cyan-400">
+            
+                    <!-- REFRESH -->
+                    <button onclick="location.reload()" class="bg-cyan-500
+                               hover:bg-cyan-600
+                               transition
+                               px-4 py-2
+                               rounded-lg
+                               text-sm
+                               font-medium
+                               text-white
+                               flex items-center gap-2">
+            
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            
+                        Refresh
+            
+                    </button>
+            
+                </div>
+            
             </div>
 
             <div class="overflow-x-auto">
@@ -138,18 +212,61 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700/50 text-center">
-                        <tr class="table-row-hover">
-                            <td class="p-3 text-gray-400">08:10</td>
-                            <td class="p-3">High</td>
-                            <td class="p-3">Brute Force</td>
-                            <td class="p-3">Web-01</td>
-                            <td class="p-3">45.x.x.x</td>
-                            <td class="p-3">Multiple login failed</td>
-                            <td class="p-3">Open</td>
-                            <td class="p-3">
-                                <button class="text-white hover:underline cursor-pointer">View Details</button>
-                            </td>
-                        </tr>
+                        @forelse($alerts as $alert)
+
+                            <tr class="table-row-hover">
+                                <td class="p-3 text-gray-400">
+                                    {{ \Carbon\Carbon::parse($alert['time'])->format('H:i') }}
+                                </td>
+                                <td class="p-3">
+                                    @if($alert['level'] >= 13)
+                                        <span class="text-red-500 font-bold">
+                                            Critical
+                                        </span>
+                                    @elseif($alert['level'] >= 10)
+                                        <span class="text-red-400 font-bold">
+                                            High
+                                        </span>
+                                    @elseif($alert['level'] >= 5)
+                                        <span class="text-yellow-400 font-bold">
+                                            Medium
+                                        </span>
+                                    @else
+                                        <span class="text-green-400 font-bold">
+                                            Low
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="p-3">
+                                    {{ $alert['agent']['name'] }}
+                                </td>
+                                <td class="p-3">
+                                    Security Event
+                                </td>
+                                <td class="p-3 max-w-xs truncate">
+                                    {{ $alert['description'] }}
+                                </td>
+                                <td class="p-3">
+                                    {{ $alert['user'] }}
+                                </td>
+                                <td class="p-3">
+                                    <span class="text-red-400">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="p-3">
+                                    <button class="text-white hover:underline">
+                                        View Details
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="p-8 text-center text-gray-500">
+                                    No alerts today
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
