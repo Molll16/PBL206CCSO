@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,21 +74,27 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     )->name('assignagent.save');
 
 
-    // ================================
-    // PROFILE
-    // ================================
+    // ======== //
+    //  PROFILE //
+    // ======== //
     Route::prefix('profile')->group(function () {
 
-        Route::get('/agent',
-            fn() => view('Admin.profile.profile-agent')
+        // PROFILE SETTINGS
+        Route::get(
+            '/setting',
+            [ProfileController::class, 'settings']
+        )->name('profile-setting-admin');
+
+        // PROFILE AGENT
+        Route::get(
+            '/agent',
+            [ProfileController::class, 'agent']
         )->name('profile-agent');
 
-        Route::get('/overview',
-            fn() => view('Admin.profile.profile-overview')
-        )->name('profile-overview-admin');
-
-        Route::get('/setting',
-            fn() => view('Admin.profile.profileset-admin')
-        )->name('profile-setting-admin');
+        // UPDATE PROFILE
+        Route::post(
+            '/update',
+            [ProfileController::class, 'update']
+        )->name('profile.update');
     });
 });
