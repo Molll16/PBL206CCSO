@@ -7,9 +7,7 @@
     <title>Alerts List</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    @vite('resources/js/app.js')
     <style>
         body {
             background-color: #2b2d34;
@@ -64,74 +62,61 @@
 
     <main class="p-8 max-w-[1400px] mx-auto animate-fade-in">
 
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
 
-    <div
-        class="lg:col-span-4 bg-[#2B2D32] border border-custom rounded-xl p-5 flex flex-col items-center justify-center min-h-[260px]">
-        <p class="text-sm font-medium text-gray-400 self-start mb-2 flex items-center gap-2">
-            <i data-lucide="pie-chart" class="w-4 h-4 text-cyan-400"></i> Alert Distribution
-        </p>
-        <div class="w-full max-w-[180px] relative flex items-center justify-center">
-            <canvas id="alertPieChart"></canvas>
+            <!-- CRITICAL -->
+            <div class="bg-[#2B2D32] border border-red-700 rounded-xl p-5">
+                <p class="text-sm text-red-400 font-medium">
+                    Critical
+                </p>
+                <h2 class="text-3xl font-bold text-red-500 mt-2">
+                    3
+                </h2>
+            </div>
+
+            <!-- HIGH -->
+            <div class="bg-[#2B2D32] border border-red-500 rounded-xl p-5">
+                <p class="text-sm text-red-300 font-medium">
+                    High
+                </p>
+                <h2 class="text-3xl font-bold text-red-400 mt-2">
+                    5
+                </h2>
+            </div>
+
+            <!-- MEDIUM -->
+            <div class="bg-[#2B2D32] border border-yellow-500 rounded-xl p-5">
+                <p class="text-sm text-yellow-300 font-medium">
+                    Medium
+                </p>
+                <h2 class="text-3xl font-bold text-yellow-400 mt-2">
+                    8
+                </h2>
+            </div>
+
+            <!-- LOW -->
+            <div class="bg-[#2B2D32] border border-green-500 rounded-xl p-5">
+                <p class="text-sm text-green-300 font-medium">
+                    Low
+                </p>
+                <h2 class="text-3xl font-bold text-green-400 mt-2">
+                    12
+                </h2>
+            </div>
+
         </div>
-    </div>
-
-    <div class="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-        <div
-            class="bg-[#2B2D32] border border-red-700 rounded-xl p-5 flex flex-col justify-between hover:bg-white/5 transition">
-            <p class="text-sm text-red-400 font-medium flex items-center justify-between">
-                Critical
-            </p>
-            <h2 class="text-4xl font-bold text-red-500 mt-2">
-                {{ $criticalAlerts ?? 0 }}
-            </h2>
-        </div>
-
-        <div
-            class="bg-[#2B2D32] border border-red-500 rounded-xl p-5 flex flex-col justify-between hover:bg-white/5 transition">
-            <p class="text-sm text-red-300 font-medium">
-                High
-            </p>
-            <h2 class="text-4xl font-bold text-red-400 mt-2">
-                {{ $highAlerts ?? 0 }}
-            </h2>
-        </div>
-
-        <div
-            class="bg-[#2B2D32] border border-yellow-500 rounded-xl p-5 flex flex-col justify-between hover:bg-white/5 transition">
-            <p class="text-sm text-yellow-300 font-medium">
-                Medium
-            </p>
-            <h2 class="text-4xl font-bold text-yellow-400 mt-2">
-                {{ $mediumAlerts ?? 0 }}
-            </h2>
-        </div>
-
-        <div
-            class="bg-[#2B2D32] border border-green-500 rounded-xl p-5 flex flex-col justify-between hover:bg-white/5 transition">
-            <p class="text-sm text-green-300 font-medium">
-                Low
-            </p>
-            <h2 class="text-4xl font-bold text-green-400 mt-2">
-                {{ $lowAlerts ?? 0 }}
-            </h2>
-        </div>
-
-    </div>
-</div>
 
         <div class="border border-white rounded-sm bg-transparent overflow-hidden">
             <div class="p-3 flex items-center justify-between border-b border-white">
-                <div class="text-sm font-medium flex items-center gap-1">Alerts = {{ $totalAlerts ?? 0 }}</div>
+                <div class="text-sm font-medium flex items-center gap-1">Alerts = 28</div>
             </div>
 
             <!-- FILTER & SEARCH -->
             <div class="p-4 border-b border-white flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
-            
+
                 <!-- LEFT -->
                 <div class="flex flex-col md:flex-row gap-3">
-            
+
                     <!-- FILTER SEVERITY -->
                     <select class="bg-[#2B2D32]
                                border border-gray-600
@@ -140,29 +125,15 @@
                                text-sm text-white
                                focus:outline-none
                                focus:border-cyan-400">
-            
-                        <option>
-                            All Severity
-                        </option>
-            
-                        <option>
-                            Critical
-                        </option>
-            
-                        <option>
-                            High
-                        </option>
-            
-                        <option>
-                            Medium
-                        </option>
-            
-                        <option>
-                            Low
-                        </option>
-            
+
+                        <option>All Severity</option>
+                        <option>Critical</option>
+                        <option>High</option>
+                        <option>Medium</option>
+                        <option>Low</option>
+
                     </select>
-            
+
                     <!-- FILTER DATE -->
                     <input type="date" class="bg-[#2B2D32]
                                border border-gray-600
@@ -171,12 +142,12 @@
                                text-sm text-white
                                focus:outline-none
                                focus:border-cyan-400">
-            
+
                 </div>
-            
+
                 <!-- RIGHT -->
                 <div class="flex gap-3">
-            
+
                     <!-- SEARCH -->
                     <input type="text" placeholder="Search alerts..." class="bg-[#2B2D32]
                                border border-gray-600
@@ -186,13 +157,26 @@
                                placeholder-gray-400
                                focus:outline-none
                                focus:border-cyan-400">
-            
+
                     <!-- REFRESH -->
-                    <button onclick="location.reload()" class="bg-cyan-500 hover:bg-cyan-600 transition px-4 py-2 rounded-lg text-sm font-medium text-white flex items-center gap-2">
+                    <button onclick="location.reload()" class="bg-cyan-500
+                               hover:bg-cyan-600
+                               transition
+                               px-4 py-2
+                               rounded-lg
+                               text-sm
+                               font-medium
+                               text-white
+                               flex items-center gap-2">
+
                         <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+
                         Refresh
+
                     </button>
+
                 </div>
+
             </div>
 
             <div class="overflow-x-auto">
@@ -210,61 +194,30 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700/50 text-center">
-                        @forelse($alerts as $alert)
 
-                            <tr class="table-row-hover">
-                                <td class="p-3 text-gray-400">
-                                    {{ \Carbon\Carbon::parse($alert['time'])->format('H:i') }}
-                                </td>
-                                <td class="p-3">
-                                    @if($alert['level'] >= 13)
-                                        <span class="text-red-500 font-bold">
-                                            Critical
-                                        </span>
-                                    @elseif($alert['level'] >= 10)
-                                        <span class="text-red-400 font-bold">
-                                            High
-                                        </span>
-                                    @elseif($alert['level'] >= 5)
-                                        <span class="text-yellow-400 font-bold">
-                                            Medium
-                                        </span>
-                                    @else
-                                        <span class="text-green-400 font-bold">
-                                            Low
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="p-3">
-                                    {{ $alert['agent']['name'] }}
-                                </td>
-                                <td class="p-3">
-                                    Security Event
-                                </td>
-                                <td class="p-3 max-w-xs truncate">
-                                    {{ $alert['description'] }}
-                                </td>
-                                <td class="p-3">
-                                    {{ $alert['user'] }}
-                                </td>
-                                <td class="p-3">
-                                    <span class="text-red-400">
-                                        Active
-                                    </span>
-                                </td>
-                                <td class="p-3">
-                                    <button class="text-white hover:underline">
-                                        View Details
-                                    </button>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="p-8 text-center text-gray-500">
-                                    No alerts today
-                                </td>
-                            </tr>
-                        @endforelse
+                        {{-- ROW 1 - Critical --}}
+                        <tr class="table-row-hover">
+                            <td class="p-3 text-gray-400">08:02</td>
+                            <td class="p-3">
+                                <span class="text-red-500 font-bold">Critical</span>
+                            </td>
+                            <td class="p-3">SRV-WEB-01</td>
+                            <td class="p-3">Security Event</td>
+                            <td class="p-3 max-w-xs truncate">Multiple failed SSH login attempts detected from external IP</td>
+                            <td class="p-3">192.168.1.45</td>
+                            <td class="p-3"><span class="text-red-400">Active</span></td>
+                            <td class="p-3">
+                                                        <!-- VIEW DETAIL BUTTON -->
+                        <td class="p-3">
+                            <button onclick="openModal()"
+                                class="text-cyan-400 hover:text-cyan-300 hover:underline transition">
+                                View Details
+                            </button>
+                        </td>
+                            </td>
+                        </tr>
+
+
                     </tbody>
                 </table>
             </div>
@@ -286,47 +239,198 @@
         </div>
     </main>
 
-@include('Customer.components.footer')
+    <script>
+        lucide.createIcons();
+    </script>
+    <!-- MODAL -->
+<div id="alertModal"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
 
+    <!-- UBAH max-w-3xl jadi max-w-lg -->
+    <div
+        class="bg-[#2B2D32] border border-gray-700 rounded-2xl w-full max-w-lg max-h-[700px]  animate-fade-in overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+
+        <!-- HEADER -->
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-700">
+
+            <div class="flex items-center gap-3">
+
+                <div
+                    class="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500 flex items-center justify-center">
+
+                    <i data-lucide="shield-alert" class="w-5 h-5 text-red-500"></i>
+
+                </div>
+
+                <div>
+
+                    <h2 class="text-base font-semibold text-white">
+                        Failed SSH Login
+                    </h2>
+
+                    <p class="text-[11px] text-gray-400">
+                        Security Event Detail
+                    </p>
+
+                </div>
+
+            </div>
+
+            <button onclick="closeModal()"
+                class="text-gray-400 hover:text-white transition">
+
+                <i data-lucide="x" class="w-4 h-4"></i>
+
+            </button>
+
+        </div>
+
+        <!-- BODY -->
+        <div class="p-5 space-y-5">
+
+            <!-- STATUS -->
+            <div class="flex items-center gap-2 flex-wrap">
+
+                <span
+                    class="px-2 py-1 rounded-full text-[10px] font-bold bg-red-500/10 border border-red-500 text-red-400">
+
+                    HIGH
+
+                </span>
+
+                <span class="text-[11px] text-gray-500">
+                    Rule ID : 5710
+                </span>
+
+                <span
+                    class="px-2 py-1 rounded-full text-[10px] bg-green-500/10 border border-green-500 text-green-400">
+
+                    Active
+
+                </span>
+
+            </div>
+
+            <!-- INFO -->
+            <div class="space-y-3 text-sm">
+
+                <div class="flex justify-between border-b border-gray-700 pb-2">
+                    <span class="text-gray-500">Time</span>
+                    <span class="text-white">2026-05-20 14:22</span>
+                </div>
+
+                <div class="flex justify-between border-b border-gray-700 pb-2">
+                    <span class="text-gray-500">Agent</span>
+                    <span class="text-white">Ubuntu-Server-01</span>
+                </div>
+
+                <div class="flex justify-between border-b border-gray-700 pb-2">
+                    <span class="text-gray-500">Source IP</span>
+                    <span class="text-cyan-400">103.21.1.10</span>
+                </div>
+
+                <div class="flex justify-between border-b border-gray-700 pb-2">
+                    <span class="text-gray-500">Port</span>
+                    <span class="text-white">22</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Username</span>
+                    <span class="text-white">root</span>
+                </div>
+
+            </div>
+
+            <!-- DESCRIPTION -->
+            <div>
+
+                <h3 class="text-xs font-semibold text-cyan-400 mb-2">
+                    Description
+                </h3>
+
+                <div class="bg-[#111827] border border-gray-700 rounded-lg p-3">
+
+                    <p class="text-xs text-gray-300 leading-relaxed">
+
+                        Multiple failed SSH login attempts detected from same IP.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- RAW LOG -->
+            <div>
+
+                <h3 class="text-xs font-semibold text-cyan-400 mb-2">
+                    Raw Log
+                </h3>
+
+                <div
+                    class="bg-black border border-gray-700 rounded-lg p-3 overflow-x-auto">
+
+<pre class="text-green-400 text-[11px] leading-relaxed">
+sshd[221]:
+Failed password for root
+from 103.21.1.10
+port 51221 ssh2
+</pre>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div
+            class="px-5 py-4 border-t border-gray-700 flex items-center justify-end gap-2">
+
+            <button onclick="closeModal()"
+                class="px-3 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 transition text-xs">
+
+                Close
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 <script>
-    // Inisialisasi icon lucide
+
     lucide.createIcons();
 
-    // Ambil data langsung dari variabel backend Laravel
-    const criticalCount = {{ $criticalAlerts ?? 0 }};
-    const highCount = {{ $highAlerts ?? 0 }};
-    const mediumCount = {{ $mediumAlerts ?? 0 }};
-    const lowCount = {{ $lowAlerts ?? 0 }};
-    const totalAlerts = criticalCount + highCount + mediumCount + lowCount;
+    function openModal() {
 
-    const ctx = document.getElementById('alertPieChart').getContext('2d');
+        const modal = document.getElementById('alertModal');
 
-    // Cek jika tidak ada alert sama sekali hari ini, tampilkan warna abu placeholder
-    const hasData = totalAlerts > 0;
-    const dataSet = hasData ? [criticalCount, highCount, mediumCount, lowCount] : [1];
-    const colorSet = hasData ? ['#ef4444', '#f87171', '#facc15', '#4ade80'] : ['#4a4e54'];
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
 
-    new Chart(ctx, {
-        type: 'doughnut', // Model Donut melingkar biar terlihat modern
-        data: {
-            datasets: [{
-                data: dataSet,
-                backgroundColor: colorSet,
-                borderWidth: 0,
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            cutout: '75%', // Ketebalan lingkaran
-            plugins: {
-                legend: { display: false }, // Kita sembunyikan karena detail sudah ada di card kanan
-                tooltip: { enabled: hasData }
-            },
-            responsive: true,
-            maintainAspectRatio: true
+        lucide.createIcons();
+    }
+
+    function closeModal() {
+
+        const modal = document.getElementById('alertModal');
+
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    // close ketika klik background
+    document.getElementById('alertModal').addEventListener('click', function(e) {
+
+        if (e.target === this) {
+            closeModal();
         }
+
     });
+
 </script>
 </body>
 
-</html>
+</html> 
