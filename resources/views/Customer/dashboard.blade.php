@@ -27,6 +27,7 @@
     </div>
 
     <!-- Alert Password -->
+    @if(!auth()->user()->password_changed)
     <div id="pwd-alert"
          class="absolute top-4 right-4 w-72 bg-[#212121] border border-gray-500 rounded-xl p-5 shadow-2xl z-20">
 
@@ -41,13 +42,14 @@
                 Later
             </button>
 
-            <a href="/changepw"
+            <a href="{{ route('changepw') }}"
                class="px-4 py-1.5 rounded-md text-xs bg-[#00A8E8] text-white hover:bg-blue-500 transition">
                 Change Now
             </a>
 
         </div>
     </div>
+    @endif
 
     @if($wazuhOffline)
 
@@ -120,8 +122,6 @@
 
             @elseif($item->fitur->nama_fitur === 'Threat Summary')
             @include('Customer.widgets.threat-summary')
-
-            
 
         @else
         
