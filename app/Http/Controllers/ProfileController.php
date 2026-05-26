@@ -4,14 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 use App\Services\WazuhApiService;
 use App\Models\Agen;
 
 class ProfileController extends Controller
 {
     // =========================================
-    // PROFILE SETTINGS PAGE
+    // PROFILE SETTINGS PAGE (ADMIN)
     // =========================================
     public function settings()
     {
@@ -20,9 +19,19 @@ class ProfileController extends Controller
         );
     }
 
-    // =============== //
-    // UPDATE PROFILE  //
-    // =============== //
+    // =========================================
+    // PROFILE SETTINGS PAGE (CUSTOMER)
+    // =========================================
+    public function customerSettings()
+    {
+        return view(
+            'Customer.profile.profileset'
+        );
+    }
+
+    // =========================================
+    // UPDATE PROFILE
+    // =========================================
     public function update(Request $request)
     {
         $request->validate([
@@ -34,51 +43,12 @@ class ProfileController extends Controller
         // user login
         $user = auth()->user();
 
-        // ==============================
-        // UPDATE PROFILE
-        // ==============================
+        // update data profile
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
             'no_telp' => $request->no_telp,
         ]);
-
-        // ==============================
-        // CHANGE PASSWORD
-        // ==============================
-        if (
-            $request->filled('current_password') ||
-            $request->filled('new_password') ||
-            $request->filled('new_password_confirmation')
-        ) {
-
-            // validasi input password
-            $request->validate([
-                'current_password' => 'required',
-                'new_password' => 'required|min:6|confirmed',
-            ]);
-
-            // cek password lama
-            if (
-                !Hash::check(
-                    $request->current_password,
-                    $user->password
-                )
-            ) {
-
-                return back()->with(
-                    'error',
-                    'Password lama salah'
-                );
-            }
-
-            // update password baru
-            $user->update([
-                'password' => Hash::make(
-                    $request->new_password
-                )
-            ]);
-        }
 
         return back()->with(
             'success',
@@ -86,12 +56,49 @@ class ProfileController extends Controller
         );
     }
 
-    // =================== //
-    //  PROFILE AGENT PAGE //
-    // =================== //
+    // =========================================
+    // UPDATE PASSWORD
+    // =========================================
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
+        ]);
+
+        // user login
+        $user = auth()->user();
+
+        // cek password lama
+        if (
+            !Hash::check(
+                $request->current_password,
+                $user->password
+            )
+        ) {
+
+            return back()->with(
+                'error',
+                'The current password you entered is incorrect.'
+            );
+        }
+
+        // update password baru
+        $user->update([
+            'password' => Hash::make($request->new_password),
+            'password_changed' => true,
+        ]);
+
+        return back()->with('success', 'Your password has been successfully updated!')->with('password_success', true);
+    }
+
+    // =========================================
+    // PROFILE AGENT PAGE
+    // =========================================
     public function agent(
         WazuhApiService $wazuh
     ) {
+
         // ambil data agent dari wazuh
         $response = $wazuh->agents();
 
@@ -121,47 +128,15 @@ class ProfileController extends Controller
             'Admin.profile.profile-agent',
             [
                 'agents' => $agents,
+
                 'totalAgents' =>
                     $agents->count(),
+
                 'assignedAgents' =>
                     Agen::count(),
+
                 'wazuhOffline' => false,
             ]
         );
     }
-
-        // ========================= //
-        // SHOW CHANGE PASSWORD PAGE //  
-        // ========================= //
-        public function showChangePw()
-        {
-            return view('customer.profile.changepw');
-        }
-
-        // =========================== //
-        // UPDATE CHANGE PASSWORD PAGE //  
-        // =========================== //
-        public function updateChangePw(Request $request)
-        {
-            $request->validate([
-                'current_password' => 'required',
-                'new_password'     => 'required|min:6|confirmed',
-            ]);
-
-            $user = Auth::user();
-
-            if (!Hash::check($request->current_password, $user->password)) {
-                return back()->withErrors([
-                    'current_password' => 'Password saat ini salah.'
-                ]);
-            }
-
-            $user->update([
-                'password'         => Hash::make($request->new_password),
-                'password_changed' => true,
-            ]);
-
-            return redirect()->route('customer-dashboard')
-                            ->with('success', 'Password berhasil diubah!');
-        }
-    }
+}

@@ -7,7 +7,9 @@
     <title>Alerts List</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    @vite('resources/js/app.js')
     <style>
         body {
             background-color: #2b2d34;
@@ -62,53 +64,62 @@
 
     <main class="p-8 max-w-[1400px] mx-auto animate-fade-in">
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                
-                    <!-- CRITICAL -->
-                    <div class="bg-[#2B2D32] border border-red-700 rounded-xl p-5">
-                        <p class="text-sm text-red-400 font-medium">
-                            Critical
-                        </p>
-                
-                        <h2 class="text-3xl font-bold text-red-500 mt-2">
-                        {{ $criticalAlerts ?? 0 }}
-                        </h2>
-                    </div>
-                
-                    <!-- HIGH -->
-                    <div class="bg-[#2B2D32] border border-red-500 rounded-xl p-5">
-                        <p class="text-sm text-red-300 font-medium">
-                            High
-                        </p>
-                
-                        <h2 class="text-3xl font-bold text-red-400 mt-2">
-                        {{ $highAlerts ?? 0 }}
-                        </h2>
-                    </div>
-                
-                    <!-- MEDIUM -->
-                    <div class="bg-[#2B2D32] border border-yellow-500 rounded-xl p-5">
-                        <p class="text-sm text-yellow-300 font-medium">
-                            Medium
-                        </p>
-                
-                        <h2 class="text-3xl font-bold text-yellow-400 mt-2">
-                            {{ $mediumAlerts ?? 0 }}
-                        </h2>
-                    </div>
-                
-                    <!-- LOW -->
-                    <div class="bg-[#2B2D32] border border-green-500 rounded-xl p-5">
-                        <p class="text-sm text-green-300 font-medium">
-                            Low
-                        </p>
-                
-                        <h2 class="text-3xl font-bold text-green-400 mt-2">
-                            {{ $lowAlerts ?? 0 }}
-                        </h2>
-                    </div>
-                
-                </div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+
+    <div
+        class="lg:col-span-4 bg-[#2B2D32] border border-custom rounded-xl p-5 flex flex-col items-center justify-center min-h-[260px]">
+        <p class="text-sm font-medium text-gray-400 self-start mb-2 flex items-center gap-2">
+            <i data-lucide="pie-chart" class="w-4 h-4 text-cyan-400"></i> Alert Distribution
+        </p>
+        <div class="w-full max-w-[180px] relative flex items-center justify-center">
+            <canvas id="alertPieChart"></canvas>
+        </div>
+    </div>
+
+    <div class="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <div
+            class="bg-[#2B2D32] border border-red-700 rounded-xl p-5 flex flex-col justify-between hover:bg-white/5 transition">
+            <p class="text-sm text-red-400 font-medium flex items-center justify-between">
+                Critical
+            </p>
+            <h2 class="text-4xl font-bold text-red-500 mt-2">
+                {{ $criticalAlerts ?? 0 }}
+            </h2>
+        </div>
+
+        <div
+            class="bg-[#2B2D32] border border-red-500 rounded-xl p-5 flex flex-col justify-between hover:bg-white/5 transition">
+            <p class="text-sm text-red-300 font-medium">
+                High
+            </p>
+            <h2 class="text-4xl font-bold text-red-400 mt-2">
+                {{ $highAlerts ?? 0 }}
+            </h2>
+        </div>
+
+        <div
+            class="bg-[#2B2D32] border border-yellow-500 rounded-xl p-5 flex flex-col justify-between hover:bg-white/5 transition">
+            <p class="text-sm text-yellow-300 font-medium">
+                Medium
+            </p>
+            <h2 class="text-4xl font-bold text-yellow-400 mt-2">
+                {{ $mediumAlerts ?? 0 }}
+            </h2>
+        </div>
+
+        <div
+            class="bg-[#2B2D32] border border-green-500 rounded-xl p-5 flex flex-col justify-between hover:bg-white/5 transition">
+            <p class="text-sm text-green-300 font-medium">
+                Low
+            </p>
+            <h2 class="text-4xl font-bold text-green-400 mt-2">
+                {{ $lowAlerts ?? 0 }}
+            </h2>
+        </div>
+
+    </div>
+</div>
 
         <div class="border border-white rounded-sm bg-transparent overflow-hidden">
             <div class="p-3 flex items-center justify-between border-b border-white">
@@ -177,24 +188,11 @@
                                focus:border-cyan-400">
             
                     <!-- REFRESH -->
-                    <button onclick="location.reload()" class="bg-cyan-500
-                               hover:bg-cyan-600
-                               transition
-                               px-4 py-2
-                               rounded-lg
-                               text-sm
-                               font-medium
-                               text-white
-                               flex items-center gap-2">
-            
+                    <button onclick="location.reload()" class="bg-cyan-500 hover:bg-cyan-600 transition px-4 py-2 rounded-lg text-sm font-medium text-white flex items-center gap-2">
                         <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-            
                         Refresh
-            
                     </button>
-            
                 </div>
-            
             </div>
 
             <div class="overflow-x-auto">
@@ -288,10 +286,47 @@
         </div>
     </main>
 
-    <script>
-        // Inisialisasi icon lucide
-        lucide.createIcons();
-    </script>
+@include('Customer.components.footer')
+
+<script>
+    // Inisialisasi icon lucide
+    lucide.createIcons();
+
+    // Ambil data langsung dari variabel backend Laravel
+    const criticalCount = {{ $criticalAlerts ?? 0 }};
+    const highCount = {{ $highAlerts ?? 0 }};
+    const mediumCount = {{ $mediumAlerts ?? 0 }};
+    const lowCount = {{ $lowAlerts ?? 0 }};
+    const totalAlerts = criticalCount + highCount + mediumCount + lowCount;
+
+    const ctx = document.getElementById('alertPieChart').getContext('2d');
+
+    // Cek jika tidak ada alert sama sekali hari ini, tampilkan warna abu placeholder
+    const hasData = totalAlerts > 0;
+    const dataSet = hasData ? [criticalCount, highCount, mediumCount, lowCount] : [1];
+    const colorSet = hasData ? ['#ef4444', '#f87171', '#facc15', '#4ade80'] : ['#4a4e54'];
+
+    new Chart(ctx, {
+        type: 'doughnut', // Model Donut melingkar biar terlihat modern
+        data: {
+            datasets: [{
+                data: dataSet,
+                backgroundColor: colorSet,
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            cutout: '75%', // Ketebalan lingkaran
+            plugins: {
+                legend: { display: false }, // Kita sembunyikan karena detail sudah ada di card kanan
+                tooltip: { enabled: hasData }
+            },
+            responsive: true,
+            maintainAspectRatio: true
+        }
+    });
+</script>
 </body>
 
 </html>

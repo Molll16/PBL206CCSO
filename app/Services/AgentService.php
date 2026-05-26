@@ -36,26 +36,30 @@ class AgentService
             ->toArray();
     }
 
-    // =========================================
+    // =============================
     // STATISTIK AGENT CUSTOMER
-    // =========================================
+    // =============================
     public function getStats(WazuhApiService $wazuh)
     {
-        // agent milik user login
+        // 1. Ambil semua id_wazuh_agen milik user yang sedang login
         $myAgents = Agen::where('user_id', auth()->id())
             ->pluck('id_wazuh_agen')
             ->toArray();
 
-        // semua agent dari wazuh
+        // 2. Ambil seluruh data agent dari API Wazuh
         $agents = $this->getAgents($wazuh);
 
-        // filter agent user
-        $list = collect($agents)
-            ->whereIn('id', $myAgents);
+        // 3. Filter agent dari wazuh yang ID-nya ada di dalam list kepemilikan user
+        $list = collect($agents)->whereIn('id', $myAgents);
 
-        // hitung statistik
-        $online = $list->where('status', 'active')->count();
-        $offline = $list->where('status', '!=', 'active')->count();
+        // 4. Hitung statistik statusnya
+        $online = $list->filter(function ($agent) {
+            return strtolower($agent['status'] ?? '') === 'active';
+        })->count();
+
+        $offline = $list->filter(function ($agent) {
+            return strtolower($agent['status'] ?? '') !== 'active';
+        })->count();
 
         return [
             'online' => $online,

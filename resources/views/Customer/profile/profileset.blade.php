@@ -61,75 +61,88 @@
       <div class="p-6 rounded">
 
         <!-- Nama dan nomor telepon pengguna -->
-        <h2 class="mt-2 font-semibold">User Tester ABCD</h2>
-        <p class="text-sm text-gray-400">+62888888888</p>
-
-        <!-- Daftar perusahaan yang diikuti pengguna -->
-        <div class="mt-10 text-sm text-gray-400">
-          <p>Total Server: 3</p>
-          <p>Total Dashboard: 3</p>
-        </div>
-
-        <!-- Tanggal bergabung pengguna -->
-        <p class="mt-6 text-sm text-gray-500">Join Date: 01-10-2025</p>
+        <h2 class="mt-2 font-semibold">{{ auth()->user()->name }}</h2>
+        <p class="text-sm text-gray-400">{{ auth()->user()->no_telp }}</p>
 
       </div>
     </div>
 
 
     <!-- KOLOM KANAN: Form pengaturan profil -->
-    <div class="w-2/3 space-y-6 pl-10">
+<div class="w-2/3 pl-10 space-y-8">
 
-      <!-- Input Nama Lengkap -->
-      <div class="flex flex-col gap-2">
-        <label class="text-sm font-semibold">Full Name</label>
-        <input
-          type="text"
-          value="User Tester ABCD"
-          class="bg-transparent border-2 rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400"
-        >
-      </div>
+  <form action="{{ route('customer.profile.update') }}" method="POST" class="space-y-6">
+    @csrf
 
-      <!-- Input Email -->
-      <div class="flex flex-col gap-2">
-        <label class="text-sm font-semibold">Email</label>
-        <input
-          type="email"
-          value="testerabcd@gmail.com"
-          class="bg-transparent border-2 rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400"
-        >
+    @if(session('success') && !session('password_success'))
+      <div class="bg-green-500/20 border border-green-500 text-green-300 px-4 py-3 rounded">
+        {{ session('success') }}
       </div>
+    @endif
 
-      <!-- Input Nomor Telepon -->
-      <div class="flex flex-col gap-2">
-        <label class="text-sm font-semibold">Personal Phone Number</label>
-        <input
-          type="text"
-          value="+62 12345678"
-          class="bg-transparent border-2 rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400"
-        >
-      </div>
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold">Full Name</label>
+      <input type="text" name="name" value="{{ auth()->user()->name }}"
+        class="bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
+    </div>
 
-      <!-- Input Password dengan tombol lihat/sembunyikan -->
-      <div class="flex flex-col gap-2">
-        <label class="text-sm font-semibold">Password</label>
-        <div class="flex items-center border-2 rounded px-4 py-2">
-          <input
-            type="password"
-            value="12345678"
-            id="password"
-            class="bg-transparent flex-1 text-sm text-gray-300 focus:outline-none"
-          >
-          <!-- Tombol tampilkan atau sembunyikan password -->
-          <button onclick="togglePassword()" class="text-gray-400 hover:text-white ml-2">
-            <img id="eyeIcon" src="/logindark/logomataopen.png">
-          </button>
-        </div>
-        <!-- Tombol untuk mengubah password -->
-        <a href={{ route('changepw') }} class="mt-1 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded w-fit">
-          Change Password
-        </a>
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold">Email</label>
+      <input type="email" name="email" value="{{ auth()->user()->email }}"
+        class="bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold">Personal Phone Number</label>
+      <input type="text" name="no_telp" value="{{ auth()->user()->no_telp }}"
+        class="bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
+    </div>
+
+    <button type="submit" class="bg-cyan-500 hover:bg-cyan-600 transition text-white px-5 py-2 rounded font-medium">
+      Save Changes
+    </button>
+  </form>
+
+  <hr class="border-white/20 my-6">
+
+  <form action="{{ route('changepw.update') }}" method="POST" class="space-y-4">
+    @csrf
+
+    <label class="text-sm font-semibold block">Change Password</label>
+
+    @if(session('success') && session('password_success'))
+      <div class="bg-green-500/20 border border-green-500 text-green-300 px-4 py-3 rounded">
+        {{ session('success') }}
       </div>
+    @endif
+
+    @if(session('error'))
+      <div class="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded">
+        {{ session('error') }}
+      </div>
+    @endif
+
+    @if($errors->any())
+      <div class="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded">
+        {{ $errors->first() }}
+      </div>
+    @endif
+
+    <input type="password" name="current_password" placeholder="Current Password" required
+      class="w-full bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
+
+    <input type="password" name="new_password" placeholder="New Password" required
+      class="w-full bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
+
+    <input type="password" name="new_password_confirmation" placeholder="Confirm New Password" required
+      class="w-full bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
+
+    <button type="submit" class="bg-cyan-500 hover:bg-cyan-600 transition text-white px-5 py-2 rounded font-medium">
+      Update Password
+    </button>
+  </form>
+
+</div>
 
     </div>
 

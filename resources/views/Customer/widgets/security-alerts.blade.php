@@ -24,11 +24,11 @@
                 </div>
 
                 <div class="shrink-0 pl-2">
-                    @if ($alert['level'] >= 10)
+                    @if ($alert['level'] >= 13)
                         <span class="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">CRITICAL</span>
-                    @elseif ($alert['level'] >= 7)
+                    @elseif ($alert['level'] >= 10)
                         <span class="bg-orange-500 text-white px-2 py-1 rounded text-xs font-bold">HIGH</span>
-                    @elseif ($alert['level'] >= 4)
+                    @elseif ($alert['level'] >= 5)
                         <span class="bg-yellow-500 text-black px-2 py-1 rounded text-xs font-bold">MEDIUM</span>
                     @else
                         <span class="bg-green-500 text-black px-2 py-1 rounded text-xs font-bold">LOW</span>

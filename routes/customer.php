@@ -50,15 +50,18 @@ Route::prefix('customer')->middleware('auth')->group(function () {
         [ManagementDashboardController::class, 'use']
     )->name('dashboard.use');
 
-    // PROFILE
+    // ==========================================
+    // MANAGEMENT PROFILE CUSTOMER
+    // ==========================================
     Route::prefix('profile')->group(function () {
-        Route::get('/setting', fn() => view('Customer.profile.profileset'))->name('profile-setting');
+        // VIEW / HALAMAN
+        Route::get('/setting', [ProfileController::class, 'customerSettings'])->name('profile-setting');
         Route::get('/server', fn() => view('Customer.profile.profileserver'))->name('profile-server');
         Route::get('/custom', fn() => view('Customer.profile.profilecustom'))->name('profile-custom');
         Route::get('/overview', fn() => view('Customer.profile.profileover'))->name('profile-overview');
-        Route::get('/changepw', [ProfileController::class, 'showChangePw'])->name('changepw');
-        Route::post('/changepw', [ProfileController::class, 'updateChangePw'])->name('changepw.update');   
-     });
+        Route::post('/update', [ProfileController::class, 'update'])->name('customer.profile.update');
+        Route::post('/change-password', [ProfileController::class, 'updatePassword'])->name('changepw.update');
+    });
 
     // LOGS
     Route::get('/logs', [

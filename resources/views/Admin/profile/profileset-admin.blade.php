@@ -51,122 +51,92 @@
     </div>
 
 
-<!-- KOLOM KANAN: Form pengaturan profil -->
-  <form action="{{ route('profile.update') }}" method="POST" class="w-2/3 space-y-6 pl-10">
+<div class="w-2/3 pl-10 space-y-8">
+
+  <form action="{{ route('profile.update') }}" method="POST" class="space-y-6">
     @csrf
 
-    <!-- SUCCESS -->
-    @if(session('success'))
-      <div class="bg-green-500/20 border border-green-500 text-green-300 px-4 py-3 rounded">
+    @if(session('success') && !session('password_success'))
+      <div class="bg-green-500/20 border border-green-500 text-green-300 px-4 py-3 rounded text-sm">
         {{ session('success') }}
       </div>
     @endif
 
-    <!-- ERROR -->
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold">Full Name</label>
+      <input type="text" name="name" value="{{ auth()->user()->name }}"
+        class="bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold">Email</label>
+      <input type="email" name="email" value="{{ auth()->user()->email }}"
+        class="bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold">Personal Phone Number</label>
+      <input type="text" name="no_telp" value="{{ auth()->user()->no_telp }}"
+        class="bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
+    </div>
+
+    <button type="submit" class="bg-cyan-500 hover:bg-cyan-600 transition text-white px-5 py-2 rounded font-medium">
+      Save Changes
+    </button>
+  </form>
+
+  <hr class="border-white/20 my-6">
+
+  <form action="{{ route('changepw.update') }}" method="POST" class="space-y-4">
+    @csrf
+
+    <label class="text-sm font-semibold block">Change Password</label>
+
+    @if(session('success') && session('password_success'))
+      <div class="bg-green-500/20 border border-green-500 text-green-300 px-4 py-3 rounded text-sm">
+        {{ session('success') }}
+      </div>
+    @endif
+
     @if(session('error'))
-      <div class="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded">
+      <div class="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded text-sm">
         {{ session('error') }}
       </div>
     @endif
 
+    @if($errors->any())
+      <div class="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded text-sm">
+        @if($errors->first() == 'The new password field confirmation does not match.')
+          The password confirmation does not match.
+        @elseif($errors->first() == 'The new password must be at least 6 characters.')
+          The new password must be at least 6 characters.
+        @else
+          {{ $errors->first() }}
+        @endif
+      </div>
+    @endif
 
-    <!-- FULL NAME -->
-    <div class="flex flex-col gap-2">
-
-      <label class="text-sm font-semibold">
-        Full Name
-      </label>
-
-      <input type="text" name="name" value="{{ auth()->user()->name }}" class="bg-transparent
-                     border border-white
-                     rounded
-                     px-4 py-2
-                     text-sm text-gray-300
-                     focus:outline-none
-                     focus:border-blue-400">
-
+    <div class="flex flex-col gap-1">
+      <input type="password" name="current_password" placeholder="Current Password" required
+        class="w-full bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
     </div>
 
-
-    <!-- EMAIL -->
-    <div class="flex flex-col gap-2">
-
-      <label class="text-sm font-semibold">
-        Email
-      </label>
-
-      <input type="email" name="email" value="{{ auth()->user()->email }}" class="bg-transparent
-                     border border-white
-                     rounded
-                     px-4 py-2
-                     text-sm text-gray-300
-                     focus:outline-none
-                     focus:border-blue-400">
-
+    <div class="flex flex-col gap-1">
+      <input type="password" name="new_password" placeholder="New Password" required
+        class="w-full bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
     </div>
 
-
-    <!-- PHONE -->
-    <div class="flex flex-col gap-2">
-
-      <label class="text-sm font-semibold">
-        Personal Phone Number
-      </label>
-
-      <input type="text" name="no_telp" value="{{ auth()->user()->no_telp }}" class="bg-transparent
-                     border border-white
-                     rounded
-                     px-4 py-2
-                     text-sm text-gray-300
-                     focus:outline-none
-                     focus:border-blue-400">
-
+    <div class="flex flex-col gap-1">
+      <input type="password" name="new_password_confirmation" placeholder="Confirm New Password" required
+        class="w-full bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
     </div>
 
-
-    <!-- CHANGE PASSWORD -->
-    <div class="flex flex-col gap-4">
-
-      <label class="text-sm font-semibold">
-        Change Password
-      </label>
-
-      <!-- CURRENT PASSWORD -->
-      <input type="password" name="current_password" placeholder="Current Password" class="bg-transparent
-                     border border-white
-                     rounded
-                     px-4 py-2
-                     text-sm text-gray-300
-                     focus:outline-none
-                     focus:border-blue-400">
-
-      <!-- NEW PASSWORD -->
-      <input type="password" name="new_password" placeholder="New Password" class="bg-transparent
-                     border border-white
-                     rounded
-                     px-4 py-2
-                     text-sm text-gray-300
-                     focus:outline-none
-                     focus:border-blue-400">
-
-      <!-- CONFIRM PASSWORD -->
-      <input type="password" name="new_password_confirmation" placeholder="Confirm New Password" class="bg-transparent
-                     border border-white
-                     rounded
-                     px-4 py-2
-                     text-sm text-gray-300
-                     focus:outline-none
-                     focus:border-blue-400">
-
-    </div>
-
-
-    <!-- SAVE BUTTON -->
     <button type="submit" class="bg-cyan-500 hover:bg-cyan-600 transition text-white px-5 py-2 rounded font-medium">
-      Save Changes
+      Update Password
     </button>
-
   </form>
+
+</div>
 </div>
 
 

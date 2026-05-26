@@ -46,7 +46,6 @@
         </button>
         <div id="customization-menu" class="hidden bg-[#161616]">
           <a href={{ Route('pilih-dasbor') }} class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Visualize</a>
-          <a href="#" class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Discover</a>
         </div>
       </div>
 

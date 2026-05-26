@@ -73,6 +73,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         [AgentController::class, 'saveAssignAgent']
     )->name('assignagent.save');
 
+    // Daftarkan di dalam middleware admin/auth kamu yang mengatur halaman agent list
+    Route::get('/admin/agents/sync-refresh', [AgentController::class, 'refreshSync'])->name('agents.refresh');
+
 
     // ======== //
     //  PROFILE //
@@ -96,5 +99,10 @@ Route::prefix('admin')->middleware('auth')->group(function () {
             '/update',
             [ProfileController::class, 'update']
         )->name('profile.update');
+
+        Route::post(
+            '/change-password',
+            [ProfileController::class, 'updatePassword']
+        )->name('changepw.update');
     });
 });

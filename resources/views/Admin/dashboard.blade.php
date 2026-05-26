@@ -19,7 +19,6 @@
     <div class="bg-[#2B2D34] px-6 flex items-center justify-between border-b-2 border-white animate-fade-in delay-1">
         <div class="flex gap-8">
             <a href="#" class="py-3 text-cyan-400 border-b-2 border-blue-400 font-medium text-sm">Dashboard</a>
-            <a href="#" class="py-3 text-white/60 hover:text-white transition text-sm">Events</a>
         </div>
     </div>
 <!-- penutup navbar kedua -->
