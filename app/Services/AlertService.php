@@ -146,4 +146,37 @@ class AlertService
 
             ->values();
     }
+
+    public function getThreatSummary()
+    {
+        // 1. Ambil ID agen & Filter Alerts milik user (Satukan langkah 1, 2, & 3)
+        $myAgents = Agen::where('user_id', auth()->id())->pluck('id_wazuh_agen')->toArray();
+        $alerts = collect($this->getAlerts())->filter(fn($a) => in_array($a['agent']['id'] ?? null, $myAgents));
+        $totalEvents = $alerts->count();
+
+        // 2. Hitung Counter status (Gunakan logika pendek)
+        $activeCount = $alerts->where('level', '>=', 10)->count();
+        $pendingCount = $alerts->whereBetween('level', [5, 9])->count();
+        $resolvedCount = $alerts->where('level', '<', 5)->count();
+
+        // 3. Olah Kategori Ancaman menggunakan Map & Sort (Potong total baris foreach)
+        $categories = $totalEvents === 0 ? [] : $alerts->groupBy('description')
+            ->map(function ($items, $name) use ($totalEvents) {
+                $maxLevel = $items->max('level') ?? 0;
+                return [
+                    'name' => $name,
+                    'count' => $items->count(),
+                    'percentage' => round(($items->count() / $totalEvents) * 100),
+                    'severity' => $maxLevel >= 10 ? 'high' : ($maxLevel >= 5 ? 'medium' : 'low'),
+                ];
+            })
+            ->sortByDesc('count')->take(5)->values()->toArray();
+
+        return [
+            'active' => $activeCount,
+            'pending' => $pendingCount,
+            'resolved' => $resolvedCount,
+            'categories' => $categories
+        ];
+    }
 }

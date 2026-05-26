@@ -7,11 +7,15 @@
     <title>Alerts List</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    @vite('resources/js/app.js')
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             background-color: #2b2d34;
             color: #e5e7eb;
+            font-family: 'Inter', sans-serif;
         }
 
         .bg-header {
@@ -53,7 +57,7 @@
 
     @include('Customer.components.header')
 
-    <div class="bg-[#2B2D34] px-6 flex items-center justify-between border-b-2 border-white animate-fade-in delay-1">
+    <div class="bg-[#2B2D34] px-6 flex items-center justify-between border-b-2 border-white animate-fade-in">
         <div class="flex gap-8">
             <a href="{{ route('daftarlog') }}"
                 class="py-3 text-cyan-400 text-sm border-b-2 border-cyan-400 font-medium">View Logs</a>
@@ -62,121 +66,77 @@
 
     <main class="p-8 max-w-[1400px] mx-auto animate-fade-in">
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-
-            <!-- CRITICAL -->
-            <div class="bg-[#2B2D32] border border-red-700 rounded-xl p-5">
-                <p class="text-sm text-red-400 font-medium">
-                    Critical
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+            <div
+                class="lg:col-span-4 bg-[#2B2D32] border border-custom rounded-xl p-5 flex flex-col items-center justify-center min-h-[260px]">
+                <p class="text-sm font-medium text-gray-400 self-start mb-2 flex items-center gap-2">
+                    <i data-lucide="pie-chart" class="w-4 h-4 text-cyan-400"></i> Alert Distribution
                 </p>
-                <h2 class="text-3xl font-bold text-red-500 mt-2">
-                    3
-                </h2>
+                <div class="w-full max-w-[180px] relative flex items-center justify-center">
+                    <canvas id="alertPieChart"></canvas>
+                </div>
             </div>
 
-            <!-- HIGH -->
-            <div class="bg-[#2B2D32] border border-red-500 rounded-xl p-5">
-                <p class="text-sm text-red-300 font-medium">
-                    High
-                </p>
-                <h2 class="text-3xl font-bold text-red-400 mt-2">
-                    5
-                </h2>
-            </div>
+            <div class="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div
+                    class="bg-[#2B2D32] border border-red-700 rounded-xl p-5 flex flex-col justify-between hover:bg-white/5 transition">
+                    <p class="text-sm text-red-400 font-medium flex items-center justify-between">
+                        Critical <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                    </p>
+                    <h2 class="text-4xl font-bold text-red-500 mt-2">{{ $criticalAlerts ?? 0 }}</h2>
+                </div>
 
-            <!-- MEDIUM -->
-            <div class="bg-[#2B2D32] border border-yellow-500 rounded-xl p-5">
-                <p class="text-sm text-yellow-300 font-medium">
-                    Medium
-                </p>
-                <h2 class="text-3xl font-bold text-yellow-400 mt-2">
-                    8
-                </h2>
-            </div>
+                <div
+                    class="bg-[#2B2D32] border border-red-500 rounded-xl p-5 flex flex-col justify-between hover:bg-white/5 transition">
+                    <p class="text-sm text-red-300 font-medium">High</p>
+                    <h2 class="text-4xl font-bold text-red-400 mt-2">{{ $highAlerts ?? 0 }}</h2>
+                </div>
 
-            <!-- LOW -->
-            <div class="bg-[#2B2D32] border border-green-500 rounded-xl p-5">
-                <p class="text-sm text-green-300 font-medium">
-                    Low
-                </p>
-                <h2 class="text-3xl font-bold text-green-400 mt-2">
-                    12
-                </h2>
-            </div>
+                <div
+                    class="bg-[#2B2D32] border border-yellow-500 rounded-xl p-5 flex flex-col justify-between hover:bg-white/5 transition">
+                    <p class="text-sm text-yellow-300 font-medium">Medium</p>
+                    <h2 class="text-4xl font-bold text-yellow-400 mt-2">{{ $mediumAlerts ?? 0 }}</h2>
+                </div>
 
+                <div
+                    class="bg-[#2B2D32] border border-green-500 rounded-xl p-5 flex flex-col justify-between hover:bg-white/5 transition">
+                    <p class="text-sm text-green-300 font-medium">Low</p>
+                    <h2 class="text-4xl font-bold text-green-400 mt-2">{{ $lowAlerts ?? 0 }}</h2>
+                </div>
+            </div>
         </div>
 
         <div class="border border-white rounded-sm bg-transparent overflow-hidden">
             <div class="p-3 flex items-center justify-between border-b border-white">
-                <div class="text-sm font-medium flex items-center gap-1">Alerts = 28</div>
+                <div class="text-sm font-medium flex items-center gap-1">Alerts = {{ $alerts->count() }}</div>
             </div>
 
-            <!-- FILTER & SEARCH -->
             <div class="p-4 border-b border-white flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
-
-                <!-- LEFT -->
                 <div class="flex flex-col md:flex-row gap-3">
-
-                    <!-- FILTER SEVERITY -->
-                    <select class="bg-[#2B2D32]
-                               border border-gray-600
-                               rounded-lg
-                               px-3 py-2
-                               text-sm text-white
-                               focus:outline-none
-                               focus:border-cyan-400">
-
-                        <option>All Severity</option>
-                        <option>Critical</option>
-                        <option>High</option>
-                        <option>Medium</option>
-                        <option>Low</option>
-
+                    <select id="filterSeverity"
+                        class="bg-[#2B2D32] border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-400">
+                        <option value="all">All Severity</option>
+                        <option value="critical">Critical</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
                     </select>
-
-                    <!-- FILTER DATE -->
-                    <input type="date" class="bg-[#2B2D32]
-                               border border-gray-600
-                               rounded-lg
-                               px-3 py-2
-                               text-sm text-white
-                               focus:outline-none
-                               focus:border-cyan-400">
-
+                    <input type="date" id="filterDate"
+                        class="bg-[#2B2D32] border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-400">
                 </div>
 
-                <!-- RIGHT -->
                 <div class="flex gap-3">
-
-                    <!-- SEARCH -->
-                    <input type="text" placeholder="Search alerts..." class="bg-[#2B2D32]
-                               border border-gray-600
-                               rounded-lg
-                               px-3 py-2
-                               text-sm text-white
-                               placeholder-gray-400
-                               focus:outline-none
-                               focus:border-cyan-400">
-
-                    <!-- REFRESH -->
-                    <button onclick="location.reload()" class="bg-cyan-500
-                               hover:bg-cyan-600
-                               transition
-                               px-4 py-2
-                               rounded-lg
-                               text-sm
-                               font-medium
-                               text-white
-                               flex items-center gap-2">
-
-                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-
-                        Refresh
-
+                    <input type="text" id="searchAlert" placeholder="Search alerts..."
+                        class="bg-[#2B2D32] border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400">
+                    <button onclick="clearFilters()"
+                        class="bg-gray-600 hover:bg-gray-700 transition px-4 py-2 rounded-lg text-sm font-medium text-white">
+                        Reset
                     </button>
-
+                    <button onclick="location.reload()"
+                        class="bg-cyan-500 hover:bg-cyan-600 transition px-4 py-2 rounded-lg text-sm font-medium text-white flex items-center gap-2">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh
+                    </button>
                 </div>
-
             </div>
 
             <div class="overflow-x-auto">
@@ -186,38 +146,73 @@
                             <th class="p-3 font-semibold">Time</th>
                             <th class="p-3 font-semibold">Severity</th>
                             <th class="p-3 font-semibold">Agent</th>
-                            <th class="p-3 font-semibold">Event Type</th>
+                            <th class="p-3 font-semibold">Affected User</th>
                             <th class="p-3 font-semibold">Description</th>
-                            <th class="p-3 font-semibold">Source IP</th>
                             <th class="p-3 font-semibold">Status</th>
                             <th class="p-3 font-semibold">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-700/50 text-center">
+                    <tbody id="alertTableBody" class="divide-y divide-gray-700/50 text-center">
+                        @forelse($alerts as $alert)
+                            @php
+                                $lvl = (int) ($alert['level'] ?? 0);
+                                if ($lvl >= 13) {
+                                    $label = 'critical';
+                                    $labelText = 'Critical';
+                                    $color = 'text-red-500 font-bold';
+                                } elseif ($lvl >= 10) {
+                                    $label = 'high';
+                                    $labelText = 'High';
+                                    $color = 'text-red-400 font-semibold';
+                                } elseif ($lvl >= 5) {
+                                    $label = 'medium';
+                                    $labelText = 'Medium';
+                                    $color = 'text-yellow-400';
+                                } else {
+                                    $label = 'low';
+                                    $labelText = 'Low';
+                                    $color = 'text-green-400';
+                                }
 
-                        {{-- ROW 1 - Critical --}}
-                        <tr class="table-row-hover">
-                            <td class="p-3 text-gray-400">08:02</td>
-                            <td class="p-3">
-                                <span class="text-red-500 font-bold">Critical</span>
-                            </td>
-                            <td class="p-3">SRV-WEB-01</td>
-                            <td class="p-3">Security Event</td>
-                            <td class="p-3 max-w-xs truncate">Multiple failed SSH login attempts detected from external IP</td>
-                            <td class="p-3">192.168.1.45</td>
-                            <td class="p-3"><span class="text-red-400">Active</span></td>
-                            <td class="p-3">
-                                                        <!-- VIEW DETAIL BUTTON -->
-                        <td class="p-3">
-                            <button onclick="openModal()"
-                                class="text-cyan-400 hover:text-cyan-300 hover:underline transition">
-                                View Details
-                            </button>
-                        </td>
+                                $alertDate = isset($alert['time']) ? date('Y-m-d', strtotime($alert['time'])) : '';
+                            @endphp
+                            <tr class="table-row-hover alert-row" data-severity="{{ $label }}" data-date="{{ $alertDate }}">
+                                <td class="p-3 text-gray-400">
+                                    {{ isset($alert['time']) ? date('H:i:s', strtotime($alert['time'])) : '00:00' }}
+                                </td>
+                                <td class="p-3">
+                                    <span class="{{ $color }}">{{ $labelText }} ({{ $lvl }})</span>
+                                </td>
+                                <td class="p-3">{{ $alert['agent']['name'] ?? 'unknown' }}</td>
+                                <td class="p-3 text-gray-300 font-mono">{{ $alert['user'] ?? 'unknown' }}</td>
+                                <td class="p-3 max-w-xs truncate text-left search-target"
+                                    title="{{ $alert['description'] }}">
+                                    {{ $alert['description'] }}
+                                </td>
+                                <td class="p-3">
+                                    <span class="{{ $lvl >= 10 ? 'text-red-400' : 'text-green-400' }}">
+                                        {{ $lvl >= 10 ? 'Active' : 'Resolved' }}
+                                    </span>
+                                </td>
+                                <td class="p-3">
+                                    <button onclick="openModal({{ json_encode($alert) }})"
+                                        class="text-cyan-400 hover:text-cyan-300 hover:underline transition">
+                                        View Details
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="p-8 text-center text-gray-500 bg-[#2B2D32]/10">
+                                    No alerts logs recorded today.
+                                </td>
+                            </tr>
+                        @endforelse
+                        <tr id="emptyFilterRow" class="hidden">
+                            <td colspan="7" class="p-8 text-center text-gray-500 bg-[#2B2D32]/10">
+                                No data matches the selected filters.
                             </td>
                         </tr>
-
-
                     </tbody>
                 </table>
             </div>
@@ -232,205 +227,224 @@
                 <div class="flex items-center gap-4">
                     <button class="hover:text-white"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
                     <span class="text-white">1</span>
-                    <span class="hover:text-white cursor-pointer">2</span>
                     <button class="hover:text-white"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
                 </div>
             </div>
         </div>
     </main>
 
-    <script>
-        lucide.createIcons();
-    </script>
-    <!-- MODAL -->
-<div id="alertModal"
-    class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div id="alertModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div
+            class="bg-[#2B2D32] border border-gray-700 rounded-2xl w-full max-w-lg max-h-[650px] flex flex-col animate-fade-in">
 
-    <!-- UBAH max-w-3xl jadi max-w-lg -->
-    <div
-        class="bg-[#2B2D32] border border-gray-700 rounded-2xl w-full max-w-lg max-h-[700px]  animate-fade-in overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-700 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div id="modalIconContainer" class="w-10 h-10 rounded-xl flex items-center justify-center">
+                        <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h2 id="modalTitle" class="text-sm font-semibold text-white truncate max-w-[320px]">Alert Detail
+                        </h2>
+                        <p class="text-[11px] text-gray-400">Security Event Detail</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
 
-        <!-- HEADER -->
-        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-700">
+            <div class="p-5 space-y-4 overflow-y-auto flex-grow [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span id="modalSeverity" class="px-2 py-0.5 rounded-full text-[10px] font-bold">LEVEL</span>
+                    <span id="modalStatus" class="px-2 py-0.5 rounded-full text-[10px]">Active</span>
+                </div>
 
-            <div class="flex items-center gap-3">
-
-                <div
-                    class="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500 flex items-center justify-center">
-
-                    <i data-lucide="shield-alert" class="w-5 h-5 text-red-500"></i>
-
+                <div class="space-y-2.5 text-xs">
+                    <div class="flex justify-between border-b border-gray-700/50 pb-1.5">
+                        <span class="text-gray-500">Timestamp Log</span>
+                        <span id="modalTime" class="text-white font-mono">-</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-700/50 pb-1.5">
+                        <span class="text-gray-500">Target Agent</span>
+                        <span id="modalAgent" class="text-white">-</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-700/50 pb-1.5">
+                        <span class="text-gray-500">Agent ID</span>
+                        <span id="modalAgentId" class="text-gray-300 font-mono">-</span>
+                    </div>
+                    <div class="flex justify-between pb-1.5">
+                        <span class="text-gray-500">Affected User</span>
+                        <span id="modalUser" class="text-yellow-400 font-mono">-</span>
+                    </div>
                 </div>
 
                 <div>
-
-                    <h2 class="text-base font-semibold text-white">
-                        Failed SSH Login
-                    </h2>
-
-                    <p class="text-[11px] text-gray-400">
-                        Security Event Detail
-                    </p>
-
+                    <h3 class="text-[11px] font-semibold text-cyan-400 mb-1.5">Description</h3>
+                    <div class="bg-[#111827] border border-gray-700 rounded-lg p-3">
+                        <p id="modalDesc" class="text-xs text-gray-300 leading-relaxed">-</p>
+                    </div>
                 </div>
 
+                <div>
+                    <h3 class="text-[11px] font-semibold text-cyan-400 mb-1.5">Mapped Alert Object (JSON)</h3>
+                    <div class="bg-black border border-gray-700 rounded-lg p-3 max-h-[180px] overflow-auto">
+                        <pre id="modalRaw" class="text-green-400 text-[10px] font-mono leading-tight">-</pre>
+                    </div>
+                </div>
             </div>
 
-            <button onclick="closeModal()"
-                class="text-gray-400 hover:text-white transition">
-
-                <i data-lucide="x" class="w-4 h-4"></i>
-
-            </button>
-
+            <div class="px-5 py-3 border-t border-gray-700 flex items-center justify-end shrink-0">
+                <button onclick="closeModal()"
+                    class="px-3 py-1.5 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 transition text-xs">
+                    Close
+                </button>
+            </div>
         </div>
-
-        <!-- BODY -->
-        <div class="p-5 space-y-5">
-
-            <!-- STATUS -->
-            <div class="flex items-center gap-2 flex-wrap">
-
-                <span
-                    class="px-2 py-1 rounded-full text-[10px] font-bold bg-red-500/10 border border-red-500 text-red-400">
-
-                    HIGH
-
-                </span>
-
-                <span class="text-[11px] text-gray-500">
-                    Rule ID : 5710
-                </span>
-
-                <span
-                    class="px-2 py-1 rounded-full text-[10px] bg-green-500/10 border border-green-500 text-green-400">
-
-                    Active
-
-                </span>
-
-            </div>
-
-            <!-- INFO -->
-            <div class="space-y-3 text-sm">
-
-                <div class="flex justify-between border-b border-gray-700 pb-2">
-                    <span class="text-gray-500">Time</span>
-                    <span class="text-white">2026-05-20 14:22</span>
-                </div>
-
-                <div class="flex justify-between border-b border-gray-700 pb-2">
-                    <span class="text-gray-500">Agent</span>
-                    <span class="text-white">Ubuntu-Server-01</span>
-                </div>
-
-                <div class="flex justify-between border-b border-gray-700 pb-2">
-                    <span class="text-gray-500">Source IP</span>
-                    <span class="text-cyan-400">103.21.1.10</span>
-                </div>
-
-                <div class="flex justify-between border-b border-gray-700 pb-2">
-                    <span class="text-gray-500">Port</span>
-                    <span class="text-white">22</span>
-                </div>
-
-                <div class="flex justify-between">
-                    <span class="text-gray-500">Username</span>
-                    <span class="text-white">root</span>
-                </div>
-
-            </div>
-
-            <!-- DESCRIPTION -->
-            <div>
-
-                <h3 class="text-xs font-semibold text-cyan-400 mb-2">
-                    Description
-                </h3>
-
-                <div class="bg-[#111827] border border-gray-700 rounded-lg p-3">
-
-                    <p class="text-xs text-gray-300 leading-relaxed">
-
-                        Multiple failed SSH login attempts detected from same IP.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-            <!-- RAW LOG -->
-            <div>
-
-                <h3 class="text-xs font-semibold text-cyan-400 mb-2">
-                    Raw Log
-                </h3>
-
-                <div
-                    class="bg-black border border-gray-700 rounded-lg p-3 overflow-x-auto">
-
-<pre class="text-green-400 text-[11px] leading-relaxed">
-sshd[221]:
-Failed password for root
-from 103.21.1.10
-port 51221 ssh2
-</pre>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- FOOTER -->
-        <div
-            class="px-5 py-4 border-t border-gray-700 flex items-center justify-end gap-2">
-
-            <button onclick="closeModal()"
-                class="px-3 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 transition text-xs">
-
-                Close
-
-            </button>
-
-        </div>
-
     </div>
 
-</div>
-<script>
-
-    lucide.createIcons();
-
-    function openModal() {
-
-        const modal = document.getElementById('alertModal');
-
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-
+    <script>
         lucide.createIcons();
-    }
 
-    function closeModal() {
+        // 1. FUNGSI DETAIL POP-UP MODAL DINAMIS
+        function openModal(alert) {
+            const modal = document.getElementById('alertModal');
 
-        const modal = document.getElementById('alertModal');
+            document.getElementById('modalTitle').innerText = alert.description || 'Alert Detail';
+            document.getElementById('modalTime').innerText = alert.time ?? '-';
+            document.getElementById('modalAgent').innerText = alert.agent?.name ?? 'unknown';
+            document.getElementById('modalAgentId').innerText = alert.agent?.id ?? '-';
+            document.getElementById('modalUser').innerText = alert.user ?? 'unknown';
+            document.getElementById('modalDesc').innerText = alert.description || '-';
+            document.getElementById('modalRaw').innerText = JSON.stringify(alert, null, 4);
 
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
+            const lvl = parseInt(alert.level ?? 0);
+            const sevBadge = document.getElementById('modalSeverity');
+            const statusBadge = document.getElementById('modalStatus');
+            const iconContainer = document.getElementById('modalIconContainer');
 
-    // close ketika klik background
-    document.getElementById('alertModal').addEventListener('click', function(e) {
+            if (lvl >= 13) {
+                sevBadge.innerText = 'CRITICAL (LVL ' + lvl + ')';
+                sevBadge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-600/20 border border-red-600 text-red-500';
+                iconContainer.className = 'w-10 h-10 rounded-xl bg-red-500/10 border border-red-500 flex items-center justify-center text-red-500';
+            } else if (lvl >= 10) {
+                sevBadge.innerText = 'HIGH (LVL ' + lvl + ')';
+                sevBadge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-400/20 border border-red-400 text-red-400';
+                iconContainer.className = 'w-10 h-10 rounded-xl bg-red-400/10 border border-red-400 flex items-center justify-center text-red-400';
+            } else if (lvl >= 5) {
+                sevBadge.innerText = 'MEDIUM (LVL ' + lvl + ')';
+                sevBadge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-500/20 border border-yellow-500 text-yellow-400';
+                iconContainer.className = 'w-10 h-10 rounded-xl bg-yellow-500/10 border border-yellow-500 flex items-center justify-center text-yellow-400';
+            } else {
+                sevBadge.innerText = 'LOW (LVL ' + lvl + ')';
+                sevBadge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 border border-green-500 text-green-400';
+                iconContainer.className = 'w-10 h-10 rounded-xl bg-green-500/10 border border-green-500 flex items-center justify-center text-green-400';
+            }
 
-        if (e.target === this) {
-            closeModal();
+            statusBadge.innerText = lvl >= 10 ? 'Active Incident' : 'Resolved';
+            statusBadge.className = `px-2 py-0.5 rounded-full text-[10px] ${lvl >= 10 ? 'bg-red-500/10 border border-red-500/50 text-red-400' : 'bg-green-500/10 border border-green-500/50 text-green-400'}`;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
         }
 
-    });
+        function closeModal() {
+            const modal = document.getElementById('alertModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
 
-</script>
+        document.getElementById('alertModal').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+
+
+        // 2. FUNGSI LIVE FILTER SEARCH, SEVERITY & KALENDER
+        const filterSeverity = document.getElementById('filterSeverity');
+        const filterDate = document.getElementById('filterDate');
+        const searchAlert = document.getElementById('searchAlert');
+        const emptyFilterRow = document.getElementById('emptyFilterRow');
+
+        function filterData() {
+            const selectedSeverity = filterSeverity.value.toLowerCase();
+            const selectedDate = filterDate.value;
+            const searchQuery = searchAlert.value.toLowerCase();
+
+            const rows = document.querySelectorAll('.alert-row');
+            let visibleRowsCount = 0;
+
+            rows.forEach(row => {
+                const rowSeverity = row.getAttribute('data-severity');
+                const rowDate = row.getAttribute('data-date');
+
+                const cellsText = row.querySelector('.search-target').innerText.toLowerCase() + ' ' +
+                    row.children[2].innerText.toLowerCase() + ' ' +
+                    row.children[3].innerText.toLowerCase();
+
+                const matchSeverity = (selectedSeverity === 'all' || rowSeverity === selectedSeverity);
+                const matchDate = (!selectedDate || rowDate === selectedDate);
+                const matchSearch = (!searchQuery || cellsText.includes(searchQuery));
+
+                if (matchSeverity && matchDate && matchSearch) {
+                    row.classList.remove('hidden');
+                    visibleRowsCount++;
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+
+            if (visibleRowsCount === 0 && rows.length > 0) {
+                emptyFilterRow.classList.remove('hidden');
+            } else {
+                emptyFilterRow.classList.add('hidden');
+            }
+        }
+
+        filterSeverity.addEventListener('change', filterData);
+        filterDate.addEventListener('change', filterData);
+        searchAlert.addEventListener('input', filterData);
+
+        function clearFilters() {
+            filterSeverity.value = 'all';
+            filterDate.value = '';
+            searchAlert.value = '';
+            filterData();
+        }
+
+
+        // 3. CHART.JS CONFIGURATION (DOUGHNUT AMBIL DARI BACKEND)
+        const criticalCount = {{ $criticalAlerts ?? 0 }};
+        const highCount = {{ $highAlerts ?? 0 }};
+        const mediumCount = {{ $mediumAlerts ?? 0 }};
+        const lowCount = {{ $lowAlerts ?? 0 }};
+        const totalAlerts = criticalCount + highCount + mediumCount + lowCount;
+
+        const ctx = document.getElementById('alertPieChart').getContext('2d');
+        const hasData = totalAlerts > 0;
+        const dataSet = hasData ? [criticalCount, highCount, mediumCount, lowCount] : [1];
+        const colorSet = hasData ? ['#ef4444', '#f87171', '#facc15', '#4ade80'] : ['#4a4e54'];
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: dataSet,
+                    backgroundColor: colorSet,
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                cutout: '75%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: hasData }
+                },
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+    </script>
 </body>
 
-</html> 
+</html>

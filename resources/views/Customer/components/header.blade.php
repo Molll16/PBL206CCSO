@@ -106,23 +106,6 @@
                 </a>
 
             </div>
-      <!-- Customization -->
-      <div>
-        <button onclick="toggleSubmenu('customization-menu', 'chevron-customization')"
-                class="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-300 hover:bg-[#2c2c2c] transition border-l-[3px] border-transparent">
-          <div class="flex items-center gap-3">
-            <img src="/db/custom.png" class="w-4" alt="">
-            Customization
-          </div>
-          <svg id="chevron-customization"
-               class="w-3.5 h-3.5 text-gray-500 transition-transform duration-300"
-               fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path d="M19 9l-7 7-7-7"/>
-          </svg>
-        </button>
-        <div id="customization-menu" class="hidden bg-[#161616]">
-          <a href={{ Route('pilih-dasbor') }} class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Visualize</a>
-        </div>
 
         <!-- Alerts -->
         <div>

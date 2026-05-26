@@ -7,15 +7,15 @@ use App\Models\DasborKustom;
 use App\Models\HasilKustom;
 use App\Services\AgentService;
 use App\Services\AlertService;
+use Illuminate\Http\Request;
 
 class CustomerDashboardController extends Controller
 {
     public function dashboard(
         WazuhApiService $wazuh,
-        AlertController $alertController,
-        AgentService $agentService
+        AgentService $agentService,
+        AlertService $alertService
     ) {
-
         // =========================================
         // DASHBOARD CUSTOM
         // =========================================
@@ -40,16 +40,22 @@ class CustomerDashboardController extends Controller
         $agentTotal = 0;
         $wazuhOffline = false;
 
+        // Array default jika data API gagal dimuat
+        $threatSummary = [
+            'active' => 0,
+            'pending' => 0,
+            'resolved' => 0,
+            'categories' => []
+        ];
+
         // =========================================
         // 1. TES KONEKSI UTAMA WAZUH (PING)
         // =========================================
         try {
-            // Kita lakukan pengetesan token / koneksi dasar dulu ke wazuh
-            // Jika service API kamu punya fungsi getToken() atau sejenisnya, panggil di sini.
-            // Jika tidak ada, biarkan kosong atau pakai request ringan ke API.
+            // Memastikan token atau koneksi dasar ke Wazuh API aman
             $wazuh->Token();
         } catch (\Throwable $e) {
-            // Hanya jika API benar-benar tidak merespon/RTO, server ditandai offline
+            // Jika API benar-benar RTO atau mati, tandai server offline
             $wazuhOffline = true;
         }
 
@@ -58,19 +64,14 @@ class CustomerDashboardController extends Controller
         // =========================================
         if (!$wazuhOffline) {
 
-            // Cari bagian ini di Controller:
+            // Ambil 5 Security Alerts Terbaru
             try {
-                // GANTI YANG LAMA INI:
-                // $alerts = $alertController->getAlerts($wazuh);
-
-                // MENJADI INI (Mengambil 5 alert terbaru milik agen si customer):
-                $alerts = app(AlertService::class)->getLatestAlerts(5);
-
+                $alerts = $alertService->getLatestAlerts(5);
             } catch (\Throwable $e) {
                 $alerts = [];
             }
 
-            // Ambil Statistik Agent (Jika gagal, jangan buat server kelihatan offline)
+            // Ambil Statistik Agent Status
             try {
                 $agentStats = $agentService->getStats($wazuh);
 
@@ -78,10 +79,16 @@ class CustomerDashboardController extends Controller
                 $agentOffline = $agentStats['offline'] ?? 0;
                 $agentTotal = $agentStats['total'] ?? 0;
             } catch (\Throwable $e) {
-                // Jika error, biarkan nilainya tetap default 0, tapi banner merah tidak akan muncul
                 $agentOnline = 0;
                 $agentOffline = 0;
                 $agentTotal = 0;
+            }
+
+            // Ambil Data Threat Summary Real-time
+            try {
+                $threatSummary = $alertService->getThreatSummary();
+            } catch (\Throwable $e) {
+                // Tetap menggunakan array default jika terjadi error pemrosesan data
             }
         }
 
@@ -95,7 +102,8 @@ class CustomerDashboardController extends Controller
             'agentOffline',
             'agentTotal',
             'alerts',
-            'wazuhOffline'
+            'wazuhOffline',
+            'threatSummary'
         ));
     }
 }
