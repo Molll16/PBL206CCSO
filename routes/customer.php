@@ -7,6 +7,8 @@ use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\ManagementDashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\WidgetController; // 1. TAMBAHKAN INI AGAR TIDAK EROR CLASS NOT FOUND
+
 /*
 |--------------------------------------------------------------------------
 | CUSTOMER ROUTES
@@ -15,11 +17,21 @@ use App\Http\Controllers\ProfileController;
 
 Route::prefix('customer')->middleware('auth')->group(function () {
 
-    // DASHBOARD
+    // DASHBOARD MAIN VIEW
     Route::get('/dashboard', [CustomerDashboardController::class, 'dashboard'])
         ->name('dashboard-customer');
 
-    // CUSTOM DASHBOARD
+    // ==========================================
+    // JALUR API/AJAX BARU UNTUK ISI DATA WIDGET
+    // ==========================================
+    // Dimasukkan ke dalam prefix 'customer' agar otomatis aman di bawah middleware 'auth'
+    Route::prefix('widget')->group(function () {
+        Route::get('/agent-status', [WidgetController::class, 'getAgentStatus'])->name('widget.agent-status');
+        Route::get('/latest-alerts', [WidgetController::class, 'getLatestAlerts'])->name('widget.latest-alerts');
+        Route::get('/threat-summary', [WidgetController::class, 'getThreatSummary'])->name('widget.threat-summary');
+    });
+
+    // CUSTOM DASHBOARD MANAGEMENT
     Route::get('/kustom', function () {
         $fitur = Fitur::all();
         return view('Customer.customize.kustom', compact('fitur'));

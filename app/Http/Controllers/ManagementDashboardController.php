@@ -3,62 +3,51 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use App\Models\DasborKustom;
 use App\Models\Fitur;
 use App\Models\HasilKustom;
 
 class ManagementDashboardController extends Controller
 {
+    // CODE: Menyimpan susunan layout widget baru atau update layout yang lama.
+    // WEB: Halaman Kustomisasi -> Tombol "Save".
+    // UNTUK: Jika update, nama diperbarui dan widget lama dihapus dulu baru diisi ulang (Delete and Insert). Jika dashboard baru, sistem akan membuat record baru di database dengan status default 'nonaktif'.
     public function save(Request $request)
     {
-        // Cek apakah user sedang update dashboard yang sudah ada atau membuat dashboard baru
         if ($request->dashboard_id) {
-
-            // Ambil dashboard milik user yang login (keamanan: tidak bisa ambil punya orang lain)
             $dashboard = DasborKustom::where('id', $request->dashboard_id)
                 ->where('user_id', auth()->id())
                 ->firstOrFail();
 
-            // Update nama dashboard
             $dashboard->update([
                 'nama_dasbor' => $request->nama_dashboard,
             ]);
 
-            // Hapus semua widget lama (biar nanti diisi ulang)
-            HasilKustom::where(
-                'dasbor_kustom_id',
-                $dashboard->id
-            )->delete();
-
+            HasilKustom::where('dasbor_kustom_id', $dashboard->id)->delete();
         } else {
-
-            // Jika belum ada dashboard → buat dashboard baru
             $dashboard = DasborKustom::create([
                 'user_id' => auth()->id(),
                 'nama_dasbor' => $request->nama_dashboard,
-                'status_dasbor' => 'nonaktif', // defaultnya nonaktif, nanti user bisa pilih mau pakai dashboard ini atau tidak
+                'status_dasbor' => 'nonaktif',
             ]);
         }
 
-        // Simpan semua widget/fitur yang dipilih user ke dashboard
         foreach ($request->fitur as $item) {
-
             HasilKustom::create([
-                'dasbor_kustom_id' => $dashboard->id, 
-                'fitur_id' => $item['fitur_id'], // fitur yang dipilih user pada dashboard tertentu
-                'kolom' => $item['kolom'], // posisi kolom widget/fitur pada dashboard
-                'baris' => $item['baris'], // posisi baris widget/fitur pada dashboard
+                'dasbor_kustom_id' => $dashboard->id,
+                'fitur_id' => $item['fitur_id'],
+                'kolom' => $item['kolom'],
+                'baris' => $item['baris'],
                 'status_fitur' => 'aktif',
             ]);
         }
 
-        return response()->json([
-            'success' => true
-        ]);
+        return response()->json(['success' => true]);
     }
 
-
+    // CODE: Mengambil data layout dashboard yang pernah disimpan sebelumnya untuk diedit kembali.
+    // WEB: Halaman List Dashboard -> Tombol "Edit" (Membuka kembali kanvas kustomisasi).
+    // UNTUK: Menampilkan kembali widget-widget di posisi grid semula (colSpan dan rowSpan) berdasarkan data dari database.
     public function edit($id)
     {
         $dashboard = DasborKustom::where('id', $id)
@@ -80,49 +69,35 @@ class ManagementDashboardController extends Controller
                 ];
             });
 
-        // Return response JSON untuk frontend (biasanya AJAX)
-        return view('Customer.customize.kustom', compact(
-            'dashboard',
-            'fitur',
-            'hasil'
-        ));
+        return view('Customer.customize.kustom', compact('dashboard', 'fitur', 'hasil'));
     }
 
-
-    // Fungsi untuk menghapus dashboard
+    // CODE: Menghapus data dashboard beserta seluruh susunan widget di dalamnya.
+    // WEB: Halaman List Dashboard -> Tombol "Hapus/Delete".
+    // UNTUK: Membersihkan database. Record di tabel `hasil_kustoms` (widget) dihapus terlebih dahulu, baru kemudian row di `dasbor_kustoms` (parent) ikut dihapus.
     public function destroy($id)
     {
-        // Ambil dashboard milik user yang login (keamanan: tidak bisa ambil punya orang lain)
         $dashboard = DasborKustom::where('id', $id)
             ->where('user_id', auth()->id())
             ->firstOrFail();
 
-        // Hapus semua widget yang terkait dengan dashboard ini
-        HasilKustom::where(
-            'dasbor_kustom_id',
-            $dashboard->id
-        )->delete();
-
+        HasilKustom::where('dasbor_kustom_id', $dashboard->id)->delete();
         $dashboard->delete();
 
         return redirect()->route('pilih-dasbor');
     }
 
-    // Fungsi untuk mengaktifkan/menggunakan dashboard tertentu
+    // CODE: Mengubah status dashboard yang dipilih menjadi 'aktif' dan me-nonaktifkan yang lain.
+    // WEB: Halaman List Dashboard -> Tombol "Gunakan/Use Dashboard".
+    // UNTUK: Menentukan dashboard kustomisasi mana yang berhak tampil di halaman utama ketika Customer pertama kali login.
     public function use($id)
     {
-        // Nonaktifkan semua dashboard milik user yang login
         DasborKustom::where('user_id', auth()->id())
-            ->update([
-                'status_dasbor' => 'nonaktif'
-            ]);
+            ->update(['status_dasbor' => 'nonaktif']);
 
-        // Aktifkan dashboard yang dipilih user
         DasborKustom::where('id', $id)
             ->where('user_id', auth()->id())
-            ->update([
-                'status_dasbor' => 'aktif'
-            ]);
+            ->update(['status_dasbor' => 'aktif']);
 
         return redirect()->route('dashboard-customer')
             ->with('success', 'Dashboard berhasil digunakan');
