@@ -201,6 +201,9 @@
                 @elseif($item->fitur->nama_fitur === 'File Integrity Monitoring')
                 @include('Customer.widgets.file-integrity')
 
+                @elseif($item->fitur->nama_fitur === 'Active Connections')
+                @include('Customer.widgets.active_connection')
+
                 @elseif($item->fitur->nama_fitur === 'Security Alerts')
                 @include('Customer.widgets.security-alerts')
 
@@ -210,11 +213,20 @@
                 @elseif($item->fitur->nama_fitur === 'System Resources')
                 @include('Customer.widgets.system_resources')
 
-                @elseif($item->fitur->nama_fitur === 'Failed Login')
+                @elseif($item->fitur->nama_fitur === 'Failed Login Monitoring')
                 @include('Customer.widgets.failed_login')
 
                 @elseif($item->fitur->nama_fitur === 'Top Triggered Rules')
                 @include('Customer.widgets.top_triggered_rules')
+
+                @elseif($item->fitur->nama_fitur === 'Firewall Events')
+                @include('Customer.widgets.firewall-event')
+
+                @elseif($item->fitur->nama_fitur === 'User Login Activity')
+                @include('Customer.widgets.user-login-activity')
+
+                @elseif($item->fitur->nama_fitur === 'GeoIP Attack Map')
+                @include('Customer.widgets.geoip-attack-map')
 
             @else
 
