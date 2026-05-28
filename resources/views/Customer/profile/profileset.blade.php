@@ -7,13 +7,104 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   @vite('resources/js/app.js')
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            page:         '#121318',
+            surface:      '#1a1b23',
+            borderSubtle: '#262833',
+            textMain:     '#f1f3f9',
+            textMuted:    '#787f99',
+            brand:        '#6366f1',
+            brandHover:   '#4f46e5'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { background-color: #121318; }
+
+    /* Accent bar */
+    .accent-bar {
+      background: #6366f1;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    }
+
+    /* Fade in */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fadeIn 0.35s ease both; }
+
+    /* Border tab bottom */
+    .tab-border { border-bottom: 2px solid #262833; }
+
+    /* Profile card */
+    .profile-card {
+      background: #1a1b23;
+      border: 1px solid #262833;
+    }
+
+    /* Form input */
+    .form-input {
+      background: transparent;
+      border: 1px solid #262833;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 0.875rem;
+      color: #f1f3f9;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+    .form-input::placeholder { color: #787f99; }
+
+    /* Divider */
+    .divider { border-color: #262833; }
+
+    /* Save / Update button */
+    .btn-save {
+      background: #6366f1;
+      border: 1px solid rgba(99,102,241,0.4);
+      box-shadow: 0 0 14px rgba(99,102,241,0.3);
+      transition: background 0.2s;
+      color: #fff;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    .btn-save:hover { background: #4f46e5; }
+
+    /* Footer */
+    .footer-bar {
+      background: #0e0f13;
+      border-top: 1px solid #262833;
+    }
+
+    /* Logout button */
+    .btn-logout {
+      border: 1px solid #262833;
+      background: transparent;
+      transition: background 0.2s;
+    }
+    .btn-logout:hover { background: #1a1b23; }
+  </style>
 </head>
-<body class="bg-[#2B2D34] text-gray-200 font-sans flex flex-col min-h-screen">
+<body class="text-textMain font-sans flex flex-col min-h-screen bg-page antialiased">
 
 @include('Customer.components.header')
 
   <!-- ===== TAB NAVIGASI PROFIL ===== -->
-  <div class="flex items-center py-3 border-b-2">
+  <div class="flex items-center py-3 tab-border">
 
     <!-- Foto profil yang bisa diklik untuk diganti gambarnya -->
     <div class="absolute ml-14 mt-40 cursor-pointer group" onclick="document.getElementById('inputGambarProfil').click()">
@@ -39,16 +130,13 @@
 
     <!-- Menu tab halaman profil -->
     <div class="flex items-center gap-10 ml-[330px]">
-      <a href={{ Route('profile-overview') }} class="text-sm cursor-pointer hover:text-blue-400">Overview</a>
-      <a href={{ Route('profile-setting') }} class="text-sm cursor-pointer hover:text-blue-400">Profile Settings</a>
-      <a href={{ Route('profile-server') }} class="text-sm cursor-pointer hover:text-blue-400">Server</a>
-      <a href={{ Route('profile-custom') }} class="text-sm cursor-pointer hover:text-blue-400">Customization Dashboard</a>
+      <a href={{ Route('profile-overview') }} class="text-sm cursor-pointer text-textMuted hover:text-brand transition-colors">Overview</a>
+      <a href={{ Route('profile-setting') }}  class="text-sm cursor-pointer text-brand">Profile Settings</a>
+      <a href={{ Route('profile-server') }}   class="text-sm cursor-pointer text-textMuted hover:text-brand transition-colors">Server</a>
+      <a href={{ Route('profile-custom') }}   class="text-sm cursor-pointer text-textMuted hover:text-brand transition-colors">Customization Dashboard</a>
     </div>
 
-    <!-- Tombol keluar akun -->
-    <div class="ml-auto mr-4">
-      <a href="/login" class="border px-4 py-1 rounded text-sm hover:bg-gray-700">Logout</a>
-    </div>
+
 
   </div>
 
@@ -58,91 +146,91 @@
 
     <!-- KOLOM KIRI: Ringkasan singkat profil pengguna -->
     <div class="mt-32">
-      <div class="p-6 rounded">
+      <div class="profile-card p-6 mx-8 mt-6 rounded-xl">
 
         <!-- Nama dan nomor telepon pengguna -->
-        <h2 class="mt-2 font-semibold">{{ auth()->user()->name }}</h2>
-        <p class="text-sm text-gray-400">{{ auth()->user()->no_telp }}</p>
+        <h2 class="mt-2 font-semibold text-textMain">{{ auth()->user()->name }}</h2>
+        <p class="text-sm text-textMuted">{{ auth()->user()->no_telp }}</p>
 
       </div>
     </div>
 
 
     <!-- KOLOM KANAN: Form pengaturan profil -->
-<div class="w-2/3 pl-10 space-y-8">
+    <div class="w-2/3 pl-10 space-y-8 animate-fade-in">
 
-  <form action="{{ route('customer.profile.update') }}" method="POST" class="space-y-6">
-    @csrf
+      <form action="{{ route('customer.profile.update') }}" method="POST" class="space-y-6">
+        @csrf
 
-    @if(session('success') && !session('password_success'))
-      <div class="bg-green-500/20 border border-green-500 text-green-300 px-4 py-3 rounded">
-        {{ session('success') }}
-      </div>
-    @endif
+        <!-- Section heading -->
+        <div class="flex items-center gap-3 mb-1">
+          <div class="w-[3px] h-5 rounded-full accent-bar"></div>
+          <h3 class="font-semibold text-textMain tracking-wide">Profile Settings</h3>
+        </div>
 
-    <div class="flex flex-col gap-2">
-      <label class="text-sm font-semibold">Full Name</label>
-      <input type="text" name="name" value="{{ auth()->user()->name }}"
-        class="bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
-    </div>
+        @if(session('success') && !session('password_success'))
+          <div class="bg-green-500/20 border border-green-500 text-green-300 px-4 py-3 rounded-lg">
+            {{ session('success') }}
+          </div>
+        @endif
 
-    <div class="flex flex-col gap-2">
-      <label class="text-sm font-semibold">Email</label>
-      <input type="email" name="email" value="{{ auth()->user()->email }}"
-        class="bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
-    </div>
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-textMain">Full Name</label>
+          <input type="text" name="name" value="{{ auth()->user()->name }}" class="form-input">
+        </div>
 
-    <div class="flex flex-col gap-2">
-      <label class="text-sm font-semibold">Personal Phone Number</label>
-      <input type="text" name="no_telp" value="{{ auth()->user()->no_telp }}"
-        class="bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
-    </div>
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-textMain">Email</label>
+          <input type="email" name="email" value="{{ auth()->user()->email }}" class="form-input">
+        </div>
 
-    <button type="submit" class="bg-cyan-500 hover:bg-cyan-600 transition text-white px-5 py-2 rounded font-medium">
-      Save Changes
-    </button>
-  </form>
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-textMain">Personal Phone Number</label>
+          <input type="text" name="no_telp" value="{{ auth()->user()->no_telp }}" class="form-input">
+        </div>
 
-  <hr class="border-white/20 my-6">
+        <button type="submit" class="btn-save">
+          Save Changes
+        </button>
+      </form>
 
-  <form action="{{ route('changepw.update') }}" method="POST" class="space-y-4">
-    @csrf
+      <hr class="divider my-6">
 
-    <label class="text-sm font-semibold block">Change Password</label>
+      <form action="{{ route('changepw.update') }}" method="POST" class="space-y-4">
+        @csrf
 
-    @if(session('success') && session('password_success'))
-      <div class="bg-green-500/20 border border-green-500 text-green-300 px-4 py-3 rounded">
-        {{ session('success') }}
-      </div>
-    @endif
+        <!-- Section heading -->
+        <div class="flex items-center gap-3 mb-1">
+          <div class="w-[3px] h-5 rounded-full accent-bar"></div>
+          <label class="text-sm font-semibold text-textMain tracking-wide">Change Password</label>
+        </div>
 
-    @if(session('error'))
-      <div class="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded">
-        {{ session('error') }}
-      </div>
-    @endif
+        @if(session('success') && session('password_success'))
+          <div class="bg-green-500/20 border border-green-500 text-green-300 px-4 py-3 rounded-lg">
+            {{ session('success') }}
+          </div>
+        @endif
 
-    @if($errors->any())
-      <div class="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded">
-        {{ $errors->first() }}
-      </div>
-    @endif
+        @if(session('error'))
+          <div class="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded-lg">
+            {{ session('error') }}
+          </div>
+        @endif
 
-    <input type="password" name="current_password" placeholder="Current Password" required
-      class="w-full bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
+        @if($errors->any())
+          <div class="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded-lg">
+            {{ $errors->first() }}
+          </div>
+        @endif
 
-    <input type="password" name="new_password" placeholder="New Password" required
-      class="w-full bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
+        <input type="password" name="current_password" placeholder="Current Password" required class="form-input">
+        <input type="password" name="new_password" placeholder="New Password" required class="form-input">
+        <input type="password" name="new_password_confirmation" placeholder="Confirm New Password" required class="form-input">
 
-    <input type="password" name="new_password_confirmation" placeholder="Confirm New Password" required
-      class="w-full bg-transparent border border-white rounded px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-400">
-
-    <button type="submit" class="bg-cyan-500 hover:bg-cyan-600 transition text-white px-5 py-2 rounded font-medium">
-      Update Password
-    </button>
-  </form>
-
-</div>
+        <button type="submit" class="btn-save">
+          Update Password
+        </button>
+      </form>
 
     </div>
 
@@ -150,18 +238,18 @@
 
 
   <!-- ===== FOOTER ===== -->
-  <footer class="bg-[#212121] px-10 py-4 border-t-2">
-    <div class="mt-2 px-1 flex flex-wrap items-center gap-4 text-sm text-gray-400">
+  <footer class="footer-bar px-10 py-4">
+    <div class="mt-2 px-1 flex flex-wrap items-center gap-4 text-sm text-textMuted">
 
       <!-- Logo footer -->
       <img src="/lp/logo.png" class="h-10">
 
       <!-- Hak cipta -->
-      <p class="text-white">© 2026 CCSO, Inc.</p>
+      <p class="text-textMain">© 2026 CCSO, Inc.</p>
       <img src="/lp/garis.png" class="h-5">
 
       <!-- Tautan hubungi kami -->
-      <p class="text-white">Contact Us</p>
+      <p class="text-textMain">Contact Us</p>
       <img src="/lp/garis.png" class="h-5">
 
       <!-- Nomor telepon kantor -->
@@ -172,16 +260,21 @@
 
       <!-- Ikon media sosial -->
       <div class="flex items-center gap-6 ml-2">
-        <img src="/lp/tt.png" class="h-5 cursor-pointer">
-        <img src="/lp/ig.png" class="h-5 cursor-pointer">
-        <img src="/lp/wa.png" class="h-5 cursor-pointer">
+        <img src="/lp/tt.png"    class="h-5 cursor-pointer">
+        <img src="/lp/ig.png"    class="h-5 cursor-pointer">
+        <img src="/lp/wa.png"    class="h-5 cursor-pointer">
         <img src="/lp/email.png" class="h-5 cursor-pointer">
       </div>
 
       <!-- Form kirim pesan ke email tim CCSO -->
-      <div class="flex items-center ml-auto border border-gray-500 bg-white rounded overflow-hidden">
-        <input type="email" placeholder="Sent to our Email..." class="px-3 py-1 text-sm w-54 text-gray-800">
-        <button class="bg-blue-500 px-3 py-1 text-white text-sm hover:bg-blue-600">›</button>
+      <div class="flex items-center ml-auto overflow-hidden rounded-lg"
+           style="border: 1px solid #262833; background: #1a1b23;">
+        <input type="email" placeholder="Sent to our Email..."
+               class="px-3 py-1 text-sm w-54 bg-transparent text-textMain placeholder-textMuted focus:outline-none">
+        <button class="px-3 py-1 text-white text-sm transition-colors"
+                style="background:#6366f1"
+                onmouseover="this.style.background='#4f46e5'"
+                onmouseout="this.style.background='#6366f1'">›</button>
       </div>
 
     </div>

@@ -1,59 +1,131 @@
-  <!DOCTYPE html>
-  <html lang="id">
-  <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CCSO Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <meta name="csrf-token" content="{{ csrf_token() }}">
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCSO Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
-  @vite('resources/js/app.js')
+@vite('resources/js/app.js')
 
-  <script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          base: "#2c2f36",
-          deep: "#1f2228",
-          card: "#2a2e36",
-          border: "#3a3f47",
-          accent: "#4d8fff",
-          muted: "#9aa3b2"
-        }
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        page:         '#121318',
+        surface:      '#1a1b23',
+        borderSubtle: '#262833',
+        textMain:     '#f1f3f9',
+        textMuted:    '#787f99',
+        brand:        '#6366f1',
+        brandHover:   '#4f46e5'
       }
     }
   }
-  </script>
+}
+</script>
 
-  <style>
-    /* Menghilangkan scrollbar batang tapi tetap bisa scroll */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-  </style>
-  </head>
-  
-@component('Customer.components.header') 
+<style>
+  /* Menghilangkan scrollbar batang tapi tetap bisa scroll */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Footer */
+  .footer-bar {
+    background: #0e0f13;
+    border-top: 1px solid #262833;
+  }
+
+  /* Save button */
+  .btn-save {
+    border: 1px solid #262833;
+    background: transparent;
+    transition: background 0.2s;
+    color: #f1f3f9;
+    padding: 0 16px;
+    height: 32px;
+    border-radius: 6px;
+  }
+  .btn-save:hover { background: #1a1b23; }
+
+  /* Widget card */
+  .widget-card {
+    background: #1a1b23;
+    border: 1px solid #262833;
+    border-radius: 6px;
+    transition: border-color 0.2s;
+  }
+  .widget-card:hover { border-color: #6366f1; }
+
+  /* Canvas empty state */
+  .canvas-empty {
+    border: 1px dashed #262833;
+    color: #787f99;
+  }
+
+  /* Search input */
+  .search-input {
+    background: #121318;
+    border: 1px solid #262833;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.875rem;
+    color: #f1f3f9;
+    flex: 1;
+  }
+  .search-input:focus { outline: none; border-color: #6366f1; }
+  .search-input::placeholder { color: #787f99; }
+
+  /* Type button */
+  .btn-type {
+    border: 1px solid #262833;
+    background: transparent;
+    color: #f1f3f9;
+    padding: 4px 8px;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .btn-type:hover { background: #1a1b23; }
+
+  /* Type dropdown */
+  .type-menu {
+    background: #1a1b23;
+    border: 1px solid #262833;
+  }
+  .type-menu-item:hover { background: #6366f1; color: #fff; }
+
+  /* Toast */
+  .toast-box {
+    background: #1a1b23;
+    border: 1px solid #6366f1;
+  }
+</style>
+</head>
+
+@component('Customer.components.header')
 @endcomponent
 
-  <body class="bg-deep text-white flex flex-col h-screen overflow-hidden">
+<body class="bg-page text-textMain flex flex-col h-screen overflow-hidden">
 
-  <div class="flex flex-1 bg-[#2B2D34] overflow-hidden">
+<div class="flex flex-1 bg-page overflow-hidden">
 
-  <div class="flex-1 flex flex-col border-r-2 overflow-hidden">
+  <div class="flex-1 flex flex-col border-r border-borderSubtle overflow-hidden">
 
-      <div class="flex justify-between items-center px-4 py-2 border-b border-border">
+    <div class="flex justify-between items-center px-4 py-2 border-b border-borderSubtle">
 
-    <!-- Kiri -->
-    <div class="flex items-center gap-2">
+      <!-- Kiri -->
+      <div class="flex items-center gap-2">
 
         <span id="dashboard-title"
-              class="font-semibold cursor-pointer border-b-2">
+              class="font-semibold cursor-pointer border-b-2 border-brand">
             {{ $dashboard->nama_dasbor ?? 'Custom Dashboard' }}
         </span>
 
@@ -62,18 +134,18 @@
                value="{{ $dashboard->id ?? '' }}">
 
         <input id="dashboard-input"
-               class="hidden bg-deep px-2 py-0.5 text-sm rounded outline-none"
+               class="hidden bg-page border border-brand px-2 py-0.5 text-sm rounded outline-none text-textMain"
                onblur="finishRename()"
                onkeydown="handleRenameKey(event)">
 
-        <img class="w-4 cursor-pointer"
+        <img class="w-4 cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
              src="/custom/edit.png"
              onclick="startRename()">
 
-    </div>
+      </div>
 
-    <!-- Kanan -->
-    <div class="flex items-center gap-2">
+      <!-- Kanan -->
+      <div class="flex items-center gap-2">
 
         <button onclick="toggleWidgetPanel()"
                 class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded transition">
@@ -85,33 +157,33 @@
             <img src="/custom/hapus.png" alt="">
         </button>
 
-        <button onclick="saveLayout()"
-                class="border px-4 h-8 rounded-md hover:bg-white/10 transition">
+        <button onclick="saveLayout()" class="btn-save">
             Save
         </button>
 
+      </div>
+
     </div>
 
-</div>
+    <div id="canvas-area"
+        class="flex-1 p-4 overflow-y-auto no-scrollbar"
+        ondragover="handleDragOver(event)"
+        ondrop="handleDrop(event)">
 
-      <div id="canvas-area"
-          class="flex-1 p-4 overflow-y-auto no-scrollbar"
-          ondragover="handleDragOver(event)"
-          ondrop="handleDrop(event)">
+        <div id="canvas-grid"
+            class="grid grid-cols-12 gap-3 auto-rows-[80px] w-full">
+        </div>
 
-          <div id="canvas-grid"
-              class="grid grid-cols-12 gap-3 auto-rows-[80px] w-full">
-          </div>
-
-      </div>
+    </div>
 
   </div>
 
-  <div id="right-sidebar-container" 
-      class="w-72 bg-base flex flex-col transition-all duration-300 ease-in-out border-l border-border">
+  <div id="right-sidebar-container"
+      class="w-72 flex flex-col transition-all duration-300 ease-in-out border-l border-borderSubtle"
+      style="background:#1a1b23">
 
-      <div class="p-3 border-b-2 flex justify-between items-center cursor-default">
-          <span class="font-semibold flex-1 text-center">Widget</span>   
+      <div class="p-3 border-b border-borderSubtle flex justify-between items-center cursor-default">
+          <span class="font-semibold flex-1 text-center text-textMain">Widget</span>
       </div>
 
       <div id="widget-panel" class="flex flex-col flex-1 overflow-hidden">
@@ -119,19 +191,18 @@
           <div class="p-3 flex gap-2">
               <input type="text"
                     placeholder="Search"
-                    class="flex-1 bg-[#2B2D34] border rounded-md px-2 py-1 text-sm ">
+                    class="search-input">
 
               <div class="relative">
-                  <button onclick="toggleType(event)"
-                          class="border px-2 py-1 text-sm rounded-md">
+                  <button onclick="toggleType(event)" class="btn-type">
                       Type ▾
                   </button>
 
                   <div id="type-menu"
-                      class="absolute right-0 mt-1 bg-card border hidden text-sm z-10">
-                      <div class="px-3 py-1 hover:bg-accent cursor-pointer">All</div>
-                      <div class="px-3 py-1 hover:bg-accent cursor-pointer">Chart</div>
-                      <div class="px-3 py-1 hover:bg-accent cursor-pointer">Table</div>
+                      class="absolute right-0 mt-1 type-menu hidden text-sm z-10 rounded-md overflow-hidden">
+                      <div class="type-menu-item px-3 py-1 cursor-pointer text-textMuted">All</div>
+                      <div class="type-menu-item px-3 py-1 cursor-pointer text-textMuted">Chart</div>
+                      <div class="type-menu-item px-3 py-1 cursor-pointer text-textMuted">Table</div>
                   </div>
               </div>
           </div>
@@ -144,44 +215,51 @@
 
   </div>
 
-  </div>
+</div>
 
-  <footer class="bg-[#212121] px-10 py-4 border-t-2">
-      <div id="footer">
-        <div class="mt-2 px-1 flex flex-wrap items-center gap-4 text-sm text-gray-400">
+<footer class="footer-bar px-10 py-4">
+  <div id="footer">
+    <div class="mt-2 px-1 flex flex-wrap items-center gap-4 text-sm text-textMuted">
 
-          <img src="/lp/logo.png" class="h-10" alt="">
+      <img src="/lp/logo.png" class="h-10" alt="">
 
-          <p class="text-white">© 2026 CCSO, Inc.</p>
-          <img src="/lp/garis.png" class="h-5" alt="">
+      <p class="text-textMain">© 2026 CCSO, Inc.</p>
+      <img src="/lp/garis.png" class="h-5" alt="">
 
-          <p class="text-white">Contact Us</p>
-          <img src="/lp/garis.png" class="h-5" alt="">
+      <p class="text-textMain">Contact Us</p>
+      <img src="/lp/garis.png" class="h-5" alt="">
 
-          <div class="flex items-center gap-2">
-            <img src="/lp/telp.png" class="h-5" alt="">
-            <p>+62 1234567890</p>
-          </div>
-
-          <div class="flex items-center gap-6 ml-2">
-            <img src="/lp/tt.png" class="h-5 cursor-pointer" alt="">
-            <img src="/lp/ig.png" class="h-5 cursor-pointer" alt="">
-            <img src="/lp/wa.png" class="h-5 cursor-pointer" alt="">
-            <img src="/lp/email.png" class="h-5 cursor-pointer" alt="">
-          </div>
-
-          <div class="flex items-center ml-auto border border-gray-500 bg-white rounded overflow-hidden">
-            <input type="email" placeholder="Sent to our Email..." class="px-3 py-1 text-sm w-56 text-gray-800 focus:outline-none">
-            <button class="bg-blue-500 px-3 py-1 text-white text-sm hover:bg-blue-600">›</button>
-          </div>
-
-        </div>
+      <div class="flex items-center gap-2">
+        <img src="/lp/telp.png" class="h-5" alt="">
+        <p>+62 1234567890</p>
       </div>
-    </footer>
 
-  <div id="toast"
-      class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-card border border-accent px-4 py-2 rounded opacity-0 transition z-50">
+      <div class="flex items-center gap-6 ml-2">
+        <img src="/lp/tt.png"    class="h-5 cursor-pointer" alt="">
+        <img src="/lp/ig.png"    class="h-5 cursor-pointer" alt="">
+        <img src="/lp/wa.png"    class="h-5 cursor-pointer" alt="">
+        <img src="/lp/email.png" class="h-5 cursor-pointer" alt="">
+      </div>
+
+      <div class="flex items-center ml-auto overflow-hidden rounded-lg"
+           style="border: 1px solid #262833; background: #1a1b23;">
+        <input type="email" placeholder="Sent to our Email..."
+               class="px-3 py-1 text-sm w-56 bg-transparent text-textMain focus:outline-none"
+               style="color:#f1f3f9"
+               placeholder-style="color:#787f99">
+        <button class="px-3 py-1 text-white text-sm transition-colors"
+                style="background:#6366f1"
+                onmouseover="this.style.background='#4f46e5'"
+                onmouseout="this.style.background='#6366f1'">›</button>
+      </div>
+
+    </div>
   </div>
+</footer>
+
+<div id="toast"
+    class="fixed bottom-10 left-1/2 -translate-x-1/2 toast-box px-4 py-2 rounded opacity-0 transition z-50 text-textMain">
+</div>
 
 
 <script>
@@ -224,7 +302,7 @@ function renderPanel(){
         .filter(f => !used.has(f.id))
         .map(f => `
             <div
-                class="border rounded-md p-2 text-center text-xs cursor-pointer hover:border-white transition"
+                class="widget-card p-2 text-center text-xs cursor-pointer"
                 draggable="true"
                 onclick='addWidget(${JSON.stringify(f)})'
                 ondragstart='dragSource=${JSON.stringify(f)}'>
@@ -233,7 +311,7 @@ function renderPanel(){
                     <img src="/custom/fitur.png">
                 </div>
 
-                ${f.nama_fitur}
+                <span style="color:#787f99">${f.nama_fitur}</span>
             </div>
         `).join('');
 }
@@ -247,7 +325,7 @@ function renderCanvas(){
 
     if(widgets.length === 0){
         grid.innerHTML = `
-            <div class="col-span-12 flex items-center justify-center border border-dashed border-white h-64 text-white">
+            <div class="col-span-12 flex items-center justify-center canvas-empty h-64">
                 Drag widget ke sini
             </div>
         `;
@@ -260,15 +338,16 @@ function renderCanvas(){
 
         const el = document.createElement('div');
 
-        el.className = "bg-card border border-border rounded flex flex-col min-w-0";
-
+        el.className = "rounded flex flex-col min-w-0";
+        el.style.background = '#1a1b23';
+        el.style.border = '1px solid #262833';
         el.style.gridColumn = `span ${w.colSpan}`;
         el.style.gridRow = `span ${w.rowSpan}`;
 
         el.innerHTML = `
-            <div class="flex justify-between p-2 text-[10px] border-b border-border">
+            <div class="flex justify-between p-2 text-[10px]" style="border-bottom:1px solid #262833; color:#787f99">
 
-                <span>${w.name}</span>
+                <span style="color:#f1f3f9">${w.name}</span>
 
                 <div class="flex gap-1 items-center">
 
@@ -285,7 +364,7 @@ function renderCanvas(){
                 </div>
             </div>
 
-            <div class="flex-1 flex items-center justify-center text-muted text-xs italic">
+            <div class="flex-1 flex items-center justify-center text-xs italic" style="color:#787f99">
                 ${w.name}
             </div>
         `;
@@ -440,7 +519,6 @@ function showToast(msg){
         el.classList.add('opacity-0');
     }, 2000);
 }
-
 /* ===============================
    RENAME DASHBOARD
 ================================= */
@@ -482,5 +560,5 @@ function handleRenameKey(e){
 
 </script>
 
-  </body>
-  </html>
+</body>
+</html>
