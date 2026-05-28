@@ -1,148 +1,155 @@
-<!--sidebar totalitas-->
+<div id="sidebar-backdrop"
+     onclick="closeSidebar()"
+     class="fixed inset-0 bg-page/80 backdrop-blur-sm z-30 opacity-0 pointer-events-none transition-opacity duration-300">
+</div>
 
-    <div id="sidebar-backdrop"
-       onclick="closeSidebar()"
-       class="fixed inset-0 bg-black/50 z-30 opacity-0 pointer-events-none transition-opacity duration-300">
+<aside id="sidebar"
+       class="fixed top-0 left-0 h-full w-60 bg-surface border-r border-borderSubtle z-40 flex flex-col -translate-x-full transition-transform duration-300 ease-in-out shadow-2xl">
+
+  <div class="flex items-center justify-between h-16 px-5 border-b border-borderSubtle bg-surface/50">
+    <div class="flex items-center gap-3">
+      <img src="/ob/logo.png" class="w-6 animate-pulse">
+      <span class="text-xs font-bold tracking-wider leading-tight text-textMain uppercase">Central Cyber <br> <span class="text-brand">Security Office</span></span>
     </div>
+    <button onclick="closeSidebar()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-borderSubtle transition-colors text-textMuted hover:text-textMain">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
 
-  <!-- SIDEBAR -->
-  <aside id="sidebar"
-         class="fixed top-0 left-0 h-full w-52 bg-[#1a1a1a] border-r border-gray-700 z-40 flex flex-col -translate-x-full transition-transform duration-300 ease-in-out">
+  <nav class="flex-1 py-4 overflow-y-auto space-y-1 px-2">
 
-    <!-- Sidebar Header -->
-    <div class="flex items-center justify-between h-16 px-3 border-b border-gray-700">
-      <div class="flex items-center gap-4">
-        <img src="/ob/logo.png" class="w-5">
-        <span class="text-xs tracking-wide leading-tight">Central Cyber <br> Security Office</span>
-      </div>
-      <button onclick="closeSidebar()"
-              class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-700 transition text-gray-400 hover:text-white text-base">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+    <a href="{{ route('dashboard-admin') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all border-l-[3px] {{ request()->routeIs('dashboard-admin') ? 'border-brand bg-brand/10 text-brand font-medium' : 'border-transparent text-textMuted hover:bg-page hover:text-textMain' }}">
+      <img src="/db/layout.png" class="w-4 opacity-80" alt="">
+      Dashboard
+    </a>
+
+    <div>
+      <button onclick="toggleSubmenu('customization-menu', 'chevron-customization')"
+              class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm text-textMuted hover:bg-page hover:text-textMain transition-all border-l-[3px] border-transparent">
+        <div class="flex items-center gap-3">
+          <img src="/db/custom.png" class="w-4 opacity-80" alt="">
+          User Management
+        </div>
+        <svg id="chevron-customization" class="w-4 h-4 text-textMuted transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
         </svg>
-
       </button>
+
+      <div id="customization-menu" class="hidden bg-page/50 rounded-lg mx-2 mt-1 py-2 border border-borderSubtle/50">
+        <a href="{{ route('adduser') }}" class="flex items-center pl-10 pr-4 py-2 text-xs text-textMuted hover:text-brand hover:bg-surface transition-colors rounded-md mx-2">Add User</a>
+        <a href="{{ route('usersadmin') }}" class="flex items-center pl-10 pr-4 py-2 text-xs text-textMuted hover:text-brand hover:bg-surface transition-colors rounded-md mx-2">Manage Users</a>
+      </div>
     </div>
 
-    <!-- Nav -->
-    <nav class="flex-1 py-2 overflow-y-auto">
+    <div>
+      <button onclick="toggleSubmenu('agent-menu', 'chevron-agent')"
+              class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm text-textMuted hover:bg-page hover:text-textMain transition-all border-l-[3px] border-transparent">
+        <div class="flex items-center gap-3">
+          <img src="/db/agent.png" class="w-4 opacity-80" alt="">
+          Agent Wazuh
+        </div>
+        <svg id="chevron-agent" class="w-4 h-4 text-textMuted transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
 
-      <!-- Dashboard -->
-      <a href={{ route('dashboard-admin') }}
-         class="flex items-center gap-3 px-4 py-2.5 text-sm text-white hover:bg-[#2c2c2c] transition border-l-[3px] border-[#3282B8] bg-[#3282B8]/10">
-        <img src="/db/layout.png" class="w-4" alt="">
-        Dashboard
-      </a>
+      <div id="agent-menu" class="hidden bg-page/50 rounded-lg mx-2 mt-1 py-2 border border-borderSubtle/50">
+        <a href="{{ route('agents-list') }}" class="flex items-center pl-10 pr-4 py-2 text-xs text-textMuted hover:text-brand hover:bg-surface transition-colors rounded-md mx-2">Agents List</a>
+        <a href="{{ route('assignagent') }}" class="flex items-center pl-10 pr-4 py-2 text-xs text-textMuted hover:text-brand hover:bg-surface transition-colors rounded-md mx-2">Assign Agent</a>
+      </div>
+    </div>
 
-      <!-- Customization -->
-      <div>
+  </nav>
+</aside>
+<header class="bg-surface/90 backdrop-blur-md border-b border-borderSubtle sticky top-0 z-20 shadow-sm">
+  <div class="flex items-center h-16 px-4">
 
-        <button onclick="toggleSubmenu('customization-menu', 'chevron-customization')"
-                class="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-300 hover:bg-[#2c2c2c] transition border-l-[3px] border-transparent">
-          <div class="flex items-center gap-3">
-            <img src="/db/custom.png" class="w-4" alt="">
-            Users
-          </div>
-          <svg id="chevron-customization"
-               class="w-3.5 h-3.5 text-gray-500 transition-transform duration-300"
-               fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path d="M19 9l-7 7-7-7"/>
+    <button onclick="openSidebar()" class="flex items-center justify-center p-2 rounded-lg hover:bg-page border border-transparent hover:border-borderSubtle transition-all mr-4">
+      <svg class="w-6 h-6 text-textMuted hover:text-textMain" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+
+    <a href="{{ route('dashboard-admin') }}" class="hidden sm:flex items-center justify-center p-2 rounded-lg hover:bg-page transition-colors mr-4">
+      <img src="/ob/home.png" class="w-5 opacity-80" alt="Home">
+    </a>
+
+    <div class="flex items-center gap-3 border-l border-borderSubtle pl-4">
+      <img src="/ob/logo.png" class="w-6" alt="Logo">
+      <div class="hidden sm:block">
+        <p class="text-[10px] font-bold tracking-widest uppercase text-textMain">Central Cyber</p>
+        <p class="text-[10px] font-bold tracking-widest uppercase text-brand">Security Office</p>
+      </div>
+    </div>
+
+    <div class="flex-1"></div>
+
+    <div class="flex items-center gap-4">
+      <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-page border border-borderSubtle">
+        <span class="w-2 h-2 rounded-full bg-green-500 animate-ping"></span>
+        <span class="text-[10px] text-textMuted font-medium uppercase">System Secure</span>
+      </div>
+
+      <div class="relative">
+        <button onclick="toggleManage()"
+                class="flex items-center gap-2 bg-page border border-borderSubtle rounded-lg px-4 py-2 text-xs font-semibold text-textMain hover:border-brand hover:text-brand transition-all">
+          Administrator
+          <svg id="chevron-manage" class="w-3.5 h-3.5 text-textMuted transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
           </svg>
         </button>
 
-        <div id="customization-menu" class="hidden bg-[#161616]">
-          <a href={{ route('adduser') }} class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Add User</a>
-          <a href={{ route('usersadmin') }} class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Manage Users</a>
-        </div>
-
-      </div>
-
-      <!-- Agent -->
-      <div>
-        <button onclick="toggleSubmenu('agent-menu', 'chevron-agent')"
-                class="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-300 hover:bg-[#2c2c2c] transition border-l-[3px] border-transparent">
-
-          <div class="flex items-center gap-3">
-            <img src="/db/agent.png" class="w-4" alt="">
-            Agent
+        <div id="manage-menu"
+             class="hidden absolute right-0 mt-2 w-48 bg-surface border border-borderSubtle rounded-xl shadow-2xl overflow-hidden py-1 z-50">
+          <div class="px-4 py-3 border-b border-borderSubtle bg-page/50">
+            <p class="text-xs text-textMain font-bold">Admin Account</p>
+            <p class="text-[10px] text-textMuted truncate">admin@ccso.id</p>
           </div>
-
-          <svg id="chevron-agent"
-               class="w-3.5 h-3.5 text-gray-500 transition-transform duration-300"
-               fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path d="M19 9l-7 7-7-7"/>
-          </svg>
-
-        </button>
-
-        <div id="agent-menu" class="hidden bg-[#161616]">
-          <a href={{ Route('agents-list') }} class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Agents List</a>
-          <a href={{ route('assignagent') }} class="flex items-center pl-11 pr-4 py-2 text-xs text-[#4DA8DA] hover:bg-[#2c2c2c] transition">Assign Agent</a>
-        </div>
-      </div>
-
-    </nav>
-  </aside>
-
-<!-- end sidebar -->
-
-<!-- navbar totalitas bagian atas pertama -->
-
-  <!-- NAVBAR -->
-  <header class="bg-[#212121] border-b-2 border-white sticky top-0 z-20">
-    <div class="flex items-center h-16">
-
-      <button onclick="openSidebar()"
-              class="flex items-center justify-center w-16 h-16 border-r-4 border-white hover:bg-[#2c2c2c] transition">
-        <div class="w-8 h-8 border-2 border-white rounded-lg flex items-center justify-center">
-          <img src="/ob/sidebar.png" class="w-3 h-3" alt="">
-        </div>
-      </button>
-
-      <a href={{ route('dashboard-admin') }} class="flex items-center justify-center w-16 h-16 hover:bg-[#2c2c2c] transition">
-        <img src="/ob/home.png" class="w-8" alt="">
-      </a>
-
-      <div class="flex items-center gap-3 px-2">
-        <img src="/ob/logo.png" class="w-6" alt="">
-        <div>
-          <p class="text-xs tracking-wide">Central Cyber</p>
-          <p class="text-xs tracking-wide">Security Office</p>
-        </div>
-      </div>
-
-      <div class="flex-1"></div>
-
-      <div class="flex items-center gap-3 pr-3">
-
-        <!-- Manage Dropdown -->
-        <div class="relative">
-
-          <button onclick="toggleManage()"
-                  class="flex items-center gap-2 border border-white rounded-md px-4 py-2 text-sm hover:bg-[#2c2c2c] transition">
-            Manage
-            <img src="/db/arrow.png" id="arrow-manage" class="w-3 transition-transform duration-200" alt="">
-
-            <svg id="chevron-manage"
-               class="w-3.5 h-3.5 text-gray-500 transition-transform duration-300"
-               fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path d="M19 9l-7 7-7-7"/>
-          </svg>
-
-          </button>
-
-          <!-- Dropdown Menu -->
-          <div id="manage-menu"
-               class="hidden absolute right-0 mt-2 w-32 bg-[#1e1e1e] border rounded-md shadow-xl overflow-hidden">
-            <a href={{ route('profile-setting-admin') }} class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Profile Settings</a>
-            <a href={{ route('adduser') }} class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Add User</a>
-            <a href={{ route('assignagent') }} class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Assign Agent</a>
-            <a href="{{ route('login') }}" class="block px-4 py-3 text-xs text-center hover:bg-[#2c2c2c] transition">Logout</a>
-          </div>
-
+          <a href="{{ route('profile-setting-admin') }}" class="block px-4 py-2.5 text-xs text-textMuted hover:bg-page hover:text-brand transition-colors">⚙️ Profile Settings</a>
+          <a href="{{ route('adduser') }}" class="block px-4 py-2.5 text-xs text-textMuted hover:bg-page hover:text-brand transition-colors">➕ Add User</a>
+          <div class="h-px bg-borderSubtle my-1"></div>
+          <a href="{{ route('login') }}" class="block px-4 py-2.5 text-xs text-red-400 font-semibold hover:bg-red-500/10 transition-colors">🚪 Logout</a>
         </div>
       </div>
     </div>
-  </header>
+  </div>
+</header>
 
-<!-- penutup navbar totalitas bagian atas pertama -->
+<script>
+  function openSidebar() {
+    document.getElementById('sidebar').classList.remove('-translate-x-full');
+    document.getElementById('sidebar-backdrop').classList.remove('opacity-0', 'pointer-events-none');
+  }
+
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.add('-translate-x-full');
+    document.getElementById('sidebar-backdrop').classList.add('opacity-0', 'pointer-events-none');
+  }
+
+  function toggleSubmenu(menuId, chevronId) {
+    const menu = document.getElementById(menuId);
+    const chevron = document.getElementById(chevronId);
+    if (menu.classList.contains('hidden')) {
+      menu.classList.remove('hidden');
+      chevron.classList.add('rotate-180');
+    } else {
+      menu.classList.add('hidden');
+      chevron.classList.remove('rotate-180');
+    }
+  }
+
+  function toggleManage() {
+    const menu = document.getElementById('manage-menu');
+    const chevron = document.getElementById('chevron-manage');
+    if (menu.classList.contains('hidden')) {
+      menu.classList.remove('hidden');
+      chevron.classList.add('rotate-180');
+    } else {
+      menu.classList.add('hidden');
+      chevron.classList.remove('rotate-180');
+    }
+  }
+</script>

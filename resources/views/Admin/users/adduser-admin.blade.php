@@ -3,65 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add User</title>
+    <title>Dashboard - Admin CCSO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    @vite('resources/css/app.css')
     @vite('resources/js/app.js')
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #2b2d34; color: #e5e7eb; }
-        .bg-header { background-color: #1a1c1e; }
-        .border-custom { border-color: #4a4e54; }
-        .input-dark { 
-            background-color: #212121; 
-            border: 1px solid #4a4e54; 
-            color: #9ca3af;
-            font-size: 0.875rem;
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              page: '#121318',
+              surface: '#1a1b23',
+              borderSubtle: '#262833',
+              textMain: '#f1f3f9',
+              textMuted: '#787f99',
+              brand: '#6366f1',
+              brandHover: '#4f46e5'
+            }
+          }
         }
-        .input-dark:focus {
-            border-color: #22d3ee;
-            outline: none;
-            color: white;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-    </style>
+      }
+    </script>
 </head>
-<body class="min-h-screen bg-[#2B2D34]">
+<body class="min-h-screen bg-page text-textMain font-sans antialiased">
 
 @include('Admin.components.header-admin')
 
-    <div class="bg-[#2B2D34] px-6 flex items-center justify-between border-b-2 border-white animate-fade-in delay-1">
-      <div class="flex gap-8">
-            <a href={{ route('usersadmin') }} class="py-3 text-gray-400 text-sm hover:text-white transition">Users</a>
-            <a href={{ route('adduser') }} class="py-3 text-cyan-400 text-sm border-b-2 border-cyan-400 font-medium">Add User</a>
-      </div>
+<div class="p-6 max-w-[1400px] mx-auto">
+
+  <main class="p-8 max-w-2xl mx-auto space-y-6">
+    <div>
+      <h2 class="text-2xl font-bold tracking-tight text-textMain">Tambah User Baru</h2>
+      <p class="text-sm text-textMuted mt-1">Daftarkan akun administrator atau operator baru.</p>
     </div>
 
-    <main class="p-8 max-w-[1400px] mx-auto animate-fade-in">
-        <div class="grid grid-cols-2 gap-4 mb-10 text-center">
-            <div>
-                <p class="text-lg text-gray-300">Total User</p>
-                <h2 class="text-4xl font-bold mt-2">{{ $totalUsers }}</h2>
-            </div>
-            <div>
-                <p class="text-lg text-gray-300">Agent Assigned</p>
-                <h2 class="text-4xl font-bold mt-2">{{ $totalAssignedAgents }}</h2>
-            </div>
-        </div>
-
-        <div class="flex flex-col items-center">
-            <h3 class="text-sm mb-4 font-medium">Add New User</h3>
-            
-            <div class="w-full max-w-2xl border border-gray-600 rounded-sm p-8 bg-transparent">
-
-        <!-- Menampilkan error jika ada -->
-          @if($errors->any())
+    @if($errors->any())
               <div class="bg-red-500 text-white text-sm p-3 rounded mb-4">
                   @foreach($errors->all() as $error)
                       <p>• {{ $error }}</p>
@@ -69,54 +49,58 @@
               </div>
           @endif
 
-                <form action="{{ route('customers.store') }}" method="POST" class="space-y-4">
-                    @csrf
+    <div class="bg-surface border border-borderSubtle rounded-2xl p-8 shadow-sm">
+      <form action="{{ route('customers.store') }}" method="POST" class="space-y-5">
+        @csrf
 
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-xs text-gray-300">Email<span class="text-red-500">*</span></label>
-                            <input type="email" name="email" placeholder="Email" class="input-dark px-3 py-2 rounded-sm w-full">
-                        </div>
-                        
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-xs text-gray-300">Nama Lengkap<span class="text-red-500">*</span></label>
-                            <input type="text" name="name" placeholder="Nama Lengkap" class="input-dark px-3 py-2 rounded-sm w-full">
-                        </div>
-
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-xs text-gray-300">Password <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <input type="password" name="password" placeholder="Password" class="input-dark px-3 py-2 pr-10 rounded-sm w-full">
-                                <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
-                                    <i data-lucide="wand-2" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-xs text-gray-300">Username<span class="text-red-500">*</span></label>
-                            <input type="text" name="username" placeholder="Username" class="input-dark px-3 py-2 rounded-sm w-full">
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col gap-1.5 pt-2">
-                        <label class="text-xs text-gray-300">Phone Number</label>
-                        <input type="text" name="no_telp" placeholder="Phone Number" class="input-dark px-3 py-2 rounded-sm w-1/2">
-                    </div>
-
-                    <div class="flex justify-center mt-6">
-                        <button type="submit" class="bg-[#3b82f6] hover:bg-blue-600 transition text-white text-sm font-medium px-8 py-2 rounded-md shadow-lg">
-                            Add
-                        </button>
-                    </div>
-                </form>
-            </div>
+        <div>
+          <label class="block text-xs font-semibold text-textMuted uppercase tracking-wider mb-2">Nama Lengkap</label>
+          <input type="text" name="name" required placeholder="Masukkan nama lengkap Anda..." 
+            class="w-full rounded-lg px-4 py-2.5 text-sm border border-borderSubtle bg-page text-textMain placeholder-textMuted outline-none focus:border-brand focus:ring-1 focus:ring-brand transition duration-200">
         </div>
-    </main>
 
-    <script>
+        <div>
+          <label class="block text-xs font-semibold text-textMuted uppercase tracking-wider mb-2">Username</label>
+          <input type="text" name="username" required placeholder="Masukkan nama pengguna..." 
+            class="w-full rounded-lg px-4 py-2.5 text-sm border border-borderSubtle bg-page text-textMain placeholder-textMuted outline-none focus:border-brand focus:ring-1 focus:ring-brand transition duration-200">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-textMuted uppercase tracking-wider mb-2">Alamat Email</label>
+          <input type="email" name="email" required placeholder="name@company.com" 
+            class="w-full rounded-lg px-4 py-2.5 text-sm border border-borderSubtle bg-page text-textMain placeholder-textMuted outline-none focus:border-brand focus:ring-1 focus:ring-brand transition duration-200">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-textMuted uppercase tracking-wider mb-2">Phone Number</label>
+          <input type="text" name="no_telp" required placeholder="Masukkan nomor telepon..." 
+            class="w-full rounded-lg px-4 py-2.5 text-sm border border-borderSubtle bg-page text-textMain placeholder-textMuted outline-none focus:border-brand focus:ring-1 focus:ring-brand transition duration-200">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-textMuted uppercase tracking-wider mb-2">Kata Sandi</label>
+          <input type="password" name="password" required placeholder="" 
+            class="w-full rounded-lg px-4 py-2.5 text-sm border border-borderSubtle bg-page text-textMain placeholder-textMuted outline-none focus:border-brand focus:ring-1 focus:ring-brand transition duration-200">
+        </div>
+
+        <div class="pt-4 border-t border-borderSubtle flex justify-end gap-3">
+          <button type="button" onclick="history.back()" class="bg-surface border border-borderSubtle px-5 py-2.5 rounded-lg text-xs text-textMain font-medium hover:bg-borderSubtle transition-all">
+            Batal
+          </button>
+          <button type="submit" class="bg-brand hover:bg-brandHover text-white text-xs font-semibold px-5 py-2.5 rounded-lg shadow-lg shadow-brand/20 transition-all duration-200">
+            Simpan Akun
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+</div>
+
+<script>
         // Inisialisasi icon lucide
         lucide.createIcons();
     </script>
+    
 </body>
 </html>

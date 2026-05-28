@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login</title>
+  <title>Login - Central Cyber Security Office</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -12,9 +12,18 @@
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: {
-            tahoma: ['Tahoma', 'Geneva', 'Verdana', 'sans-serif'],
+          colors: {
+            page: '#121318',
+            surface: '#1a1b23',
+            borderSubtle: '#262833',
+            textMain: '#f1f3f9',
+            textMuted: '#787f99',
+            brand: '#6366f1',
+            brandHover: '#4f46e5'
           },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+          }
         }
       }
     }
@@ -24,7 +33,7 @@
     @keyframes animasilogin {
       0% {
         opacity: 0;
-        transform: scale(0.98);
+        transform: scale(0.95);
       }
       100% {
         opacity: 1;
@@ -33,111 +42,95 @@
     }
 
     .page-wrapper {
-      animation: animasilogin 300ms ease-in-out;
+      animation: animasilogin 400ms cubic-bezier(0.4, 0, 0.2, 1);
     }
   </style>
 </head>
 
-<body class="min-h-screen overflow-hidden flex flex-col font-tahoma relative bg-[#15171d]">
+<body class="min-h-screen overflow-hidden flex flex-col font-sans relative bg-page text-textMain antialiased">
 
   <div class="page-wrapper relative flex flex-col min-h-screen">
 
-    <!-- Background Gradient -->
-    <div class="absolute inset-0 bg-gradient-to-br from-[#1b1d25] via-[#232734] to-[#15171d]"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-surface via-page to-page"></div>
 
-    <!-- Blur Glow -->
-    <div class="absolute top-[-120px] left-[-120px] w-[400px] h-[400px] bg-cyan-500/10 blur-3xl rounded-full"></div>
-    <div class="absolute bottom-[-120px] right-[-120px] w-[400px] h-[400px] bg-blue-500/10 blur-3xl rounded-full"></div>
+    <div class="absolute top-[-120px] left-[-120px] w-[400px] h-[400px] bg-brand/10 blur-[100px] rounded-full pointer-events-none"></div>
+    <div class="absolute bottom-[-120px] right-[-120px] w-[400px] h-[400px] bg-brand/10 blur-[100px] rounded-full pointer-events-none"></div>
 
-    <!-- Grid Pattern -->
-    <div class="absolute inset-0 opacity-[0.05]">
-      <div class="w-full h-full bg-[linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+    <div class="absolute inset-0 opacity-10 pointer-events-none">
+      <div class="w-full h-full bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
     </div>
 
-    <!-- Tombol Exit -->
-    <div class="relative z-10 p-4">
-      <button onclick="history.back()">
+    <div class="relative z-10 p-6">
+      <button onclick="history.back()" class="opacity-70 hover:opacity-100 hover:-translate-x-1 transition-all duration-200">
         <img
           src="/logindark/logoexit.png"
-          width="40"
-          height="40"
-          class="hover:scale-110 transition duration-200"
+          width="30"
+          height="30"
+          alt="Kembali"
         >
       </button>
     </div>
 
-    <!-- Login Box -->
     <div class="relative z-10 flex-1 flex items-center justify-center">
 
-      <div class="bg-black/40 backdrop-blur-xl rounded-[30px] border border-white/20 px-10 py-10 flex flex-col items-center w-[425px] mb-12 shadow-[0_0_60px_rgba(255,255,255,0.30)]">
+      <div class="bg-surface/80 backdrop-blur-xl rounded-[24px] border border-borderSubtle px-10 py-12 flex flex-col items-center w-[400px] mb-12 shadow-[0_0_50px_rgba(99,102,241,0.08)]">
 
-        <!-- Logo -->
         <img
           src="/logindark/logo.png"
-          width="100"
-          height="100"
-          class="drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+          width="90"
+          height="90"
+          class="drop-shadow-[0_0_20px_rgba(99,102,241,0.2)] mb-2"
         >
-
         <br>
-
 
         <form action="/login" method="POST" class="w-full">
           @csrf
 
-          <!-- Username -->
-          <div class="flex items-center gap-1 w-full mb-3">
-            <div class="bg-[#2B2D34] border border-white/20 rounded-lg p-2">
-              <img src="/daftarblack/logouser.png" width="28" height="28">
+          <div class="flex items-center gap-2 w-full mb-4">
+            <div class="bg-page border border-borderSubtle rounded-lg p-2.5 flex-shrink-0">
+              <img src="/daftarblack/logouser.png" width="22" height="22" class="opacity-80">
             </div>
             <input
               type="text"
               name="username"
-              placeholder="username"
-              class="rounded-md px-3 py-2 text-sm w-full border border-[#c8dff0]/50 bg-[#2B2D34]/80 text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition duration-200"
+              placeholder="Username"
+              class="rounded-lg px-4 py-3 text-sm w-full border border-borderSubtle bg-page text-textMain placeholder-textMuted outline-none focus:border-brand focus:ring-1 focus:ring-brand transition duration-200"
             >
           </div>
 
-          <!-- Password -->
-          <div class="flex items-center gap-1 w-full">
-            <div class="bg-[#2B2D34] border border-white/20 rounded-lg p-2">
-              <img src="/logindark/logopassword.png" width="28" height="28">
+          <div class="flex items-center gap-2 w-full mb-8">
+            <div class="bg-page border border-borderSubtle rounded-lg p-2.5 flex-shrink-0">
+              <img src="/logindark/logopassword.png" width="22" height="22" class="opacity-80">
             </div>
             <div class="relative w-full">
               <input
                 id="password"
                 type="password"
                 name="password"
-                placeholder="password"
-                class="rounded-md px-3 py-2 pr-9 text-sm w-full border border-[#c8dff0]/50 bg-[#2B2D34]/80 text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition duration-200"
+                placeholder="Password"
+                class="rounded-lg px-4 py-3 pr-10 text-sm w-full border border-borderSubtle bg-page text-textMain placeholder-textMuted outline-none focus:border-brand focus:ring-1 focus:ring-brand transition duration-200"
               >
               <span
                 onclick="togglePassword()"
-                class="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer opacity-70 hover:opacity-100 transition"
+                class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer opacity-50 hover:opacity-100 transition-opacity"
               >
-                <img id="eyeIcon" src="/logindark/logomata.png" width="16" height="16">
+                <img id="eyeIcon" src="/logindark/logomata.png" width="18" height="18">
               </span>
             </div>
           </div>
 
-          <br>
-
-          <!-- Login Button -->
-          <div class="flex gap-3 w-40 mb-4 mx-auto">
-            <button
-              class="flex-1 py-2 rounded-md text-white text-sm font-tahoma bg-[#2a7db5] hover:bg-cyan-500 hover:shadow-[0_0_20px_rgba(34,211,238,0.5)] transition duration-300"
-            >
-              Login
-            </button>
-          </div>
+          <button
+            type="submit"
+            class="w-full py-3 rounded-lg text-white font-semibold tracking-wide bg-brand hover:bg-brandHover shadow-lg hover:shadow-brand/25 transition-all duration-300"
+          >
+            Login
+          </button>
 
         </form>
       </div>
     </div>
 
-  </div><!-- end page-wrapper -->
-
-  <script>
+  </div><script>
     function togglePassword() {
       const input = document.getElementById('password')
       const icon = document.getElementById('eyeIcon')
@@ -162,16 +155,17 @@ Swal.fire({
     text: "{{ session('error') }}",
     icon: 'error',
 
-    background: 'rgba(24, 26, 32, 0.85)',
-    color: '#e5e7eb',
+    background: '#1a1b23', /* bg-surface */
+    color: '#f1f3f9', /* text-main */
 
     confirmButtonText: 'OK',
 
     customClass: {
-        popup: 'rounded-[28px] border border-white/10 backdrop-blur-xl shadow-[0_0_40px_rgba(34,211,238,0.15)]',
-        title: 'text-3xl font-bold text-white',
-        htmlContainer: 'text-gray-300 text-base',
-        confirmButton: 'rounded-xl px-6 py-2 text-sm font-semibold'
+        /* Disesuaikan bayangannya dengan warna brand/merah khas error */
+        popup: 'rounded-[24px] border border-[#262833] backdrop-blur-xl shadow-[0_0_40px_rgba(239,68,68,0.15)]',
+        title: 'text-2xl font-bold text-white',
+        htmlContainer: 'text-[#787f99] text-sm', /* text-muted */
+        confirmButton: 'rounded-lg px-8 py-2.5 text-sm font-semibold bg-[#ef4444] hover:bg-[#dc2626] border-none' /* alert-critical */
     },
 
     buttonsStyling: false,
@@ -193,8 +187,8 @@ Swal.fire({
     },
 
     backdrop: `
-        rgba(0,0,0,0.65)
-        backdrop-filter: blur(6px)
+        rgba(18, 19, 24, 0.75) 
+        backdrop-filter: blur(4px)
     `
 })
 </script>
