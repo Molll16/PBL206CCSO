@@ -4,21 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Agen;
 use App\Services\AgentService;
-use App\Services\WazuhApiService;
 use Illuminate\Http\Request;
 
 class AgentController extends Controller
 {
-    // =========================================
-    // LIST AGENT
-    // =========================================
-    public function agents(
-        WazuhApiService $wazuh,
-        AgentService $agentService
-    )
+    protected $agentService;
+
+    public function __construct(AgentService $agentService)
     {
-        $agents = $agentService->getAgents($wazuh);
-        $stats = $agentService->getCustomerStats();
+        $this->agentService = $agentService;
+    }
+
+    public function agents()
+    {
+        $agents = $this->agentService->getAgents();
+        $stats = $this->agentService->getCustomerManagementSummary();
 
         return view('Admin.agents.agents-list', [
             'agents' => $agents,
@@ -28,16 +28,10 @@ class AgentController extends Controller
         ]);
     }
 
-    // =========================================
-    // HALAMAN ASSIGN AGENT
-    // =========================================
-    public function assignAgentPage(
-        WazuhApiService $wazuh,
-        AgentService $agentService
-    )
+    public function assignAgentPage()
     {
-        $agents = $agentService->getAvailableAgents($wazuh);
-        $stats = $agentService->getCustomerStats();
+        $agents = $this->agentService->getAvailableAgents();
+        $stats = $this->agentService->getCustomerManagementSummary();
 
         return view('Admin.agents.assignagent', [
             'agents' => $agents,
@@ -48,37 +42,23 @@ class AgentController extends Controller
         ]);
     }
 
-    // =========================================
-    // SIMPAN ASSIGN AGENT
-    // =========================================
-    public function saveAssignAgent(
-        Request $request,
-        WazuhApiService $wazuh,
-        AgentService $agentService
-    )
+    public function saveAssignAgent(Request $request)
     {
-        // validasi
         $request->validate([
             'agent_id' => ['required'],
             'user_id' => ['required'],
         ]);
 
-        // ambil data agent
-        $agent = collect(
-            $agentService->getAgents($wazuh)
-        )->firstWhere('id', $request->agent_id);
+        $agent = collect($this->agentService->getAgents())->firstWhere('id', $request->agent_id);
 
-        // cek agent
         if (!$agent) {
             return back()->with('error', 'Agent tidak ditemukan');
         }
 
-        // cek duplicate
         if (Agen::where('id_wazuh_agen', $request->agent_id)->exists()) {
             return back()->with('error', 'Agent sudah diassign');
         }
 
-        // simpan
         Agen::create([
             'user_id' => $request->user_id,
             'id_wazuh_agen' => $request->agent_id,
@@ -87,8 +67,6 @@ class AgentController extends Controller
             'status' => 'aktif',
         ]);
 
-        return redirect()
-            ->route('assignagent')
-            ->with('success', 'Agent berhasil di-assign');
+        return redirect()->route('assignagent')->with('success', 'Agent berhasil di-assign');
     }
 }

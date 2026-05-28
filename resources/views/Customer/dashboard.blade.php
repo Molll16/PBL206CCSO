@@ -207,6 +207,15 @@
                 @elseif($item->fitur->nama_fitur === 'Threat Summary')
                 @include('Customer.widgets.threat-summary')
 
+                @elseif($item->fitur->nama_fitur === 'System Resources')
+                @include('Customer.widgets.system_resources')
+
+                @elseif($item->fitur->nama_fitur === 'Failed Login')
+                @include('Customer.widgets.failed_login')
+
+                @elseif($item->fitur->nama_fitur === 'Top Triggered Rules')
+                @include('Customer.widgets.top_triggered_rules')
+
             @else
 
                 <div class="h-full flex items-center justify-center">

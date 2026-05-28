@@ -86,25 +86,9 @@
                  class="hidden bg-black/20 border-y border-white/5">
 
                 <a href="{{ Route('pilih-dasbor') }}"
-                   class="flex items-center pl-11 pr-4 py-2.5 text-xs
-                          text-cyan-400
-                          hover:bg-white/[0.04]
-                          transition duration-300">
-
+                   class="flex items-center pl-11 pr-4 py-2.5 text-xs text-cyan-400 hover:bg-white/[0.04] transition duration-300">
                     Visualize
-
                 </a>
-
-                <a href="#"
-                   class="flex items-center pl-11 pr-4 py-2.5 text-xs
-                          text-cyan-400
-                          hover:bg-white/[0.04]
-                          transition duration-300">
-
-                    Discover
-
-                </a>
-
             </div>
 
         <!-- Alerts -->

@@ -4,78 +4,72 @@ namespace App\Services;
 
 use App\Models\Agen;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 
 class AgentService
 {
-    // =========================================
-    // AMBIL SEMUA AGENT DARI WAZUH
-    // =========================================
-    public function getAgents(WazuhApiService $wazuh)
-    {
-        $response = $wazuh->agents();
+    protected $wazuh;
 
+    // OOP Constructor Injection: API Wazuh kini otomatis tersedia di semua method
+    public function __construct(WazuhApiService $wazuh)
+    {
+        $this->wazuh = $wazuh;
+    }
+
+    public function getAgents()
+    {
+        $response = $this->wazuh->agents();
         return $response['data']['affected_items'] ?? [];
     }
 
-    // =========================================
-    // AMBIL AGENT YANG BELUM DIASSIGN
-    // =========================================
-    public function getAvailableAgents(WazuhApiService $wazuh)
+    public function getAvailableAgents()
     {
-        // semua agent
-        $agents = $this->getAgents($wazuh);
-
-        // agent yang sudah dipakai
+        $agents = $this->getAgents();
         $assignedAgents = Agen::pluck('id_wazuh_agen')->toArray();
 
-        // filter agent yang belum diassign
         return collect($agents)
             ->whereNotIn('id', $assignedAgents)
             ->values()
             ->toArray();
     }
 
-    // =============================
-    // STATISTIK AGENT CUSTOMER
-    // =============================
-    public function getStats(WazuhApiService $wazuh)
+    /**
+     * Mengambil statistik Agen khusus halaman Admin
+     * (Pindahan logika dari AdminDashboardController)
+     */
+    public function getAdminStats(): array
     {
-        // 1. Ambil semua id_wazuh_agen milik user yang sedang login
-        $myAgents = Agen::where('user_id', auth()->id())
-            ->pluck('id_wazuh_agen')
-            ->toArray();
-
-        // 2. Ambil seluruh data agent dari API Wazuh
-        $agents = $this->getAgents($wazuh);
-
-        // 3. Filter agent dari wazuh yang ID-nya ada di dalam list kepemilikan user
-        $list = collect($agents)->whereIn('id', $myAgents);
-
-        // 4. Hitung statistik statusnya
-        $online = $list->filter(function ($agent) {
-            return strtolower($agent['status'] ?? '') === 'active';
-        })->count();
-
-        $offline = $list->filter(function ($agent) {
-            return strtolower($agent['status'] ?? '') !== 'active';
-        })->count();
+        $agents = collect($this->getAgents());
 
         return [
-            'online' => $online,
-            'offline' => $offline,
-            'total' => $list->count(),
+            'active' => $agents->where('status', 'active')->count(),
+            'pending' => $agents->where('status', 'pending')->count(),
+            'disconnected' => $agents->where('status', 'disconnected')->count(),
+            'never' => $agents->where('status', 'never_connected')->count(),
+            'total' => $agents->count()
         ];
     }
 
-    // =========================================
-    // STATISTIK CUSTOMER
-    // =========================================
-    public function getCustomerStats()
+    /**
+     * Mengambil statistik Agen khusus milik Customer yang login
+     */
+    public function getCustomerStats(): array
     {
-        $users = User::where('role', 'customer')
-            ->withCount('agents')
-            ->get();
+        $myAgents = Agen::where('user_id', auth()->id())->pluck('id_wazuh_agen')->toArray();
+        $agents = collect($this->getAgents())->whereIn('id', $myAgents);
+
+        return [
+            'online' => $agents->filter(fn($a) => strtolower($a['status'] ?? '') === 'active')->count(),
+            'offline' => $agents->filter(fn($a) => strtolower($a['status'] ?? '') !== 'active')->count(),
+            'total' => $agents->count(),
+        ];
+    }
+
+    /**
+     * Mengambil data relasi Customer dan Agen
+     */
+    public function getCustomerManagementSummary(): array
+    {
+        $users = User::where('role', 'customer')->withCount('agents')->get();
 
         return [
             'users' => $users,
