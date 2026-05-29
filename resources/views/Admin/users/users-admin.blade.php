@@ -148,6 +148,32 @@
      ============================================================ --}}
 <div class="p-6 max-w-[1400px] mx-auto">
     <main class="p-8 max-w-7xl mx-auto space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+        
+            <div
+                class="bg-[#222428] border border-white/10 p-5 rounded-xl hover:border-cyan-400/30 transition-all duration-300 group">
+                <p
+                    class="text-xs font-semibold uppercase tracking-wider text-gray-400 group-hover:text-gray-300 transition-colors">
+                    Total User
+                </p>
+                <h2 class="text-4xl font-bold mt-2 text-white tracking-tight">
+                    {{ $totalUsers }}
+                </h2>
+            </div>
+        
+            <div
+                class="bg-[#222428] border border-white/10 p-5 rounded-xl hover:border-cyan-400/30 transition-all duration-300 group">
+                <p
+                    class="text-xs font-semibold uppercase tracking-wider text-gray-400 group-hover:text-gray-300 transition-colors">
+                    Agent Assigned
+                </p>
+                <h2 class="text-4xl font-bold mt-2 text-cyan-400 tracking-tight">
+                    {{ $totalAssignedAgents }}
+                </h2>
+            </div>
+        
+        </div>
+
 
         <div class="flex justify-between items-center">
             <div>

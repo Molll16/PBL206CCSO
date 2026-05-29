@@ -61,19 +61,21 @@
             <h2 class="text-3xl font-bold mt-2 text-green-400 drop-shadow-[0_0_10px_rgba(34,197,94,0.4)]">{{ $active }}</h2>
         </div>
 
-        <div class="bg-surface border border-borderSubtle p-4 rounded-xl group cursor-default animate-fade-in delay-1 hover:border-yellow-500/30 transition-all">
-            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-yellow-400 transition-colors">Agent Pending</p>
-            <h2 class="text-3xl font-bold mt-2 text-yellow-400 drop-shadow-[0_0_10px_rgba(234,179,8,0.4)]">{{ $pending }}</h2>
-        </div>
-
-        <div class="bg-surface border border-borderSubtle p-4 rounded-xl group cursor-default animate-fade-in delay-2 hover:border-red-500/30 transition-all">
-            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-red-400 transition-colors">Disconnected</p>
+        <div
+            class="bg-surface border border-borderSubtle p-4 rounded-xl group cursor-default animate-fade-in delay-2 hover:border-red-500/30 transition-all">
+            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-red-400 transition-colors">
+                Disconnected</p>
             <h2 class="text-3xl font-bold mt-2 text-red-400 drop-shadow-[0_0_10px_rgba(239,68,68,0.4)]">{{ $disconnected }}</h2>
         </div>
 
+        <div class="bg-surface border border-borderSubtle p-4 rounded-xl group cursor-default animate-fade-in delay-1 hover:border-yellow-500/30 transition-all">
+            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-yellow-400 transition-colors">Total Agents</p>
+            <h2 class="text-3xl font-bold mt-2 text-yellow-400 drop-shadow-[0_0_10px_rgba(234,179,8,0.4)]">{{ $totalAgents }}</h2>
+        </div>
+
         <div class="bg-surface border border-borderSubtle p-4 rounded-xl group cursor-default animate-fade-in delay-2 hover:border-gray-500/30 transition-all">
-            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-textMain transition-colors">Never Connected</p>
-            <h2 class="text-3xl font-bold mt-2 text-textMuted">{{ $never }}</h2>
+            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-textMain transition-colors">Total Users</p>
+            <h2 class="text-3xl font-bold mt-2 text-textMuted">{{ $totalUsers }}</h2>
         </div>
     </div>
 
@@ -88,20 +90,21 @@
                     <span class="text-[10px] text-textMuted uppercase">Active</span>
                     <span class="font-bold text-green-400">{{ $active }}</span>
                 </div>
-                <div class="border-b border-borderSubtle flex flex-col items-center justify-center p-2 hover:bg-yellow-500/10 transition-all">
-                    <i data-lucide="user-minus" class="w-5 h-5 text-yellow-400 mb-1"></i>
-                    <span class="text-[10px] text-textMuted uppercase">Pending</span>
-                    <span class="font-bold text-yellow-400">{{ $pending }}</span>
-                </div>
-                <div class="border-r border-borderSubtle flex flex-col items-center justify-center p-2 hover:bg-red-500/10 transition-all">
+                <div
+                    class="border-r border-borderSubtle flex flex-col items-center justify-center p-2 hover:bg-red-500/10 transition-all">
                     <i data-lucide="user-x" class="w-5 h-5 text-red-400 mb-1"></i>
                     <span class="text-[10px] text-textMuted uppercase">Disconnected</span>
                     <span class="font-bold text-red-400">{{ $disconnected }}</span>
                 </div>
+                <div class="border-b border-borderSubtle flex flex-col items-center justify-center p-2 hover:bg-yellow-500/10 transition-all">
+                    <i data-lucide="user-minus" class="w-5 h-5 text-yellow-400 mb-1"></i>
+                    <span class="text-[10px] text-textMuted uppercase">Total Agents</span>
+                    <span class="font-bold text-yellow-400">{{ $totalAgents }}</span>
+                </div>
                 <div class="flex flex-col items-center justify-center p-2 hover:bg-white/5 transition-all">
                     <i data-lucide="user" class="w-5 h-5 text-textMuted mb-1"></i>
-                    <span class="text-[10px] text-textMuted uppercase">Never</span>
-                    <span class="font-bold text-textMuted">{{ $never }}</span>
+                    <span class="text-[10px] text-textMuted uppercase">Total Users</span>
+                    <span class="font-bold text-textMuted">{{ $totalUsers }}</span>
                 </div>
             </div>
         </div>
@@ -109,16 +112,17 @@
         <div class="border border-borderSubtle bg-surface p-5 rounded-xl flex flex-col items-center justify-center relative hover-scale animate-fade-in delay-2 overflow-hidden">
             <h3 class="text-sm font-semibold absolute top-5 left-5 text-textMain">Overview Agent</h3>
             @php
-                $totalAgent = $active + $pending + $disconnected + $never;
-                $activePercent = $totalAgent > 0 ? ($active / $totalAgent) * 100 : 0;
+                // Rumus Baru: Hanya hitung Active dan Disconnected saja
+                $totalAgentForChart = $active + $disconnected;
+                $activePercent = $totalAgentForChart > 0 ? ($active / $totalAgentForChart) * 100 : 0;
             @endphp
             <div class="w-32 h-32 rounded-full relative flex items-center justify-center drop-shadow-[0_0_15px_rgba(34,197,94,0.2)]"
                 style="background: conic-gradient(#22c55e 0% {{ $activePercent }}%, #262833 {{ $activePercent }}% 100%);">
                 <div class="w-20 h-20 bg-surface rounded-full"></div>
             </div>
-
-            @if($totalAgent > 0)
-                <p class="mt-5 text-xs font-bold tracking-widest text-green-400 animate-pulse">{{ $totalAgent }} AGENT DETECTED</p>
+            
+            @if($totalAgents > 0)
+                <p class="mt-5 text-xs font-bold tracking-widest text-green-400 animate-pulse">{{ $totalAgents }} AGENT DETECTED</p>
             @else
                 <p class="mt-5 text-xs font-bold tracking-widest text-textMuted animate-pulse">NO AGENT DETECTED</p>
             @endif

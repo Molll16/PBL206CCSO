@@ -24,13 +24,14 @@ class AdminDashboardController extends Controller
             $agents = $this->agentService->getAgents();
             $agentStats = $this->agentService->getAdminStats();
             $chartStats = $this->alertService->getWeeklyChartData();
+            $users = $this->agentService->getCustomerManagementSummary();
 
             return view('Admin.dashboard', [
                 'agents' => $agents,
                 'active' => $agentStats['active'],
-                'pending' => $agentStats['pending'],
                 'disconnected' => $agentStats['disconnected'],
-                'never' => $agentStats['never'],
+                'totalUsers' => $users['totalUsers'] ?? 0,
+                'totalAgents' => $agentStats['total'] ?? 0,
                 'chartLabels' => $chartStats['labels'],
                 'chartData' => $chartStats['data'],
                 'totalAlerts' => $chartStats['total'],
@@ -43,9 +44,9 @@ class AdminDashboardController extends Controller
                 'error' => 'Server monitoring sedang tidak tersedia',
                 'agents' => [],
                 'active' => 0,
-                'pending' => 0,
                 'disconnected' => 0,
-                'never' => 0,
+                'totalUsers' => 0,
+                'totalAgents' => 0,
                 'chartLabels' => [],
                 'chartData' => [],
                 'totalAlerts' => 0,
