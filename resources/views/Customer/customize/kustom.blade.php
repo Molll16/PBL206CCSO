@@ -7,6 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
+@vite('resources/css/customer/customize/kustom.css')
 @vite('resources/js/app.js')
 
 <script>
@@ -27,87 +28,6 @@ tailwind.config = {
 }
 </script>
 
-<style>
-  /* Menghilangkan scrollbar batang tapi tetap bisa scroll */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  /* Footer */
-  .footer-bar {
-    background: #0e0f13;
-    border-top: 1px solid #262833;
-  }
-
-  /* Save button */
-  .btn-save {
-    border: 1px solid #262833;
-    background: transparent;
-    transition: background 0.2s;
-    color: #f1f3f9;
-    padding: 0 16px;
-    height: 32px;
-    border-radius: 6px;
-  }
-  .btn-save:hover { background: #1a1b23; }
-
-  /* Widget card */
-  .widget-card {
-    background: #1a1b23;
-    border: 1px solid #262833;
-    border-radius: 6px;
-    transition: border-color 0.2s;
-  }
-  .widget-card:hover { border-color: #6366f1; }
-
-  /* Canvas empty state */
-  .canvas-empty {
-    border: 1px dashed #262833;
-    color: #787f99;
-  }
-
-  /* Search input */
-  .search-input {
-    background: #121318;
-    border: 1px solid #262833;
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 0.875rem;
-    color: #f1f3f9;
-    flex: 1;
-  }
-  .search-input:focus { outline: none; border-color: #6366f1; }
-  .search-input::placeholder { color: #787f99; }
-
-  /* Type button */
-  .btn-type {
-    border: 1px solid #262833;
-    background: transparent;
-    color: #f1f3f9;
-    padding: 4px 8px;
-    font-size: 0.875rem;
-    border-radius: 6px;
-    transition: background 0.2s;
-  }
-  .btn-type:hover { background: #1a1b23; }
-
-  /* Type dropdown */
-  .type-menu {
-    background: #1a1b23;
-    border: 1px solid #262833;
-  }
-  .type-menu-item:hover { background: #6366f1; color: #fff; }
-
-  /* Toast */
-  .toast-box {
-    background: #1a1b23;
-    border: 1px solid #6366f1;
-  }
-</style>
 </head>
 
 @component('Customer.components.header')
@@ -217,45 +137,7 @@ tailwind.config = {
 
 </div>
 
-<footer class="footer-bar px-10 py-4">
-  <div id="footer">
-    <div class="mt-2 px-1 flex flex-wrap items-center gap-4 text-sm text-textMuted">
-
-      <img src="/lp/logo.png" class="h-10" alt="">
-
-      <p class="text-textMain">© 2026 CCSO, Inc.</p>
-      <img src="/lp/garis.png" class="h-5" alt="">
-
-      <p class="text-textMain">Contact Us</p>
-      <img src="/lp/garis.png" class="h-5" alt="">
-
-      <div class="flex items-center gap-2">
-        <img src="/lp/telp.png" class="h-5" alt="">
-        <p>+62 1234567890</p>
-      </div>
-
-      <div class="flex items-center gap-6 ml-2">
-        <img src="/lp/tt.png"    class="h-5 cursor-pointer" alt="">
-        <img src="/lp/ig.png"    class="h-5 cursor-pointer" alt="">
-        <img src="/lp/wa.png"    class="h-5 cursor-pointer" alt="">
-        <img src="/lp/email.png" class="h-5 cursor-pointer" alt="">
-      </div>
-
-      <div class="flex items-center ml-auto overflow-hidden rounded-lg"
-           style="border: 1px solid #262833; background: #1a1b23;">
-        <input type="email" placeholder="Sent to our Email..."
-               class="px-3 py-1 text-sm w-56 bg-transparent text-textMain focus:outline-none"
-               style="color:#f1f3f9"
-               placeholder-style="color:#787f99">
-        <button class="px-3 py-1 text-white text-sm transition-colors"
-                style="background:#6366f1"
-                onmouseover="this.style.background='#4f46e5'"
-                onmouseout="this.style.background='#6366f1'">›</button>
-      </div>
-
-    </div>
-  </div>
-</footer>
+@include('Customer.components.footer')
 
 <div id="toast"
     class="fixed bottom-10 left-1/2 -translate-x-1/2 toast-box px-4 py-2 rounded opacity-0 transition z-50 text-textMain">

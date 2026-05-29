@@ -6,6 +6,7 @@
   <title>Profile Settings</title>
   <script src="https://cdn.tailwindcss.com"></script>
 
+  @vite('resources/css/customer/profile/profileset.css')
   @vite('resources/js/app.js')
 
   <script>
@@ -26,78 +27,6 @@
     }
   </script>
 
-  <style>
-    body { background-color: #121318; }
-
-    /* Accent bar */
-    .accent-bar {
-      background: #6366f1;
-      box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
-    }
-
-    /* Fade in */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in { animation: fadeIn 0.35s ease both; }
-
-    /* Border tab bottom */
-    .tab-border { border-bottom: 2px solid #262833; }
-
-    /* Profile card */
-    .profile-card {
-      background: #1a1b23;
-      border: 1px solid #262833;
-    }
-
-    /* Form input */
-    .form-input {
-      background: transparent;
-      border: 1px solid #262833;
-      border-radius: 6px;
-      padding: 8px 16px;
-      font-size: 0.875rem;
-      color: #f1f3f9;
-      width: 100%;
-      transition: border-color 0.2s;
-    }
-    .form-input:focus {
-      outline: none;
-      border-color: #6366f1;
-    }
-    .form-input::placeholder { color: #787f99; }
-
-    /* Divider */
-    .divider { border-color: #262833; }
-
-    /* Save / Update button */
-    .btn-save {
-      background: #6366f1;
-      border: 1px solid rgba(99,102,241,0.4);
-      box-shadow: 0 0 14px rgba(99,102,241,0.3);
-      transition: background 0.2s;
-      color: #fff;
-      padding: 8px 20px;
-      border-radius: 6px;
-      font-weight: 500;
-    }
-    .btn-save:hover { background: #4f46e5; }
-
-    /* Footer */
-    .footer-bar {
-      background: #0e0f13;
-      border-top: 1px solid #262833;
-    }
-
-    /* Logout button */
-    .btn-logout {
-      border: 1px solid #262833;
-      background: transparent;
-      transition: background 0.2s;
-    }
-    .btn-logout:hover { background: #1a1b23; }
-  </style>
 </head>
 <body class="text-textMain font-sans flex flex-col min-h-screen bg-page antialiased">
 

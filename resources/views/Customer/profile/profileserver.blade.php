@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Company Overview</title>
+  <title>Server</title>
   <script src="https://cdn.tailwindcss.com"></script>
 
+  @vite('resources/css/customer/profile/profileserver.css')
   @vite('resources/js/app.js')
 
   <script>
@@ -26,63 +27,6 @@
     }
   </script>
 
-  <style>
-    body { background-color: #121318; }
-
-    /* Accent bar */
-    .accent-bar {
-      background: #6366f1;
-      box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
-    }
-
-    /* Fade in */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in { animation: fadeIn 0.35s ease both; }
-
-    /* Border tab bottom */
-    .tab-border { border-bottom: 2px solid #262833; }
-
-    /* Stat card */
-    .stat-card {
-      background: #1a1b23;
-      border: 1px solid #262833;
-    }
-
-    /* Profile card */
-    .profile-card {
-      background: #1a1b23;
-      border: 1px solid #262833;
-    }
-
-    /* Input readonly */
-    input.server-input {
-      background: transparent;
-      border: 1px solid #262833;
-      color: #f1f3f9;
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-size: 0.875rem;
-      width: 100%;
-    }
-    input.server-input:focus { outline: none; }
-
-    /* Footer */
-    .footer-bar {
-      background: #0e0f13;
-      border-top: 1px solid #262833;
-    }
-
-    /* Logout button */
-    .btn-logout {
-      border: 1px solid #262833;
-      background: transparent;
-      transition: background 0.2s;
-    }
-    .btn-logout:hover { background: #1a1b23; }
-  </style>
 </head>
 <body class="text-textMain font-sans flex flex-col min-h-screen bg-page antialiased">
 
@@ -116,15 +60,6 @@
         <!-- Nama dan nomor telepon pengguna -->
         <h2 class="mt-2 font-semibold text-textMain">User Tester ABCD</h2>
         <p class="text-sm text-textMuted">+62888888888</p>
-
-        <!-- Daftar perusahaan yang diikuti pengguna -->
-        <div class="mt-10 text-sm text-textMuted">
-          <p>Total Server: 3</p>
-          <p>Total Dashboard: 3</p>
-        </div>
-
-        <!-- Tanggal bergabung pengguna -->
-        <p class="mt-6 text-sm" style="color:#4a4f66">Join Date: 01-10-2025</p>
 
       </div>
     </div>

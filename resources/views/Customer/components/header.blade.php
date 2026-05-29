@@ -6,7 +6,7 @@
 
 <!-- SIDEBAR -->
 <aside id="sidebar"
-       class="fixed top-0 left-0 h-full w-56
+       class="fixed top-0 left-0 h-full w-70
               bg-surface border-r border-borderSubtle
               shadow-2xl
               z-40 flex flex-col

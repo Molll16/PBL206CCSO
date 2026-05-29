@@ -1,0 +1,100 @@
+  /* Menghilangkan scrollbar batang tapi tetap bisa scroll */
+  .no-scrollbar::-webkit-scrollbar {
+      display: none;
+  }
+
+  .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+  }
+
+  /* Footer */
+  .footer-bar {
+      background: #0e0f13;
+      border-top: 1px solid #262833;
+  }
+
+  /* Save button */
+  .btn-save {
+      border: 1px solid #262833;
+      background: transparent;
+      transition: background 0.2s;
+      color: #f1f3f9;
+      padding: 0 16px;
+      height: 32px;
+      border-radius: 6px;
+  }
+
+  .btn-save:hover {
+      background: #1a1b23;
+  }
+
+  /* Widget card */
+  .widget-card {
+      background: #1a1b23;
+      border: 1px solid #262833;
+      border-radius: 6px;
+      transition: border-color 0.2s;
+  }
+
+  .widget-card:hover {
+      border-color: #6366f1;
+  }
+
+  /* Canvas empty state */
+  .canvas-empty {
+      border: 1px dashed #262833;
+      color: #787f99;
+  }
+
+  /* Search input */
+  .search-input {
+      background: #121318;
+      border: 1px solid #262833;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.875rem;
+      color: #f1f3f9;
+      flex: 1;
+  }
+
+  .search-input:focus {
+      outline: none;
+      border-color: #6366f1;
+  }
+
+  .search-input::placeholder {
+      color: #787f99;
+  }
+
+  /* Type button */
+  .btn-type {
+      border: 1px solid #262833;
+      background: transparent;
+      color: #f1f3f9;
+      padding: 4px 8px;
+      font-size: 0.875rem;
+      border-radius: 6px;
+      transition: background 0.2s;
+  }
+
+  .btn-type:hover {
+      background: #1a1b23;
+  }
+
+  /* Type dropdown */
+  .type-menu {
+      background: #1a1b23;
+      border: 1px solid #262833;
+  }
+
+  .type-menu-item:hover {
+      background: #6366f1;
+      color: #fff;
+  }
+
+  /* Toast */
+  .toast-box {
+      background: #1a1b23;
+      border: 1px solid #6366f1;
+  }

@@ -6,6 +6,8 @@
     <title>OpenSource Dashboard</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+
+    @vite('resources/css/customer/customize/choosedashboard.css')
     @vite('resources/js/app.js')
 
     <script>
@@ -26,90 +28,6 @@
         }
     </script>
 
-    <style>
-        body { background-color: #121318; }
-
-        .dashboard-card {
-            background: #1a1b23;
-            border: 1px solid #262833;
-            transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
-        }
-        .dashboard-card:hover {
-            background: #1e1f29;
-            border-color: rgba(99, 102, 241, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-        }
-
-        .create-card {
-            background: #1a1b23;
-            border: 1px dashed #262833;
-            transition: border-color 0.2s, background 0.2s, transform 0.2s;
-        }
-        .create-card:hover {
-            background: #1e1f29;
-            border-color: rgba(99, 102, 241, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .accent-bar {
-            background: #6366f1;
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
-        }
-
-        .pill-divider {
-            background: #1a1b23;
-            border: 1px solid #262833;
-        }
-
-        .pulse-dot {
-            background: #6366f1;
-            box-shadow: 0 0 6px rgba(99, 102, 241, 0.9);
-        }
-
-        .btn-view {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid #262833;
-            color: #f1f3f9;
-            transition: background 0.2s, border-color 0.2s;
-        }
-        .btn-view:hover {
-            background: rgba(99,102,241,0.12);
-            border-color: rgba(99,102,241,0.4);
-        }
-
-        .btn-inuse {
-            background: rgba(34,197,94,0.12);
-            border: 1px solid rgba(34,197,94,0.25);
-            color: #4ade80;
-            cursor: default;
-        }
-
-        .btn-use {
-            background: #6366f1;
-            box-shadow: 0 0 14px rgba(99,102,241,0.3);
-            color: #fff;
-            transition: background 0.2s;
-        }
-        .btn-use:hover { background: #4f46e5; }
-
-        .btn-delete {
-            background: rgba(239,68,68,0.1);
-            border: 1px solid rgba(239,68,68,0.25);
-            color: #f87171;
-            transition: background 0.2s, border-color 0.2s;
-        }
-        .btn-delete:hover {
-            background: rgba(239,68,68,0.2);
-            border-color: rgba(239,68,68,0.4);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in { animation: fadeIn 0.35s ease both; }
-    </style>
 </head>
 
 <body class="text-textMain font-sans flex flex-col min-h-screen bg-page antialiased">

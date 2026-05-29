@@ -6,6 +6,7 @@
   <title>Customization Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
 
+  @vite('resources/css/customer/profile/profilecustom.css')
   @vite('resources/js/app.js')
 
   <script>
@@ -26,96 +27,6 @@
     }
   </script>
 
-  <style>
-    body { background-color: #121318; }
-
-    /* Accent bar */
-    .accent-bar {
-      background: #6366f1;
-      box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
-    }
-
-    /* Pulse dot */
-    .pulse-dot {
-      background: #6366f1;
-      box-shadow: 0 0 6px rgba(99, 102, 241, 0.9);
-    }
-
-    /* Fade in */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in { animation: fadeIn 0.35s ease both; }
-
-    /* Hover scale */
-    .hover-scale { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    .hover-scale:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
-
-    /* Border tab bottom */
-    .tab-border { border-bottom: 2px solid #262833; }
-
-    /* Table rows */
-    .table-header {
-      background: #1a1b23;
-      border-bottom: 1px solid #262833;
-    }
-    .table-row {
-      border-bottom: 1px solid #262833;
-    }
-    .table-row:last-child { border-bottom: none; }
-    .table-cell-border { border-right: 1px solid #262833; }
-
-    /* Stat card */
-    .stat-card {
-      background: #1a1b23;
-      border: 1px solid #262833;
-    }
-
-    /* Dashboard table wrapper */
-    .table-wrapper {
-      background: #1a1b23;
-      border: 1px solid #262833;
-    }
-
-    /* Profile card */
-    .profile-card {
-      background: #1a1b23;
-      border: 1px solid #262833;
-    }
-
-    /* Footer */
-    .footer-bar {
-      background: #0e0f13;
-      border-top: 1px solid #262833;
-    }
-
-    /* Add button */
-    .btn-add {
-      background: #6366f1;
-      border: 1px solid rgba(99,102,241,0.4);
-      box-shadow: 0 0 14px rgba(99,102,241,0.3);
-      transition: background 0.2s;
-    }
-    .btn-add:hover { background: #4f46e5; }
-
-    /* Logout button */
-    .btn-logout {
-      border: 1px solid #262833;
-      background: transparent;
-      transition: background 0.2s;
-    }
-    .btn-logout:hover { background: #1a1b23; }
-
-    /* Inline edit input */
-    input.inline-edit {
-      background: transparent;
-      border: 1px solid #6366f1;
-      border-radius: 4px;
-      color: #f1f3f9;
-    }
-    input.inline-edit:focus { outline: none; }
-  </style>
 </head>
 <body class="text-textMain font-sans flex flex-col min-h-screen bg-page antialiased">
 
@@ -150,15 +61,6 @@
         <!-- Nama dan nomor telepon pengguna -->
         <h2 class="mt-2 font-semibold text-textMain">User Tester ABCD</h2>
         <p class="text-sm text-textMuted">+62888888888</p>
-
-        <!-- Daftar perusahaan yang diikuti pengguna -->
-        <div class="mt-10 text-sm text-textMuted">
-          <p>Total Server: 3</p>
-          <p>Total Dashboard: 3</p>
-        </div>
-
-        <!-- Tanggal bergabung pengguna -->
-        <p class="mt-6 text-sm" style="color:#4a4f66">Join Date: 01-10-2025</p>
 
       </div>
     </div>
