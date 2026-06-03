@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+  
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,9 +56,6 @@
       <div>
         <h2 class="text-lg font-semibold text-textMain">{{ auth()->user()->name }}</h2>
         <p class="text-sm text-textMuted">{{ auth()->user()->no_telp }}</p>
-        <span class="mt-1 inline-flex items-center gap-1.5 text-[11px] bg-brand/10 text-brand border border-brand/20 px-2 py-0.5 rounded font-medium">
-          <i data-lucide="shield" class="w-3 h-3"></i> Administrator
-        </span>
       </div>
     </div>
 
@@ -86,7 +84,7 @@
           <h3 class="text-sm font-semibold text-textMain flex items-center gap-2">
             <i data-lucide="server" class="w-4 h-4 text-brand"></i>
             Agents
-            <span class="text-[10px] bg-page border border-borderSubtle px-2 py-0.5 rounded-full text-textMuted">{{ $agents->count() }}</span>
+            <span class="text-[10px] bg-page border border-borderSubtle px-2 py-0.5 rounded-full">{{ $agents->count() }}</span>
           </h3>
         </div>
 
@@ -154,10 +152,10 @@
               </select>
             </div>
             <div class="flex items-center gap-2">
-              <button class="hover:text-textMain transition px-1">‹</button>
+              <button class="hover:text-textMain transition px-1"><i data-lucide="chevron-left" class="w-2 h-2"></i></button>
               <span class="text-brand font-bold bg-brand/10 border border-brand/20 px-2 py-0.5 rounded">1</span>
               <span class="hover:text-textMain cursor-pointer px-1">2</span>
-              <button class="hover:text-textMain transition px-1">›</button>
+              <button class="hover:text-textMain transition px-1"><i data-lucide="chevron-right" class="w-2 h-2"></i></button>
             </div>
           </div>
 

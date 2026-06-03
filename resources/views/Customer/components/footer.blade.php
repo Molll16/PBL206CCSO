@@ -1,4 +1,4 @@
-<footer class="bg-surface border-t border-borderSubtle px-6 py-4">
+<footer class="bg-surface/90 border-b border-borderSubtle px-6 py-4">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 text-sm text-textMuted">
         
         <!-- Kiri: Logo & Copyright -->

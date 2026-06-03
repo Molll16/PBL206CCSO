@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
@@ -33,7 +33,7 @@
 
 </head>
 
-<body class="min-h-screen">
+<body class="min-h-screen bg-page text-textMain font-sans antialiased">
 
     @include('Customer.components.header')
 
@@ -47,7 +47,7 @@
         </div>
     </div>
 
-    <main class="p-8 max-w-7xl mx-auto space-y-6 animate-fade-in">
+    <main class="p-6 mx-auto">
 
         {{-- Top Stats --}}
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
@@ -73,17 +73,23 @@
                 </div>
 
                 <div class="bg-surface border border-red-800/40 rounded-xl p-5 flex flex-col justify-between hover:border-red-400/30 transition-all group">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-red-300">High</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-red-300 flex items-center justify-between">
+                        High <span class="w-2 h-2 rounded-full bg-red-400 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]"></span>
+                    </p>
                     <h2 class="text-4xl font-bold text-red-400 mt-2 tracking-tight">{{ $highAlerts ?? 0 }}</h2>
                 </div>
 
                 <div class="bg-surface border border-yellow-700/40 rounded-xl p-5 flex flex-col justify-between hover:border-yellow-500/30 transition-all group">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-yellow-300">Medium</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-yellow-300 flex items-center justify-between">
+                        Medium <span class="w-2 h-2 rounded-full bg-yellow-300 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]"></span>
+                    </p>
                     <h2 class="text-4xl font-bold text-yellow-400 mt-2 tracking-tight">{{ $mediumAlerts ?? 0 }}</h2>
                 </div>
 
                 <div class="bg-surface border border-green-800/40 rounded-xl p-5 flex flex-col justify-between hover:border-green-500/30 transition-all group">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-green-300">Low</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-green-300 flex items-center justify-between">
+                        Low <span class="w-2 h-2 rounded-full bg-green-300 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]"></span>
+                    </p>
                     <h2 class="text-4xl font-bold text-green-400 mt-2 tracking-tight">{{ $lowAlerts ?? 0 }}</h2>
                 </div>
 
@@ -117,7 +123,7 @@
 
                 <div class="flex gap-3">
                     <div class="relative">
-                        <i data-lucide="search" class="flex justify-center items-center left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-textMuted pointer-events-none"></i>
+                        <i data-lucide="search" class="absolute left-3 top-3/4 -translate-y-1/2 w-3.5 h-3.5 text-textMuted pointer-events-none"></i>
                         <input type="text" id="searchAlert" placeholder="Search alerts..."
                             class="pl-9 pr-4 py-2 bg-page border border-borderSubtle text-textMain rounded-lg text-xs focus:outline-none focus:border-brand/50 transition w-64 placeholder:text-textMuted">
                     </div>
@@ -195,13 +201,13 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="p-12 text-center text-textMuted italic">
+                                <td colspan="7" class="text-center p-8 text-textMuted text-sm italic">
                                     No alerts logs recorded today.
                                 </td>
                             </tr>
                         @endforelse
                         <tr id="emptyFilterRow" class="hidden">
-                            <td colspan="7" class="p-12 text-center text-textMuted italic">
+                            <td colspan="7" class="text-center p-8 text-textMuted text-sm italic">
                                 No data matches the selected filters.
                             </td>
                         </tr>
@@ -218,9 +224,9 @@
                     </select>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button class="hover:text-textMain transition px-1"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                    <button class="hover:text-textMain transition px-1"><i data-lucide="chevron-left" class="w-2 h-2"></i></button>
                     <span class="text-brand font-bold bg-brand/10 border border-brand/20 px-2 py-0.5 rounded">1</span>
-                    <button class="hover:text-textMain transition px-1"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                    <button class="hover:text-textMain transition px-1"><i data-lucide="chevron-right" class="w-2 h-2"></i></button>
                 </div>
             </div>
         </div>

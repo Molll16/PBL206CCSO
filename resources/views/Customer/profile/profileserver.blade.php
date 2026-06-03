@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Server</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  @vite('resources/css/customer/profile/profileserver.css')
+  @vite('resources/css/app.css')
   @vite('resources/js/app.js')
 
   <script>
@@ -28,97 +29,109 @@
     }
   </script>
 </head>
+<body class="min-h-screen bg-page text-textMain font-sans antialiased flex flex-col">
 
-<body class="text-textMain font-sans flex flex-col min-h-screen bg-page antialiased">
+@include('Customer.components.header')
 
-  @include('Customer.components.header')
-
-  <div class="flex items-center py-3 tab-border">
-    <img class="w-48 h-48 mt-40 ml-14 absolute" src="/profilee/profile.png">
-
-    <div class="flex items-center gap-10 ml-[330px]">
-      <a href="{{ route('profile-setting') }}" class="text-sm cursor-pointer text-textMuted hover:text-brand transition-colors">Profile Settings</a>
-      <a href="{{ route('profile-server') }}" class="text-sm cursor-pointer text-brand">Server</a>
-      <a href="{{ route('profile-custom') }}" class="text-sm cursor-pointer text-textMuted hover:text-brand transition-colors">Customization Dashboard</a>
+  <!-- ===== TAB NAVIGASI PROFIL ===== -->
+  <div class="bg-surface px-6 flex items-center justify-between border-b border-borderSubtle mt-16 md:mt-0">
+    <div class="flex gap-8">
+      <a href="{{ route('profile-setting') }}" class="py-3 text-textMuted text-sm hover:text-textMain transition font-medium">Profile Settings</a>
+      <a href="{{ route('profile-server') }}" class="py-3 text-brand text-sm border-b-2 border-brand font-medium">Server</a>
+      <a href="{{ route('profile-custom') }}" class="py-3 text-textMuted text-sm hover:text-textMain transition font-medium">Customization Dashboard</a>
     </div>
   </div>
 
-  <div class="flex p-6 gap-6 flex-1">
+  <div class="p-6 mx-auto w-full flex-1">
 
-    <div class="mt-32">
-      <div class="profile-card p-6 mx-8 mt-6 rounded-xl">
-        <h2 class="mt-2 font-semibold text-textMain">{{ auth()->user()->name }}</h2>
+    <!-- ===== PROFIL HEADER ===== -->
+    <div class="flex items-center gap-6 mb-8 p-6 bg-surface border border-borderSubtle rounded-xl">
+      <div class="relative cursor-pointer group">
+        <img id="fotoProfil" class="w-20 h-20 rounded-full object-cover ring-2 ring-borderSubtle" src="/profilee/profile.png">
+      </div>
+      <div>
+        <h2 class="text-lg font-semibold text-textMain">{{ auth()->user()->name }}</h2>
         <p class="text-sm text-textMuted">{{ auth()->user()->no_telp }}</p>
       </div>
     </div>
 
-    <div class="w-3/4 space-y-6 pl-10">
+    <main class="space-y-6">
 
-      <div class="animate-fade-in">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-[3px] h-5 rounded-full accent-bar"></div>
-          <h3 class="font-semibold text-textMain tracking-wide">Server</h3>
-        </div>
-
-        <div class="stat-card rounded-xl p-6 grid grid-cols-3 text-center gap-4">
-          <div>
-            <p class="text-sm text-textMuted">Agents Total</p>
-            <p class="text-2xl font-bold mt-1 text-textMain">{{ sprintf('%02d', $agentsTotal ?? 0) }}</p>
+      <!-- ===== AGENT LOG STATS ===== -->
+      <div>
+        <h3 class="text-sm font-semibold text-textMain mb-3 flex items-center gap-2">
+          <i data-lucide="activity" class="w-4 h-4 text-brand"></i> Agent Log
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-surface border border-borderSubtle p-5 rounded-xl group cursor-default hover:border-brand/30 transition-all">
+            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-textMain transition-colors">Total Agents</p>
+            <h2 class="text-3xl font-bold mt-2 text-textMain">{{ sprintf('%02d', $agentsTotal ?? 0) }}</h2>
           </div>
-
-          <div>
-            <p class="text-sm text-textMuted">Active Agents</p>
-            <p class="text-2xl font-bold mt-1 text-textMain">{{ sprintf('%02d', $activeAgents ?? 0) }}</p>
+          <div class="bg-surface border border-borderSubtle p-5 rounded-xl group cursor-default hover:border-green-500/30 transition-all">
+            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-green-400 transition-colors">Active Agents</p>
+            <h2 class="text-3xl font-bold mt-2 text-green-400">{{ sprintf('%02d', $activeAgents ?? 0) }}</h2>
           </div>
-
-          <div>
-            <p class="text-sm text-textMuted">Disconnect Agents</p>
-            <p class="text-2xl font-bold mt-1 text-textMain">{{ sprintf('%02d', $disconnectAgents ?? 0) }}</p>
+          <div class="bg-surface border border-borderSubtle p-5 rounded-xl group cursor-default hover:border-red-500/30 transition-all">
+            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-red-400 transition-colors">Disconnect Agents</p>
+            <h2 class="text-3xl font-bold mt-2 text-red-400">{{ sprintf('%02d', $disconnectAgents ?? 0) }}</h2>
           </div>
         </div>
       </div>
 
-      <div class="animate-fade-in">
-
-        <div class="grid grid-cols-3 gap-4 mb-2 text-xs font-semibold px-1 text-textMuted tracking-wider uppercase">
-          <p>Server Name</p>
-          <p>Server IP</p>
-          <p>Agent Status</p>
+      <!-- ===== AGENTS TABLE ===== -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-semibold text-textMain flex items-center gap-2">
+            <i data-lucide="server" class="w-4 h-4 text-brand"></i>
+            Agents
+            <span class="text-[10px] bg-page border border-borderSubtle px-2 py-0.5 rounded-full text-textMuted">{{ count($agents) }}</span>
+          </h3>
         </div>
 
-        @forelse($agents as $agent)
-          <div class="grid grid-cols-3 gap-4 items-center mb-3">
-            <input type="text" value="{{ $agent->server_name }}" readonly class="server-input">
-            <input type="text" value="{{ $agent->server_ip }}" readonly class="server-input">
-
-            <div>
-              <button class="border rounded-lg py-2 text-sm w-24 font-medium capitalize
-                  @if($agent->status === 'Active' || $agent->status === 'active') border-blue-400 text-blue-400
-                  @elseif($agent->status === 'Pending' || $agent->status === 'pending') border-yellow-400 text-yellow-400
-                  @else border-red-500 text-red-500 @endif">
-                {{ $agent->status }}
-              </button>
-            </div>
+        <div class="bg-surface border border-borderSubtle rounded-xl overflow-hidden shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="w-full text-center text-sm">
+              <thead class="bg-surface text-textMuted text-xs uppercase tracking-wider border-b border-borderSubtle">
+                <tr>
+                  <th class="p-4 font-semibold text-left">Server Name</th>
+                  <th class="p-4 font-semibold">IP Address</th>
+                  <th class="p-4 font-semibold text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-borderSubtle bg-page/30">
+                @forelse($agents as $agent)
+                <tr class="hover:bg-surface/60 transition-colors">
+                  <td class="p-4 text-left font-semibold text-brand">{{ $agent->server_name }}</td>
+                  <td class="p-4 text-textMuted font-mono text-xs">{{ $agent->server_ip }}</td>
+                  <td class="p-4 text-right">
+                    @if($agent->status === 'Active' || $agent->status === 'active')
+                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20">● Active</span>
+                    @elseif($agent->status === 'Pending' || $agent->status === 'pending')
+                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">● Pending</span>
+                    @else
+                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">● {{ $agent->status }}</span>
+                    @endif
+                  </td>
+                </tr>
+                @empty
+                <tr>
+                  <td colspan="3" class="text-center p-8 text-textMuted text-sm italic">Tidak ada server atau agent yang terdaftar pada akun Anda.</td>
+                </tr>
+                @endforelse
+              </tbody>
+            </table>
           </div>
-        @empty
-          <div class="p-8 text-center text-sm text-textMuted italic bg-surface rounded-xl">
-            Tidak ada server atau agent yang terdaftar pada akun Anda.
-          </div>
-        @endforelse
-
+        </div>
       </div>
 
-    </div>
-
+    </main>
   </div>
 
-  <footer class="footer-bar px-10 py-4">
-    <div class="mt-2 px-1 flex flex-wrap items-center gap-4 text-sm text-textMuted">
-      <img src="/lp/logo.png" class="h-10">
-      <p class="text-textMain">© 2026 CCSO, Inc.</p>
-    </div>
-  </footer>
+@include('Customer.components.footer')
+
+  <script>
+    lucide.createIcons();
+  </script>
 
 </body>
-
 </html>
