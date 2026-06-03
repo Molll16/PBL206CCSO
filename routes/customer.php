@@ -66,13 +66,14 @@ Route::prefix('customer')->middleware('auth')->group(function () {
     // MANAGEMENT PROFILE CUSTOMER
     // ==========================================
     Route::prefix('profile')->group(function () {
-        // VIEW / HALAMAN
-        Route::get('/setting', [ProfileController::class, 'customerSettings'])->name('profile-setting');
-        Route::get('/server', fn() => view('Customer.profile.profileserver'))->name('profile-server');
-        Route::get('/custom', fn() => view('Customer.profile.profilecustom'))->name('profile-custom');
-        Route::get('/overview', fn() => view('Customer.profile.profileover'))->name('profile-overview');
-        Route::post('/update', [ProfileController::class, 'update'])->name('customer.profile.update');
-        Route::post('/change-password', [ProfileController::class, 'updatePassword'])->name('changepw.update');
+        // VIEW / HALAMAN (Sekarang semua terstruktur lewat Controller)
+        Route::get('/setting', [ProfileController::class, 'customerAccountSettings'])->name('profile-setting');
+        Route::get('/server', [ProfileController::class, 'customerServerSettings'])->name('profile-server');
+        Route::get('/custom', [ProfileController::class, 'customerCustomizeSettings'])->name('profile-custom');
+
+        // ACTION / PROSES (Menggunakan PUT/PATCH sesuai standar RESTful Laravel untuk Update data)
+        Route::put('/update', [ProfileController::class, 'update'])->name('customer.profile.update');
+        Route::put('/change-password', [ProfileController::class, 'updatePassword'])->name('changepw.update');
     });
 
     // LOGS

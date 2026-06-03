@@ -111,7 +111,7 @@
             <p class="text-xs text-textMain font-bold">Customer Account</p>
             <p class="text-[10px] text-textMuted truncate">{{ Auth::user()->username ?? 'customer@ccso.id' }}</p>
           </div>
-          <a href="{{ route('profile-overview') }}"
+          <a href="{{ route('profile-setting') }}"
             class="block px-4 py-2.5 text-xs text-textMuted hover:bg-page hover:text-brand transition-colors">
             Profile</a>
           <a href="{{ route('pilih-dasbor') }}"

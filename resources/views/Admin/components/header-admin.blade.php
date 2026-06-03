@@ -116,7 +116,7 @@
           class="hidden absolute right-0 mt-2 w-48 bg-surface border border-borderSubtle rounded-xl shadow-2xl overflow-hidden py-1 z-50 animate-fade-in">
           <div class="px-4 py-3 border-b border-borderSubtle bg-page/50">
             <p class="text-xs text-textMain font-bold">Admin Account</p>
-            <p class="text-[10px] text-textMuted truncate">admin@ccso.id</p>
+            <p class="text-[10px] text-textMuted truncate">{{ Auth::user()->email }}</p>
           </div>
           <a href="{{ route('profile-setting-admin') }}"
             class="block px-4 py-2.5 text-xs text-textMuted hover:bg-page hover:text-brand transition-colors">

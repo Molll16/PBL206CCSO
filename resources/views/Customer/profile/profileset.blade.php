@@ -59,7 +59,6 @@
 
     <!-- Menu tab halaman profil -->
     <div class="flex items-center gap-10 ml-[330px]">
-      <a href={{ Route('profile-overview') }} class="text-sm cursor-pointer text-textMuted hover:text-brand transition-colors">Overview</a>
       <a href={{ Route('profile-setting') }}  class="text-sm cursor-pointer text-brand">Profile Settings</a>
       <a href={{ Route('profile-server') }}   class="text-sm cursor-pointer text-textMuted hover:text-brand transition-colors">Server</a>
       <a href={{ Route('profile-custom') }}   class="text-sm cursor-pointer text-textMuted hover:text-brand transition-colors">Customization Dashboard</a>
@@ -88,21 +87,6 @@
     <!-- KOLOM KANAN: Form pengaturan profil -->
     <div class="w-2/3 pl-10 space-y-8 animate-fade-in">
 
-      <form action="{{ route('customer.profile.update') }}" method="POST" class="space-y-6">
-        @csrf
-
-        <!-- Section heading -->
-        <div class="flex items-center gap-3 mb-1">
-          <div class="w-[3px] h-5 rounded-full accent-bar"></div>
-          <h3 class="font-semibold text-textMain tracking-wide">Profile Settings</h3>
-        </div>
-
-        @if(session('success') && !session('password_success'))
-          <div class="bg-green-500/20 border border-green-500 text-green-300 px-4 py-3 rounded-lg">
-            {{ session('success') }}
-          </div>
-        @endif
-
         <div class="flex flex-col gap-2">
           <label class="text-sm font-semibold text-textMain">Full Name</label>
           <input type="text" name="name" value="{{ auth()->user()->name }}" class="form-input">
@@ -117,11 +101,6 @@
           <label class="text-sm font-semibold text-textMain">Personal Phone Number</label>
           <input type="text" name="no_telp" value="{{ auth()->user()->no_telp }}" class="form-input">
         </div>
-
-        <button type="submit" class="btn-save">
-          Save Changes
-        </button>
-      </form>
 
       <hr class="divider my-6">
 

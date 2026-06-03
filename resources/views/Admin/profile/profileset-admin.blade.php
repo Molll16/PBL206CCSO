@@ -55,9 +55,6 @@
       <div>
         <h2 class="text-lg font-semibold text-textMain">{{ auth()->user()->name }}</h2>
         <p class="text-sm text-textMuted">{{ auth()->user()->no_telp }}</p>
-        <span class="mt-1 inline-flex items-center gap-1.5 text-[11px] bg-brand/10 text-brand border border-brand/20 px-2 py-0.5 rounded font-medium">
-          <i data-lucide="shield" class="w-3 h-3"></i> Administrator
-        </span>
       </div>
     </div>
 
