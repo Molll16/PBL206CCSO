@@ -3,234 +3,185 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile Settings</title>
+  <title>Profile - Agent</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  @vite('resources/jss/app.js')
+  @vite('resources/css/app.css')
+  @vite('resources/js/app.js')
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            page: '#121318',
+            surface: '#1a1b23',
+            borderSubtle: '#262833',
+            textMain: '#f1f3f9',
+            textMuted: '#787f99',
+            brand: '#6366f1',
+            brandHover: '#4f46e5'
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body class="bg-[#2B2D34] text-gray-200 font-sans flex flex-col min-h-screen">
+<body class="min-h-screen bg-page text-textMain font-sans antialiased">
 
 @include('Admin.components.header-admin')
 
   <!-- ===== TAB NAVIGASI PROFIL ===== -->
-  <div class="relative bg-[#2B2D34] px-6 flex items-center justify-center border-b-2 border-white">
+  <div class="bg-surface px-6 flex items-center justify-between border-b border-borderSubtle mt-16 md:mt-0">
     <div class="flex gap-8">
-        <a href="{{ route('profile-setting-admin') }}" class="py-3 text-gray-400 text-sm hover:text-white transition">Profile Settings</a>
-        <a href="{{ route('profile-agent') }}" class="py-3 py-3 text-cyan-400 text-sm border-b-2 border-cyan-400 font-medium">Agent</a>
-    </div>
-
-    <div class="absolute right-6">
-        <a href="/login" class="border border-white/60 rounded px-4 py-1 text-xs hover:bg-white hover:text-black transition inline-block">
-            Logout
-        </a>
+      <a href="{{ route('profile-setting-admin') }}" class="py-3 text-textMuted text-sm hover:text-textMain transition font-medium">Profile Settings</a>
+      <a href="{{ route('profile-agent') }}" class="py-3 text-brand text-sm border-b-2 border-brand font-medium">Agent</a>
     </div>
   </div>
 
-  <div class="relative">
-      <div class="absolute ml-14 mt-[-35px] cursor-pointer group z-10" onclick="document.getElementById('inputGambarProfil').click()">
-        <img id="fotoProfil" class="w-48 h-48 rounded-full object-cover" src="/profilee/profile.png">
-        <div class="absolute inset-0 rounded-full bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <span class="text-white text-xs text-center px-2">Ganti Foto</span>
+  <div class="p-6 mx-auto">
+
+    <!-- ===== PROFIL HEADER ===== -->
+    <div class="flex items-center gap-6 mb-8 p-6 bg-surface border border-borderSubtle rounded-xl">
+      <div class="relative cursor-pointer group" onclick="document.getElementById('inputGambarProfil').click()">
+        <img id="fotoProfil" class="w-20 h-20 rounded-full object-cover ring-2 ring-borderSubtle group-hover:ring-brand transition-all duration-300" src="/profilee/profile.png">
+        <div class="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <i data-lucide="camera" class="w-5 h-5 text-white"></i>
         </div>
       </div>
       <input type="file" id="inputGambarProfil" accept="image/*" class="hidden" onchange="gantiGambarProfil(event)">
-  </div>
-
-
-  <!-- ===== KONTEN UTAMA ===== -->
-  <div class="flex p-6 gap-6 flex-1">
-
-    <!-- KOLOM KIRI: Ringkasan singkat profil pengguna -->
-    <div class="mt-32">
-      <div class="p-10 rounded">
-        <!-- Nama dan nomor telepon pengguna -->
-        <h2 class="mt-2 font-semibold">{{ auth()->user()->name }}</h2>
-        <p class="text-sm text-gray-400">{{ auth()->user()->no_telp }}</p>
+      <div>
+        <h2 class="text-lg font-semibold text-textMain">{{ auth()->user()->name }}</h2>
+        <p class="text-sm text-textMuted">{{ auth()->user()->no_telp }}</p>
+        <span class="mt-1 inline-flex items-center gap-1.5 text-[11px] bg-brand/10 text-brand border border-brand/20 px-2 py-0.5 rounded font-medium">
+          <i data-lucide="shield" class="w-3 h-3"></i> Administrator
+        </span>
       </div>
     </div>
 
-    <!-- KOLOM KANAN: Form pengaturan profil -->
-    <div class="w-2/3 space-y-6 pl-10">
-        
-        <div class="space-y-4">
-    <h3 class="text-lg font-medium">Agent Log</h3>
-    <div class="flex items-center border border-white rounded-lg bg-[#1a1a1a]/30 overflow-hidden">
-        
-        <div class="flex-1 p-8 text-center">
-            <p class="text-xs text-gray-400">Total Agent</p>
-            <p class="text-2xl font-bold">{{ $totalAgents }}</p>
+    <main class="space-y-6">
+
+      <!-- ===== AGENT LOG STATS ===== -->
+      <div>
+        <h3 class="text-sm font-semibold text-textMain mb-3 flex items-center gap-2">
+          <i data-lucide="activity" class="w-4 h-4 text-brand"></i> Agent Log
+        </h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-surface border border-borderSubtle p-5 rounded-xl group cursor-default hover:border-brand/30 transition-all">
+            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-textMain transition-colors">Total Agent</p>
+            <h2 class="text-3xl font-bold mt-2 text-textMain">{{ $totalAgents }}</h2>
+          </div>
+          <div class="bg-surface border border-borderSubtle p-5 rounded-xl group cursor-default hover:border-green-500/30 transition-all">
+            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-green-400 transition-colors">Assigned Agent</p>
+            <h2 class="text-3xl font-bold mt-2 text-green-400 drop-shadow-[0_0_10px_rgba(34,197,94,0.4)]">{{ $assignedAgents }}</h2>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== AGENTS TABLE ===== -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-semibold text-textMain flex items-center gap-2">
+            <i data-lucide="server" class="w-4 h-4 text-brand"></i>
+            Agents
+            <span class="text-[10px] bg-page border border-borderSubtle px-2 py-0.5 rounded-full text-textMuted">{{ $agents->count() }}</span>
+          </h3>
         </div>
 
-        <div class="w-[1px] h-12 bg-gray-700"></div>
+        <div class="bg-surface border border-borderSubtle rounded-xl overflow-hidden shadow-sm">
 
-        <div class="flex-1 p-8 text-center">
-            <p class="text-xs text-gray-400">Assigned Agent</p>
-            <p class="text-2xl font-bold">{{ $assignedAgents }}</p>
-        </div>
 
-        <div class="w-[1px] h-12 bg-gray-700"></div>
-        
-    </div>
-</div>
-
-        <div class="space-y-4">
-            <h3 class="text-lg font-medium">Agents</h3>
-            <div class="border border-white rounded-lg bg-[#1a1a1a]/40 overflow-hidden">
-                
-                <div class="p-4 flex flex-col gap-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm font-medium">Agents ({{ $agents->count() }})</span>
+          <div class="overflow-x-auto">
+            <table class="w-full text-center text-sm">
+              <thead class="bg-surface text-textMuted text-xs uppercase tracking-wider border-b border-borderSubtle">
+                <tr>
+                  <th class="p-4 font-semibold">ID</th>
+                  <th class="p-4 font-semibold">Name</th>
+                  <th class="p-4 font-semibold">IP Address</th>
+                  <th class="p-4 font-semibold">Assigned To</th>
+                  <th class="p-4 font-semibold">Status</th>
+                  <th class="p-4 font-semibold text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-borderSubtle bg-page/30">
+                @forelse($agents as $agent)
+                <tr class="hover:bg-surface/60 transition-colors">
+                  <td class="p-4"><input type="checkbox" class="accent-brand rounded"></td>
+                  <td class="p-4 text-textMuted font-mono text-xs">{{ $agent['id'] }}</td>
+                  <td class="p-4 font-semibold text-brand">{{ $agent['name'] }}</td>
+                  <td class="p-4 text-textMuted font-mono text-xs">{{ $agent['ip'] }}</td>
+                  <td class="p-4 text-textMuted text-xs">
+                    @php
+                      $assigned = \App\Models\Agen::where('id_wazuh_agen', $agent['id'])->first();
+                    @endphp
+                    {{ $assigned->user->name ?? '-' }}
+                  </td>
+                  <td class="p-4">
+                    @if($agent['status'] === 'active')
+                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20">● Active</span>
+                    @elseif($agent['status'] === 'disconnected')
+                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">● Disconnected</span>
+                    @else
+                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">● {{ $agent['status'] }}</span>
+                    @endif
+                  </td>
+                  <td class="p-4 text-right">
+                    <div class="flex justify-end gap-3 text-xs">
+                      <button class="text-brand hover:text-brandHover font-medium hover:underline">View</button>
+                      <button class="text-textMuted hover:text-textMain font-medium hover:underline">Edit</button>
+                      <button class="text-red-400/70 hover:text-red-400 font-medium hover:underline">Delete</button>
                     </div>
+                  </td>
+                </tr>
+                @empty
+                <tr>
+                  <td colspan="7" class="text-center p-8 text-textMuted text-sm italic">No agents found</td>
+                </tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
 
-                <table class="w-full text-left text-[11px]">
-                    <thead class="text-gray-400 border-t border-b border-gray-700">
-                        <tr>
-                            <th class="px-4 py-3 font-semibold uppercase tracking-wider">ID ↑</th>
-                            <th class="px-4 py-3 font-semibold uppercase tracking-wider">Name</th>
-                            <th class="px-4 py-3 font-semibold uppercase tracking-wider">IP Address</th>
-                            <th class="px-4 py-3 font-semibold uppercase tracking-wider">Assigned To</th>
-                            <th class="px-4 py-3 font-semibold uppercase tracking-wider">Status</th>
-                            <th class="px-4 py-3 font-semibold uppercase tracking-wider text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-800">
-                        @forelse($agents as $agent)
-
-                          <tr class="hover:bg-white/5 transition-colors">
-                            <!-- CHECKBOX -->
-                            <td class="px-4 py-4">
-                              <input type="checkbox" class="rounded bg-transparent border-gray-500">
-                            </td>
-                            <!-- ID -->
-                            <td class="px-4 py-4 text-gray-400">
-                              {{ $agent['id'] }}
-                            </td>
-                            <!-- NAME -->
-                            <td class="px-4 py-4 text-cyan-400">
-                              {{ $agent['name'] }}
-                            </td>
-                            <!-- IP -->
-                            <td class="px-4 py-4 text-gray-300">
-                              {{ $agent['ip'] }}
-                            </td>
-                            <!-- ASSIGNED -->
-                            <td class="px-4 py-4 text-cyan-400">
-                              @php
-                                $assigned = \App\Models\Agen::where(
-                                  'id_wazuh_agen',
-                                  $agent['id']
-                                )->first();
-                              @endphp
-
-                              {{ $assigned->user->name ?? '-' }}
-                            </td>
-                            <!-- STATUS -->
-                            <td class="px-4 py-4">
-                              @if($agent['status'] === 'active')
-
-                                <span class="flex items-center gap-1.5">
-                                  <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                  active
-                                </span>
-                              @elseif($agent['status'] === 'disconnected')
-
-                                <span class="flex items-center gap-1.5">
-                                  <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                  disconnected
-                                </span>
-                              @else
-
-                                <span class="flex items-center gap-1.5">
-                                  <span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
-                                  {{ $agent['status'] }}
-                                </span>
-                              @endif
-                            </td>
-                            <!-- ACTION -->
-                            <td class="px-4 py-4">
-                              <div class="flex justify-center gap-4 opacity-70">
-                                <button class="hover:text-white">
-                                  View
-                                </button>
-                                <button class="hover:text-white">
-                                  Edit
-                                </button>
-                                <button class="hover:text-white">
-                                  Delete
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-
-                        @empty
-
-                          <tr>
-                            <td colspan="7" class="text-center py-10 text-gray-500">
-                              No agents found
-                            </td>
-                          </tr>
-
-                        @endforelse
-
-                    </tbody>
-                </table>
-
-                <div class="p-3 flex justify-between items-center text-[10px] text-gray-500 border-t border-gray-800">
-                    <div class="flex items-center gap-2">
-                        Rows per page: 
-                        <select class="bg-transparent border-none focus:ring-0 text-gray-400 cursor-pointer">
-                            <option>5</option>
-                            <option>10</option>
-                        </select>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <span class="cursor-pointer">‹</span>
-                        <span class="text-cyan-400 font-bold underline">1</span>
-                        <span class="cursor-pointer">2</span>
-                        <span class="cursor-pointer">›</span>
-                    </div>
-                </div>
+          <!-- Pagination -->
+          <div class="p-4 flex items-center justify-between text-xs text-textMuted border-t border-borderSubtle bg-surface/50">
+            <div class="flex items-center gap-2">
+              Rows per page:
+              <select class="bg-page border border-borderSubtle text-textMuted rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-brand text-xs cursor-pointer">
+                <option>5</option>
+                <option>10</option>
+              </select>
             </div>
+            <div class="flex items-center gap-2">
+              <button class="hover:text-textMain transition px-1">‹</button>
+              <span class="text-brand font-bold bg-brand/10 border border-brand/20 px-2 py-0.5 rounded">1</span>
+              <span class="hover:text-textMain cursor-pointer px-1">2</span>
+              <button class="hover:text-textMain transition px-1">›</button>
+            </div>
+          </div>
+
         </div>
-    </div>
+      </div>
 
+    </main>
   </div>
-
 
   <!-- ===== JAVASCRIPT ===== -->
   <script>
-
-    // Fungsi untuk menampilkan atau menyembunyikan teks password
-    function togglePassword() {
-      const input = document.getElementById('password')
-      const icon = document.getElementById('eyeIcon')
-      if (input.type === 'password') {
-        input.type = 'text'
-        icon.src = '/logindark/logomataopen.png'
-      } else {
-        input.type = 'password'
-        icon.src = '/logindark/logomata.png'
-      }
-    }
+    lucide.createIcons();
 
     // Fungsi untuk mengganti foto profil saat pengguna memilih gambar dari perangkat
     function gantiGambarProfil(event) {
       const file = event.target.files[0]
-
-      // Pastikan pengguna benar-benar memilih file
       if (!file) return
-
       const reader = new FileReader()
-
-      // Setelah gambar selesai dibaca, langsung tampilkan ke foto profil
       reader.onload = function(e) {
         document.getElementById('fotoProfil').src = e.target.result
       }
-
       reader.readAsDataURL(file)
     }
   </script>
-
 
 </body>
 </html>

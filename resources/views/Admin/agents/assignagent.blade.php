@@ -39,8 +39,7 @@
 
         <main class="p-8 max-w-2xl mx-auto space-y-6">
             <div>
-                <h2 class="text-2xl font-bold tracking-tight text-textMain">Tugaskan Agen Ke Perangkat</h2>
-                <p class="text-sm text-textMuted mt-1">Konfigurasikan penempatan kunci enkripsi agen SIEM baru.</p>
+                <h2 class="text-2xl font-bold tracking-tight text-textMain">Konfigurasikan Agen pada Customer</h2>
             </div>
 
             @if(session('success'))
@@ -104,6 +103,9 @@
         </main>
     </div>
     </div>
+    <script>
+    lucide.createIcons();
+</script>
 
 </body>
 

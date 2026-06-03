@@ -1,5 +1,12 @@
 @import 'tailwindcss';
 @import './dashboard-admin.css';
+@import './customer/customize/choosedashboard.css';
+@import './customer/customize/kustom.css';
+@import './customer/profile/profilecustom.css';
+@import './customer/profile/profileover.css';
+@import './customer/profile/profileserver.css';
+@import './customer/profile/profileset.css';
+@import './customer/log/daftarlog.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

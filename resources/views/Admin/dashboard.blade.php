@@ -35,10 +35,10 @@
 
 <div class="bg-surface px-6 flex items-center justify-between border-b border-borderSubtle animate-fade-in delay-1 mt-16 md:mt-0">
     <div class="flex gap-8">
-        <a href="#" class="py-3 text-brand border-b-2 border-brand font-medium text-sm">Dashboard Analytics</a>
+        <a href="#" class="py-3 text-brand border-b-2 border-brand font-medium text-sm">Dashboard</a>
     </div>
 </div>
-<div class="p-6 max-w-[1400px] mx-auto">
+<div class="p-6 mx-auto">
 
     @if($wazuhOffline)
     <div class="mb-4 bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg shadow-[0_0_15px_rgba(239,68,68,0.1)]">
@@ -155,12 +155,7 @@
             </button> 
         </div>
 
-        <div class="p-3 bg-page border-b border-borderSubtle">
-            <div class="bg-[#0d0e12] border border-borderSubtle rounded px-3 py-2 text-xs text-brand font-mono flex items-center gap-2">
-                <span class="opacity-70">root@ccso-server:~# system_check --status</span>
-                <div class="w-[6px] h-3 bg-brand animate-pulse"></div>
-            </div>
-        </div>
+        
 
         <div class="overflow-x-auto">
             <table class="w-full text-center text-sm">

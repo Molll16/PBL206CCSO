@@ -1,33 +1,54 @@
-<footer class="bg-surface border-t border-borderSubtle px-10 py-6">
-    
-    <div id="footer" class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-6 text-sm text-textMuted">
-      <div class="flex items-center gap-4 flex-wrap">
-        <img src="/lp/logo.png" class="h-8 transition-transform hover:scale-105">
-        <p class="text-textMain">© 2026 CCSO, Inc.</p>
-        <div class="h-4 w-px bg-borderSubtle hidden sm:block"></div>
-        <p>Kontak Hubungi</p>
-        <div class="h-4 w-px bg-borderSubtle hidden sm:block"></div>
-        <div class="flex items-center gap-2 text-textMain">
-          <img src="/lp/telp.png" class="h-4">
-          <p>+62 1234567890</p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-8 flex-wrap w-full md:w-auto justify-between md:justify-end">
-        <div class="flex items-center gap-4 bg-page px-4 py-2 rounded-lg border border-borderSubtle">
-          <img src="/lp/tt.png" class="h-4 cursor-pointer opacity-70 hover:opacity-100 hover:scale-110 transition-all">
-          <img src="/lp/ig.png" class="h-4 cursor-pointer opacity-70 hover:opacity-100 hover:scale-110 transition-all">
-          <img src="/lp/wa.png" class="h-4 cursor-pointer opacity-70 hover:opacity-100 hover:scale-110 transition-all">
-          <img src="/lp/email.png" class="h-4 cursor-pointer opacity-70 hover:opacity-100 hover:scale-110 transition-all">
+<footer class="bg-surface border-t border-borderSubtle px-6 py-4">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 text-sm text-textMuted">
+        
+        <!-- Kiri: Logo & Copyright -->
+        <div class="flex items-center gap-4">
+            <img src="/lp/logo.png" alt="Logo" class="h-6 transition-transform hover:scale-105">
+            <span class="text-textMain font-medium">© 2026 CCSO, Inc.</span>
+            <div class="h-4 w-px bg-borderSubtle hidden sm:block"></div>
+            <div class="flex items-center gap-2">
+                <i data-lucide="phone" class="w-4 h-4 text-brand"></i>
+                <span class="text-textMain">+62 1234567890</span>
+            </div>
         </div>
 
-        <div class="flex items-center border border-borderSubtle bg-page rounded-lg overflow-hidden focus-within:border-brand/60 transition-colors">
-          <input
-            type="email"
-            placeholder="Send to our Email"
-            class="bg-transparent px-4 py-2 text-xs w-48 text-textMain focus:outline-none placeholder:text-textMuted">
-          <button class="bg-brand px-4 py-2 text-white text-xs font-bold hover:bg-brandHover transition-colors">Send</button>
+        <!-- Kanan: Social & Newsletter -->
+        <div class="flex flex-wrap items-center gap-4">
+            
+            <!-- Social Icons -->
+            <div class="flex items-center gap-4 bg-page/50 px-3 py-1.5 rounded-full border border-borderSubtle">
+                <a href="#" class="opacity-70 hover:opacity-100 transition-all hover:scale-110">
+                    <i data-lucide="music-2" class="w-4 h-4"></i> <!-- TikTok placeholder or similar -->
+                </a>
+                <a href="#" class="opacity-70 hover:opacity-100 transition-all hover:scale-110">
+                    <i data-lucide="hand-metal" class="w-4 h-4"></i>
+                </a>
+                <a href="#" class="opacity-70 hover:opacity-100 transition-all hover:scale-110">
+                    <i data-lucide="message-circle" class="w-4 h-4"></i> <!-- WhatsApp -->
+                </a>
+                <a href="#" class="opacity-70 hover:opacity-100 transition-all hover:scale-110">
+                    <i data-lucide="mail" class="w-4 h-4"></i>
+                </a>
+            </div>
+
+            <!-- Mini Newsletter -->
+            <div class="flex items-center bg-page border border-borderSubtle rounded-md overflow-hidden focus-within:border-brand/50 transition-all">
+                <input 
+                    type="email" 
+                    placeholder="Let Me Know Your Problem" 
+                    class="bg-transparent px-3 py-1.5 text-xs w-40 text-textMain outline-none placeholder:text-textMuted"
+                >
+                <button class="bg-brand/10 text-brand px-3 py-1.5 text-xs font-semibold hover:bg-brand hover:text-white transition-all border-l border-borderSubtle">
+                    Send
+                </button>
+            </div>
         </div>
-      </div>
     </div>
-  </footer>
+</footer>
+
+<script>
+    // Ensure icons are rendered if this is loaded via AJAX or if global script missed it
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+</script>

@@ -4,36 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CCSO Dashboard</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-@vite('resources/css/customer/customize/kustom.css')
-@vite('resources/js/app.js')
+    @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
 
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: {
-        page:         '#121318',
-        surface:      '#1a1b23',
-        borderSubtle: '#262833',
-        textMain:     '#f1f3f9',
-        textMuted:    '#787f99',
-        brand:        '#6366f1',
-        brandHover:   '#4f46e5'
-      }
-    }
-  }
-}
-</script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        page: '#121318',
+                        surface: '#1a1b23',
+                        borderSubtle: '#262833',
+                        textMain: '#f1f3f9',
+                        textMuted: '#787f99',
+                        brand: '#6366f1',
+                        brandHover: '#4f46e5'
+                    }
+                }
+            }
+        }
+    </script>
 
 </head>
 
-@component('Customer.components.header')
-@endcomponent
-
 <body class="bg-page text-textMain flex flex-col h-screen overflow-hidden">
+
+@include('Customer.components.header')
 
 <div class="flex flex-1 bg-page overflow-hidden">
 
@@ -58,26 +60,21 @@ tailwind.config = {
                onblur="finishRename()"
                onkeydown="handleRenameKey(event)">
 
-        <img class="w-4 cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
-             src="/custom/edit.png"
-             onclick="startRename()">
+        <i data-lucide="pencil"
+           class="w-4 h-4 cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
+           onclick="startRename()"></i>
 
       </div>
 
       <!-- Kanan -->
       <div class="flex items-center gap-2">
 
-        <button onclick="toggleWidgetPanel()"
-                class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded transition">
-            <img src="/custom/fitur.png" alt="">
-        </button>
-
         <button onclick="clearCanvas()"
                 class="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded transition">
-            <img src="/custom/hapus.png" alt="">
+            <i data-lucide="trash-2" class="w-5 h-5 text-red-400"></i>
         </button>
 
-        <button onclick="saveLayout()" class="btn-save">
+        <button onclick="saveLayout()" class="btn-save flex items-center justify-center">
             Save
         </button>
 
@@ -107,25 +104,6 @@ tailwind.config = {
       </div>
 
       <div id="widget-panel" class="flex flex-col flex-1 overflow-hidden">
-
-          <div class="p-3 flex gap-2">
-              <input type="text"
-                    placeholder="Search"
-                    class="search-input">
-
-              <div class="relative">
-                  <button onclick="toggleType(event)" class="btn-type">
-                      Type ▾
-                  </button>
-
-                  <div id="type-menu"
-                      class="absolute right-0 mt-1 type-menu hidden text-sm z-10 rounded-md overflow-hidden">
-                      <div class="type-menu-item px-3 py-1 cursor-pointer text-textMuted">All</div>
-                      <div class="type-menu-item px-3 py-1 cursor-pointer text-textMuted">Chart</div>
-                      <div class="type-menu-item px-3 py-1 cursor-pointer text-textMuted">Table</div>
-                  </div>
-              </div>
-          </div>
 
           <div id="widget-list"
               class="grid grid-cols-3 gap-2 p-3 overflow-y-auto no-scrollbar">
@@ -169,6 +147,7 @@ init();
 function init(){
     renderPanel();
     renderCanvas();
+    lucide.createIcons();
 }
 
 /* ===============================
@@ -190,12 +169,14 @@ function renderPanel(){
                 ondragstart='dragSource=${JSON.stringify(f)}'>
 
                 <div class="flex justify-center mb-1">
-                    <img src="/custom/fitur.png">
+                    <i data-lucide="box" class="w-6 h-6 text-textMuted"></i>
                 </div>
 
                 <span style="color:#787f99">${f.nama_fitur}</span>
             </div>
         `).join('');
+
+    lucide.createIcons();
 }
 
 /* ===============================
@@ -233,15 +214,25 @@ function renderCanvas(){
 
                 <div class="flex gap-1 items-center">
 
-                    <button onclick="adjustSpan(${w.id},'col',-1)">-</button>
+                    <button onclick="adjustSpan(${w.id},'col',-1)" class="hover:text-white">
+                        <i data-lucide="minus" class="w-3 h-3"></i>
+                    </button>
                     <span class="w-3 text-center">${w.colSpan}</span>
-                    <button onclick="adjustSpan(${w.id},'col',1)">+</button>
+                    <button onclick="adjustSpan(${w.id},'col',1)" class="hover:text-white">
+                        <i data-lucide="plus" class="w-3 h-3"></i>
+                    </button>
 
-                    <button class="ml-1" onclick="adjustSpan(${w.id},'row',-1)">-</button>
+                    <button class="ml-1 hover:text-white" onclick="adjustSpan(${w.id},'row',-1)">
+                        <i data-lucide="minus" class="w-3 h-3"></i>
+                    </button>
                     <span class="w-3 text-center">${w.rowSpan}</span>
-                    <button onclick="adjustSpan(${w.id},'row',1)">+</button>
+                    <button onclick="adjustSpan(${w.id},'row',1)" class="hover:text-white">
+                        <i data-lucide="plus" class="w-3 h-3"></i>
+                    </button>
 
-                    <button onclick="removeWidget(${w.id})" class="text-red-400 ml-1">✕</button>
+                    <button onclick="removeWidget(${w.id})" class="text-red-400 ml-1 hover:text-red-300">
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    </button>
 
                 </div>
             </div>
@@ -253,6 +244,8 @@ function renderCanvas(){
 
         grid.appendChild(el);
     });
+
+    lucide.createIcons();
 }
 
 /* ===============================

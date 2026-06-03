@@ -1,0 +1,98 @@
+body {
+    background-color: #121318;
+    color: #f1f3f9;
+    font-family: 'Inter', sans-serif;
+}
+
+.bg-card {
+    background-color: #1a1b23;
+}
+
+.border-custom {
+    border-color: #262833;
+}
+
+.table-row-hover:hover {
+    background-color: rgba(99, 102, 241, 0.04);
+    transition: all 0.2s;
+}
+
+/* Tab nav bar */
+.nav-bar {
+    background-color: #1a1b23;
+    border-bottom: 1px solid #262833;
+}
+
+/* Table container */
+.table-container {
+    background: #1a1b23;
+    border: 1px solid #262833;
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+/* Input / select */
+.filter-input {
+    background: #121318;
+    border: 1px solid #262833;
+    color: #f1f3f9;
+    border-radius: 0.5rem;
+    transition: border-color 0.2s;
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: rgba(99, 102, 241, 0.5);
+}
+
+/* Accent bar */
+.accent-bar {
+    background: #6366f1;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+/* Modal */
+.modal-card {
+    background: #1a1b23;
+    border: 1px solid #262833;
+}
+
+.modal-code-block {
+    background: #0d0e12;
+    border: 1px solid #262833;
+}
+
+.modal-desc-block {
+    background: #0d0e12;
+    border: 1px solid #262833;
+}
+
+/* Divider */
+.row-divider {
+    border-color: #262833;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Scrollbar hide */
+.no-scrollbar {
+    scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}

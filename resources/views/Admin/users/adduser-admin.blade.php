@@ -38,7 +38,7 @@
   <main class="p-8 max-w-2xl mx-auto space-y-6">
     <div>
       <h2 class="text-2xl font-bold tracking-tight text-textMain">Tambah User Baru</h2>
-      <p class="text-sm text-textMuted mt-1">Daftarkan akun administrator atau operator baru.</p>
+      <p class="text-sm text-textMuted mt-1">Daftarkan akun Customer</p>
     </div>
 
     @if($errors->any())

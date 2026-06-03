@@ -28,7 +28,7 @@ class WazuhApiService
     {
         return Cache::remember('wazuh_token', 900, function () {
             return Http::withoutVerifying()
-                ->timeout(30)
+                ->timeout(3)
                 ->withBasicAuth($this->user, $this->pass)
                 ->get("{$this->url}/security/user/authenticate?raw=true")
                 ->body();

@@ -41,7 +41,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-14">
             
                 <div
-                    class="bg-[#222428] border border-white/10 p-5 rounded-xl hover:border-cyan-400/30 transition-all duration-300 group">
+                    class="bg-[#222428] border border-white/10 p-5 rounded-xl hover:border-grey transition-all duration-300 group">
                     <p
                         class="text-xs font-semibold uppercase tracking-wider text-gray-400 group-hover:text-gray-300 transition-colors">
                         Total User
@@ -63,7 +63,7 @@
                 </div>
             
                 <div
-                    class="bg-[#222428] border border-white/10 p-5 rounded-xl hover:border-cyan-400/30 transition-all duration-300 group">
+                    class="bg-[#222428] border border-white/10 p-5 rounded-xl hover:border-green-400/30 transition-all duration-300 group">
                     <p
                         class="text-xs font-semibold uppercase tracking-wider text-gray-400 group-hover:text-gray-300 transition-colors">
                         Agent Assigned
@@ -78,13 +78,12 @@
             <div class="flex justify-between items-center">
                 <div>
                     <h2 class="text-2xl font-bold tracking-tight text-textMain">Agen Terdaftar (Wazuh)</h2>
-                    <p class="text-sm text-textMuted mt-1">Daftar entitas perangkat server dan workstation yang
-                        terhubung.</p>
+                    <p class="text-sm text-textMuted mt-1">Daftar entitas perangkat server dan workstation yang terhubung</p>
                 </div>
                 <a href="{{ route('assignagent') }}">
                     <button
                         class="bg-brand hover:bg-brandHover text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-lg shadow-brand/20 transition-all duration-200">
-                        ⚙️ Tugaskan Agen
+                        + Tugaskan Agen
                     </button>
                 </a>
             </div>

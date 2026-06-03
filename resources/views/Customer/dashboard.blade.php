@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
-
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    @vite('resources/css/app.css')
     @vite('resources/js/app.js')
 
     <script>
@@ -277,6 +280,10 @@
 </main>
 
 @include('Customer.components.footer')
+
+<script>
+    lucide.createIcons();
+</script>
 
 <script>
 function dismissAlert() {

@@ -97,7 +97,7 @@
             <div id="no-agent-box"
                  class="hidden flex items-center gap-2 p-3 rounded-xl border border-dashed border-borderSubtle text-xs text-textMuted">
                 <i data-lucide="unlink" class="w-4 h-4 flex-shrink-0"></i>
-                <span>Belum ada agent yang di-assign ke user ini.</span>
+                <span>Belum ada agent yang di-assign ke user ini</span>
             </div>
         </div>
 
@@ -115,7 +115,7 @@
             </div>
 
             <div id="agent-list" class="agent-scroll space-y-1.5 max-h-48 overflow-y-auto pr-0.5"></div>
-            <p id="no-result" class="hidden text-center text-xs text-textMuted py-4">Tidak ada agent ditemukan.</p>
+            <p id="no-result" class="hidden text-center text-xs text-textMuted py-4">Tidak ada agent ditemukan</p>
         </div>
 
         {{-- Footer --}}
@@ -178,7 +178,7 @@
         <div class="flex justify-between items-center">
             <div>
                 <h2 class="text-2xl font-bold tracking-tight text-textMain">Manajemen User</h2>
-                <p class="text-sm text-textMuted mt-1">Kelola hak akses dan akun pengguna sistem CCSO.</p>
+                <p class="text-sm text-textMuted mt-1">Kelola hak akses dan akun pengguna</p>
             </div>
             <a href="{{ route('adduser') }}">
                 <button class="bg-brand hover:bg-brandHover text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-lg shadow-brand/20 transition-all duration-200">

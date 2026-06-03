@@ -7,6 +7,7 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
 
   <script>
     tailwind.config = {
@@ -60,15 +61,8 @@
       <div class="w-full h-full bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
     </div>
 
-    <div class="relative z-10 p-6">
-      <button onclick="history.back()" class="opacity-70 hover:opacity-100 hover:-translate-x-1 transition-all duration-200">
-        <img
-          src="/logindark/logoexit.png"
-          width="30"
-          height="30"
-          alt="Kembali"
-        >
-      </button>
+    <div onclick="history.back()" class="relative z-10 p-6 opacity-70 hover:opacity-100 hover:-translate-x-1 transition-all duration-200">
+      <i data-lucide="chevron-left" class="w-5 h-5 text-white"></i>
     </div>
 
     <div class="relative z-10 flex-1 flex items-center justify-center">
@@ -88,7 +82,7 @@
 
           <div class="flex items-center gap-2 w-full mb-4">
             <div class="bg-page border border-borderSubtle rounded-lg p-2.5 flex-shrink-0">
-              <img src="/daftarblack/logouser.png" width="22" height="22" class="opacity-80">
+              <i data-lucide="user" class="w-[22px] h-[22px] opacity-80 text-textMuted"></i>
             </div>
             <input
               type="text"
@@ -100,7 +94,7 @@
 
           <div class="flex items-center gap-2 w-full mb-8">
             <div class="bg-page border border-borderSubtle rounded-lg p-2.5 flex-shrink-0">
-              <img src="/logindark/logopassword.png" width="22" height="22" class="opacity-80">
+              <i data-lucide="lock" class="w-[22px] h-[22px] opacity-80 text-textMuted"></i>
             </div>
             <div class="relative w-full">
               <input
@@ -114,7 +108,7 @@
                 onclick="togglePassword()"
                 class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer opacity-50 hover:opacity-100 transition-opacity"
               >
-                <img id="eyeIcon" src="/logindark/logomata.png" width="18" height="18">
+                <span id="eyeIcon"><i data-lucide="eye-off" class="w-[18px] h-[18px] text-textMuted"></i></span>
               </span>
             </div>
           </div>
@@ -130,18 +124,22 @@
       </div>
     </div>
 
-  </div><script>
+  </div>
+  <script>
+    lucide.createIcons();
+
     function togglePassword() {
       const input = document.getElementById('password')
-      const icon = document.getElementById('eyeIcon')
+      const iconWrapper = document.getElementById('eyeIcon')
 
       if (input.type === 'password') {
         input.type = 'text'
-        icon.src = '/logindark/logomataopen.png'
+        iconWrapper.innerHTML = '<i data-lucide="eye" class="w-[18px] h-[18px] text-textMuted"></i>'
       } else {
         input.type = 'password'
-        icon.src = '/logindark/logomata.png'
+        iconWrapper.innerHTML = '<i data-lucide="eye-off" class="w-[18px] h-[18px] text-textMuted"></i>'
       }
+      lucide.createIcons()
     }
   </script>
 
