@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenSource Dashboard</title>
+    <title>Choose Dashboard</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -41,7 +41,7 @@
     <!-- Judul -->
     <div class="mb-8 flex items-center gap-3 animate-fade-in">
         <div class="w-[3px] h-6 rounded-full accent-bar"></div>
-        <h1 class="text-textMain text-lg tracking-wide">OpenSource Dashboard</h1>
+        <h1 class="text-textMain text-lg tracking-wide">Choose Dashboard</h1>
     </div>
 
 

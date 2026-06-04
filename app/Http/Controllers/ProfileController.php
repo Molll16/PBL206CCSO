@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Agen;
+use App\Models\DasborKustom;
 use App\Services\AgentService;
 use App\Services\WazuhApiService; // Di-import untuk menarik data server riil
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Models\DasborKustom;
 
 class ProfileController extends Controller
 {
@@ -24,6 +24,7 @@ class ProfileController extends Controller
     // ==========================================
     // 1. ROUTE MANAGEMENT UNTUK ADMIN
     // ==========================================
+
     public function settings()
     {
         return view('Admin.profile.profileset-admin');
@@ -54,57 +55,63 @@ class ProfileController extends Controller
     // 2. METHOD KHUSUS HALAMAN CUSTOMER
     // ==========================================
 
-    /**
-     * TAB 1: Profile Settings (Edit Akun Utama)
-     */
     public function customerAccountSettings()
     {
+        // // CODE: Mengambil data diri customer yang sedang login ke sistem.
+        // // WEB: Menu Profile > Tab "Profile Settings" (Edit Akun Utama).
+        // // UNTUK: Menampilkan informasi profile user agar bisa diperbarui (Nama, Email, No Telp).
         return view('Customer.profile.profileset', [
             'user' => auth()->user()
         ]);
     }
 
-    /**
-     * TAB 2: Server / Agent (FIXED: Mengambil Data Langsung dari API Wazuh Riil)
-     */
     public function customerServerSettings()
     {
+        // // CODE: Memfilter daftar ID agen dari database lokal dan mencocokkannya dengan API Wazuh.
+        // // WEB: Menu Profile > Tab "Server" (Inventaris Perangkat).
+        // // UNTUK: Menampilkan daftar mesin yang di-assign ke customer & menghitung statistik keaktifannya secara real-time.
         try {
-            // 1. Ambil data agents dari API Wazuh melalui service
+            // 1. Ambil list ID agen yang benar-benar ditugaskan ke customer ini dari database lokal
+            $myAssignedAgentIds = Agen::where('user_id', auth()->id())->pluck('id_wazuh_agen')->toArray();
+
+            // 2. Ambil data agents dari API Wazuh
             $wazuhResponse = $this->wazuhApi->agents();
             $agents = [];
 
             if (isset($wazuhResponse['data']['affected_items'])) {
                 foreach ($wazuhResponse['data']['affected_items'] as $item) {
-                    // Menyembunyikan agent bawaan manager (ID 000) jika diperlukan
                     if ($item['id'] === '000') {
                         continue;
                     }
 
+                    // PROTEKSI KEAMANAN: Jika ID agen dari Wazuh tidak ada dalam daftar milik user di DB lokal, lewati (skip)
+                    if (!in_array($item['id'], $myAssignedAgentIds)) {
+                        continue;
+                    }
+
                     $agents[] = (object) [
+                        'id_wazuh' => $item['id'], // Menyimpan ID asli untuk pemicu Switch Agent nanti
                         'server_name' => $item['name'] ?? 'Unknown Agent',
                         'server_ip' => $item['ip'] ?? '0.0.0.0',
-                        'status' => ucfirst($item['status'] ?? 'disconnected'), // Menyeragamkan huruf kapital awal
+                        'status' => ucfirst($item['status'] ?? 'disconnected'),
                     ];
                 }
             }
 
             $agentsCollection = collect($agents);
 
-            // 2. Hitung statistik otomatis berdasarkan status riil dari API Wazuh
+            // 3. Hitung statistik otomatis berdasarkan status riil dari API Wazuh yang sudah difilter
             $agentsTotal = $agentsCollection->count();
             $activeAgents = $agentsCollection->whereIn('status', ['Active', 'active'])->count();
             $disconnectAgents = $agentsCollection->whereIn('status', ['Disconnected', 'disconnected', 'Never_connected'])->count();
 
         } catch (\Throwable $e) {
-            // Jika koneksi server Wazuh tiba-tiba terkendala, fallback ke array kosong agar tidak crash
             $agents = [];
             $agentsTotal = 0;
             $activeAgents = 0;
             $disconnectAgents = 0;
         }
 
-        // 3. Lempar semua variabel ke file blade server
         return view('Customer.profile.profileserver', compact(
             'agents',
             'agentsTotal',
@@ -113,25 +120,20 @@ class ProfileController extends Controller
         ));
     }
 
-    /**
-     * TAB 3: Customization Dashboard (FIXED dengan Kolom Database Asli)
-     */
     public function customerCustomizeSettings()
     {
-        // 1. Ambil semua kustomisasi dashboard milik customer yang sedang login dari tabel dasbor_kustoms
+        // // CODE: Mengambil semua daftar template kustomisasi layout dashboard milik pengguna dari database.
+        // // WEB: Menu Profile > Tab "Customization Dashboard" (Layout Builder).
+        // // UNTUK: Menampilkan status template mana yang sedang aktif digunakan ("In Use") atau siap dihapus.
         $myDashboards = DasborKustom::where('user_id', auth()->id())->get();
 
-        // 2. Hitung statistik berdasarkan nilai status_dasbor di MySQL ('aktif' / 'nonaktif')
         $totalDashboard = $myDashboards->count();
 
-        // Menghitung yang berstatus 'aktif' di database Anda
         $activeDashboard = $myDashboards->where('status_dasbor', 'aktif')->count();
 
-        // Mencari ID dashboard pertama yang statusnya 'aktif' (sebagai pengganti logic 'In Use')
         $dashboardInUseItem = $myDashboards->where('status_dasbor', 'aktif')->first();
         $dashboardInUse = $dashboardInUseItem ? sprintf("%02d", $dashboardInUseItem->id) : '00';
 
-        // 3. Kirim data ke file Blade
         return view('Customer.profile.profilecustom', [
             'dashboards' => $myDashboards,
             'totalDashboard' => $totalDashboard,
@@ -140,11 +142,11 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Fitur Tambahan: Menangani Proses Hapus Data (Menghilangkan Eror 500)
-     */
     public function destroyCustomize($id)
     {
+        // // CODE: Mencari data ID layout dashboard kustom tertentu lalu menghapusnya dari database MySQL.
+        // // WEB: Aksi tombol "Delete" pada baris tabel halaman Customization Dashboard.
+        // // UNTUK: Menghapus konfigurasi widget kustom yang sudah tidak digunakan lagi oleh customer.
         $dashboard = DasborKustom::where('user_id', auth()->id())->findOrFail($id);
         $dashboard->delete();
 
@@ -155,6 +157,7 @@ class ProfileController extends Controller
     // ==========================================
     // 3. LOGIC PROSES UPDATE (SHARED)
     // ==========================================
+
     public function update(Request $request)
     {
         $request->validate([
@@ -186,5 +189,33 @@ class ProfileController extends Controller
         ]);
 
         return back()->with('success', 'Your password has been successfully updated!');
+    }
+
+    // ==========================================
+    // 4. FITUR BARU: SWITCH AGENT LOGIC
+    // ==========================================
+
+    public function switchAgent(Request $request)
+    {
+        // // CODE: Memvalidasi kepemilikan ID agen lalu menyimpannya ke dalam Session global Laravel.
+        // // WEB: Aksi klik tombol "Switch" pada kolom Action di tabel halaman Profile Server.
+        // // UNTUK: Mengunci status monitoring ke 1 server pilihan agar halaman dashboard utama menyaring data terfokus.
+        $request->validate([
+            'agent_id' => 'required|string'
+        ]);
+
+        // PROTEKSI KEAMANAN: Memastikan customer tidak menembak ID agen milik perusahaan/customer lain
+        $isValidAgent = Agen::where('user_id', auth()->id())
+            ->where('id_wazuh_agen', $request->agent_id)
+            ->exists();
+
+        if ($isValidAgent) {
+            // MENYIMPAN KE SESSION: Kunci ID agen ke session browser agar diingat oleh seluruh halaman web customer
+            session(['active_wazuh_agent_id' => $request->agent_id]);
+
+            return back()->with('success', 'Berhasil beralih ke agen ' . $request->agent_id);
+        }
+
+        return back()->with('error', 'Akses agen tidak diizinkan.');
     }
 }

@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './dashboard-admin.css';
+@import './dashboard-customer.css';
 @import './customer/customize/choosedashboard.css';
 @import './customer/customize/kustom.css';
 @import './customer/profile/profilecustom.css';

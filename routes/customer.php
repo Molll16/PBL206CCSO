@@ -74,6 +74,9 @@ Route::prefix('customer')->middleware('auth')->group(function () {
         // ACTION / PROSES (Menggunakan PUT/PATCH sesuai standar RESTful Laravel untuk Update data)
         Route::put('/update', [ProfileController::class, 'update'])->name('customer.profile.update');
         Route::put('/change-password', [ProfileController::class, 'updatePassword'])->name('changepw.update');
+
+        // Untuk mengganti session agent aktif saat klik "Switch Server" di halaman profile server
+        Route::post('/customer/agent/switch', [ProfileController::class, 'switchAgent'])->name('customer.agent.switch');
     });
 
     // LOGS

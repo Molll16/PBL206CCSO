@@ -1,0 +1,89 @@
+body {
+    background-color: #121318;
+}
+
+/* Alert card */
+.alert-card {
+    background: #1a1b23;
+    border: 1px solid #262833;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Widget card */
+.widget-card {
+    background: #1a1b23;
+    border: 1px solid #262833;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.widget-card:hover {
+    background: #1e1f29;
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Custom Scrollbar untuk Widget Tinggi */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Offline banner */
+.offline-banner {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Empty state */
+.empty-card {
+    background: #1a1b23;
+    border: 1px solid #262833;
+}
+
+/* Pill divider */
+.pill-divider {
+    background: #1a1b23;
+    border: 1px solid #262833;
+}
+
+/* Accent bar */
+.accent-bar {
+    background: #6366f1;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+/* Pulse dot */
+.pulse-dot {
+    background: #6366f1;
+    box-shadow: 0 0 6px rgba(99, 102, 241, 0.9);
+}
+
+/* Animate fade in */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.35s ease both;
+}
+
+/* Hover scale */
+.hover-scale {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-scale:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}

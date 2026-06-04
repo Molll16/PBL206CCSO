@@ -84,10 +84,11 @@
           <h3 class="text-sm font-semibold text-textMain flex items-center gap-2">
             <i data-lucide="server" class="w-4 h-4 text-brand"></i>
             Agents
-            <span class="text-[10px] bg-page border border-borderSubtle px-2 py-0.5 rounded-full text-textMuted">{{ count($agents) }}</span>
+            <span
+              class="text-[10px] bg-page border border-borderSubtle px-2 py-0.5 rounded-full text-textMuted">{{ count($agents) }}</span>
           </h3>
         </div>
-
+      
         <div class="bg-surface border border-borderSubtle rounded-xl overflow-hidden shadow-sm">
           <div class="overflow-x-auto">
             <table class="w-full text-center text-sm">
@@ -95,28 +96,58 @@
                 <tr>
                   <th class="p-4 font-semibold text-left">Server Name</th>
                   <th class="p-4 font-semibold">IP Address</th>
-                  <th class="p-4 font-semibold text-right">Status</th>
+                  <th class="p-4 font-semibold">Status</th>
+                  <th class="p-4 font-semibold text-right">Action</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-borderSubtle bg-page/30">
+                @php
+                  // Membaca session agen aktif, default mengambil dari agen pertama jika session belum terbentuk
+                  $sessionActiveAgentId = session('active_wazuh_agent_id', collect($agents)->first()->id_wazuh ?? null);
+                @endphp
+      
                 @forelse($agents as $agent)
-                <tr class="hover:bg-surface/60 transition-colors">
-                  <td class="p-4 text-left font-semibold text-brand">{{ $agent->server_name }}</td>
-                  <td class="p-4 text-textMuted font-mono text-xs">{{ $agent->server_ip }}</td>
-                  <td class="p-4 text-right">
-                    @if($agent->status === 'Active' || $agent->status === 'active')
-                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20">● Active</span>
-                    @elseif($agent->status === 'Pending' || $agent->status === 'pending')
-                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">● Pending</span>
-                    @else
-                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">● {{ $agent->status }}</span>
-                    @endif
-                  </td>
-                </tr>
+                  <tr class="hover:bg-surface/60 transition-colors">
+                    <td class="p-4 text-left font-semibold text-brand">{{ $agent->server_name }}</td>
+                    <td class="p-4 text-textMuted font-mono text-xs">{{ $agent->server_ip }}</td>
+                    <td class="p-4">
+                      @if($agent->status === 'Active' || $agent->status === 'active')
+                        <span
+                          class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20">●
+                          Active</span>
+                      @elseif($agent->status === 'Pending' || $agent->status === 'pending')
+                        <span
+                          class="px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">●
+                          Pending</span>
+                      @else
+                        <span
+                          class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">●
+                          {{ $agent->status }}</span>
+                      @endif
+                    </td>
+                    <td class="p-4 text-right">
+                      @if($sessionActiveAgentId === $agent->id_wazuh)
+                        <span
+                          class="px-3 py-1 rounded-lg text-xs font-semibold bg-brand/10 text-brand border border-brand/30 inline-flex items-center gap-1.5">
+                          <i data-lucide="eye" class="w-3.5 h-3.5"></i> Monitored
+                        </span>
+                      @else
+                        <form action="{{ route('customer.agent.switch') }}" method="POST" class="inline-block">
+                          @csrf
+                          <input type="hidden" name="agent_id" value="{{ $agent->id_wazuh }}">
+                          <button type="submit"
+                            class="bg-surface border border-borderSubtle hover:border-brand hover:bg-brand/10 text-textMain text-xs px-3 py-1 rounded-lg font-medium transition-all inline-flex items-center gap-1.5">
+                            <i data-lucide="refresh-cw" class="w-3 h-3 text-textMuted group-hover:text-textMain"></i> Switch
+                          </button>
+                        </form>
+                      @endif
+                    </td>
+                  </tr>
                 @empty
-                <tr>
-                  <td colspan="3" class="text-center p-8 text-textMuted text-sm italic">Tidak ada server atau agent yang terdaftar pada akun Anda.</td>
-                </tr>
+                  <tr>
+                    <td colspan="4" class="text-center p-8 text-textMuted text-sm italic">Tidak ada server atau agent yang
+                      terdaftar pada akun Anda.</td>
+                  </tr>
                 @endforelse
               </tbody>
             </table>
