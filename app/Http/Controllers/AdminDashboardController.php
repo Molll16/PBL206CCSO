@@ -39,7 +39,7 @@ class AdminDashboardController extends Controller
             ]);
 
         } catch (\Throwable $e) {
-            // Fallback terpusat jika API Wazuh/Indexer down
+            // Fallback jika API Wazuh Manager/Indexer down/gak hidup
             return view('Admin.dashboard', [
                 'error' => 'Server monitoring sedang tidak tersedia',
                 'agents' => [],

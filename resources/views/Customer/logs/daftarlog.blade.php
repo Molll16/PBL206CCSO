@@ -216,13 +216,7 @@
             </div>
 
             {{-- Pagination --}}
-            <div class="p-4 flex items-center justify-between text-xs text-textMuted border-t border-borderSubtle bg-surface/50">
-                <div class="flex items-center gap-2">
-                    Rows per page:
-                    <select class="bg-page border border-borderSubtle text-textMuted rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-brand text-xs cursor-pointer">
-                        <option>10</option>
-                    </select>
-                </div>
+            <div class="p-4 flex items-center justify-end text-xs text-textMuted border-t border-borderSubtle bg-surface/50">
                 <div class="flex items-center gap-2">
                     <button class="hover:text-textMain transition px-1"><i data-lucide="chevron-left" class="w-2 h-2"></i></button>
                     <span class="text-brand font-bold bg-brand/10 border border-brand/20 px-2 py-0.5 rounded">1</span>
