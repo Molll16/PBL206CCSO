@@ -71,7 +71,7 @@
   </nav>
 </aside>
 
-<header class="bg-surface/90 backdrop-blur-md border-b border-borderSubtle sticky top-0 z-20 shadow-sm">
+<header class="bg-surface/90 backdrop-blur-md border-b border-b-borderSubtle sticky top-0 z-20 shadow-sm">
   <div class="flex items-center h-16 px-4">
 
     <button onclick="openSidebar()"
@@ -98,6 +98,23 @@
     <div class="flex-1"></div>
 
     <div class="flex items-center gap-4">
+
+      <form action="{{ route('customer.agent.switch') }}" method="POST" id="form-header-switch-agent"
+        class="flex items-center">
+        @csrf
+        <select name="agent_id" onchange="document.getElementById('form-header-switch-agent').submit()"
+          class="bg-page border border-borderSubtle rounded-lg px-3 py-2 text-xs font-semibold text-textMain hover:border-brand focus:outline-none cursor-pointer transition-all">
+      
+          @if(isset($list_agen))
+            @foreach($list_agen as $agen)
+              <option value="{{ $agen->id_wazuh_agen }}" {{ session('active_wazuh_agent_id', $agen->id_wazuh_agen) == $agen->id_wazuh_agen ? 'selected' : '' }}>
+                🖥️ {{ $agen->nama_agen ?? $agen->id_wazuh_agen }}
+              </option>
+            @endforeach
+          @endif
+        </select>
+      </form>
+
       <div class="relative id-dropdown-wrapper">
         <button onclick="toggleManage(event)"
           class="flex items-center gap-2 bg-page border border-borderSubtle rounded-lg px-4 py-2 text-xs font-semibold text-textMain hover:border-brand hover:text-brand transition-all">
@@ -123,15 +140,11 @@
             Logout</a>
         </div>
       </div>
+
       <a href="{{ Route('pilih-dasbor') }}"
-               class="flex items-center justify-center
-                      w-9 h-9 rounded-lg
-                      border border-borderSubtle
-                      bg-brand/10 text-brand text-lg font-bold
-                      hover:bg-brand/20 hover:border-brand
-                      transition-all">
-                +
-            </a>
+        class="flex items-center justify-center w-9 h-9 rounded-lg border border-borderSubtle bg-brand/10 text-brand text-lg font-bold hover:bg-brand/20 hover:border-brand transition-all">
+        +
+      </a>
     </div>
   </div>
 </header>
@@ -169,7 +182,6 @@
   }
 
   function toggleManage(event) {
-    // Mencegah trigger click langsung ke document root window
     if (event) event.stopPropagation();
 
     const menu = document.getElementById('manage-menu');
@@ -186,14 +198,12 @@
     }
   }
 
-  // SCRIPT PENUTUP OTOMATIS SAAT KLIK DI LUAR MENU DROPDOWN
   window.addEventListener('click', function (e) {
     const menu = document.getElementById('manage-menu');
     const chevron = document.getElementById('arrow-manage');
     const wrapper = document.querySelector('.id-dropdown-wrapper');
 
     if (menu && !menu.classList.contains('hidden')) {
-      // Jika yang di-klik bukan tombol pemicu atau isi dalam kotak menu
       if (wrapper && !wrapper.contains(e.target)) {
         menu.classList.add('hidden');
         if (chevron) chevron.classList.remove('rotate-180');

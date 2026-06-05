@@ -197,22 +197,23 @@ class ProfileController extends Controller
 
     public function switchAgent(Request $request)
     {
-        // // CODE: Memvalidasi kepemilikan ID agen lalu menyimpannya ke dalam Session global Laravel.
-        // // WEB: Aksi klik tombol "Switch" pada kolom Action di tabel halaman Profile Server.
-        // // UNTUK: Mengunci status monitoring ke 1 server pilihan agar halaman dashboard utama menyaring data terfokus.
         $request->validate([
             'agent_id' => 'required|string'
         ]);
 
-        // PROTEKSI KEAMANAN: Memastikan customer tidak menembak ID agen milik perusahaan/customer lain
+        // KONDISI KHUSUS: Jika user memilih "All Agents", langsung loloskan ke session
+        if ($request->agent_id === 'all') {
+            session(['active_wazuh_agent_id' => 'all']);
+            return back()->with('success', 'Berhasil beralih ke semua agen.');
+        }
+
+        // PROTEKSI KEAMANAN: Memastikan customer tidak menembak ID agen milik orang lain
         $isValidAgent = Agen::where('user_id', auth()->id())
             ->where('id_wazuh_agen', $request->agent_id)
             ->exists();
 
         if ($isValidAgent) {
-            // MENYIMPAN KE SESSION: Kunci ID agen ke session browser agar diingat oleh seluruh halaman web customer
             session(['active_wazuh_agent_id' => $request->agent_id]);
-
             return back()->with('success', 'Berhasil beralih ke agen ' . $request->agent_id);
         }
 

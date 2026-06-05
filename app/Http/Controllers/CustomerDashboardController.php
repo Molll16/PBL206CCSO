@@ -21,17 +21,18 @@ class CustomerDashboardController extends Controller
 
     public function dashboard()
     {
-        // 1. Ambil data semua agen yang di-assign ke customer ini dari MySQL lokal
+        // 1. Ambil data semua agen milik customer
         $allMyAgents = Agen::where('user_id', auth()->id())->get();
 
-        // 2. Cek session browser untuk pilihan agen aktif
-        $activeAgentId = session('active_wazuh_agent_id', $allMyAgents->first()->id_wazuh_agen ?? null);
+        // 2. SEBENTAR/PERBAIKAN: Jika session kosong, default-nya langsung ambil ID agen pertama
+        $defaultAgentId = $allMyAgents->first()->id_wazuh_agen ?? null;
+        $activeAgentId = session('active_wazuh_agent_id', $defaultAgentId);
 
-        // 3. Load data kustomisasi layout dashboard milik customer (Tetap berupa Object Eloquent)
+        // 3. Load data kustomisasi layout dashboard
         $dashboard = DasborKustom::where('user_id', auth()->id())->where('status_dasbor', 'aktif')->first();
         $widgets = $dashboard ? HasilKustom::with('fitur')->where('dasbor_kustom_id', $dashboard->id)->get() : collect([]);
 
-        // 4. Siapkan fallback data default (State Safety)
+        // 4. Siapkan data untuk dilempar ke view (list_agen sudah otomatis di-share oleh Provider)
         $viewData = [
             'dashboard' => $dashboard,
             'widgets' => $widgets,
@@ -44,7 +45,7 @@ class CustomerDashboardController extends Controller
             'threatSummary' => ['active' => 0, 'pending' => 0, 'resolved' => 0, 'categories' => []]
         ];
 
-        // 5. Inject data real-time jika koneksi aman
+        // 5. Inject data real-time berdasarkan $activeAgentId yang spesifik
         try {
             $agentStats = $this->agentService->getCustomerStats();
 
