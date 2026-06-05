@@ -80,11 +80,9 @@ class ProfileController extends Controller
 
             if (isset($wazuhResponse['data']['affected_items'])) {
                 foreach ($wazuhResponse['data']['affected_items'] as $item) {
-                    if ($item['id'] === '000') {
-                        continue;
-                    }
 
                     // PROTEKSI KEAMANAN: Jika ID agen dari Wazuh tidak ada dalam daftar milik user di DB lokal, lewati (skip)
+                    // ID '000' (ccso) sekarang bisa lolos ke bawah asalkan ID tersebut sudah kamu assign ke user ini di DB lokal
                     if (!in_array($item['id'], $myAssignedAgentIds)) {
                         continue;
                     }
@@ -102,7 +100,7 @@ class ProfileController extends Controller
 
             // 3. Hitung statistik otomatis berdasarkan status riil dari API Wazuh yang sudah difilter
             $agentsTotal = $agentsCollection->count();
-            $activeAgents = $agentsCollection->whereIn('status', ['Active', 'active'])->count();
+            $activeAgents = $agentsCollection->whereIn('status', ['Active', 'active', 'Disconnect', 'Active'])->count();
             $disconnectAgents = $agentsCollection->whereIn('status', ['Disconnected', 'disconnected', 'Never_connected'])->count();
 
         } catch (\Throwable $e) {
