@@ -87,11 +87,6 @@
                     <p id="cur-name" class="text-sm font-semibold text-textMain truncate"></p>
                     <p id="cur-meta" class="text-[11px] font-mono text-textMuted"></p>
                 </div>
-                <button onclick="doUnassign()"
-                        class="text-[11px] font-semibold px-3 py-1.5 rounded-lg border border-red-500/20 transition hover:bg-red-500/20"
-                        style="background:rgba(239,68,68,.08); color:#f87171">
-                    Lepas
-                </button>
             </div>
 
             <div id="no-agent-box"
@@ -126,7 +121,7 @@
             </button>
             <button onclick="doAssign()"
                     class="px-5 py-2 rounded-lg text-xs font-semibold text-white bg-brand hover:bg-brandHover shadow-lg shadow-brand/20 transition-all duration-200">
-                Simpan Assign
+                Simpan
             </button>
         </div>
 
@@ -254,8 +249,8 @@ const ALL_AGENTS = [
 
 // State modal
 let currentUserId   = null;
-let currentAgentId  = null;  // agent yang sedang aktif pada user ini
-let selectedAgentId = null;  // agent yang dipilih di list
+let currentAgentId  = null;
+let selectedAgentId = null;
 let filteredAgents  = [...ALL_AGENTS];
 
 // ============================================================
@@ -269,8 +264,26 @@ function openModal(userId, username, agentId) {
     document.getElementById('modal-subtitle').textContent =
         username + ' · #' + userId;
 
-    // Tampilkan current agent
-    const agent  = ALL_AGENTS.find(a => String(a.id) === String(agentId));
+    renderCurrentAgent();
+
+    // Reset search & render list
+    document.getElementById('agent-search').value = '';
+    filteredAgents = [...ALL_AGENTS];
+    renderAgentList();
+
+    document.getElementById('modal-overlay').classList.add('open');
+    lucide.createIcons();
+}
+
+function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// ============================================================
+// RENDER CURRENT AGENT (bagian atas)
+// ============================================================
+function renderCurrentAgent() {
+    const agent  = ALL_AGENTS.find(a => String(a.id) === String(currentAgentId));
     const curBox = document.getElementById('current-agent-box');
     const noBox  = document.getElementById('no-agent-box');
 
@@ -286,18 +299,6 @@ function openModal(userId, username, agentId) {
         curBox.classList.add('hidden');
         noBox.classList.remove('hidden');
     }
-
-    // Reset search & render list
-    document.getElementById('agent-search').value = '';
-    filteredAgents = [...ALL_AGENTS];
-    renderAgentList();
-
-    document.getElementById('modal-overlay').classList.add('open');
-    lucide.createIcons();
-}
-
-function closeModal() {
-    document.getElementById('modal-overlay').classList.remove('open');
 }
 
 // ============================================================
@@ -322,7 +323,6 @@ function renderAgentList() {
     noMsg.classList.add('hidden');
 
     list.innerHTML = filteredAgents.map(a => {
-        const isCur = String(a.id) === String(currentAgentId);
         const isSel = String(a.id) === String(selectedAgentId);
         const dotBg = isSel ? '#6366f1'
                     : (a.status === 'active' ? '#4ade80' : '#f87171');
@@ -330,12 +330,13 @@ function renderAgentList() {
             ? 'border-color:#6366f1; background:rgba(99,102,241,.08)'
             : 'background:rgba(18,19,24,.3)';
         const dotShadow = isSel ? 'box-shadow:0 0 0 3px rgba(99,102,241,.3)' : '';
-        const statusBadge = a.status === 'active'
-            ? `<span style="background:rgba(74,222,128,.1); color:#4ade80; border:1px solid rgba(74,222,128,.2)" class="text-[10px] font-bold px-1.5 py-0.5 rounded">● Active</span>`
-            : `<span style="background:rgba(248,113,113,.1); color:#f87171; border:1px solid rgba(248,113,113,.2)" class="text-[10px] font-bold px-1.5 py-0.5 rounded">● Offline</span>`;
-        const activeBadge = isCur
-            ? `<span style="background:rgba(99,102,241,.15); color:#818cf8; border:1px solid rgba(99,102,241,.25)" class="text-[9px] font-bold px-1.5 py-0.5 rounded">AKTIF</span>`
-            : '';
+
+        // Semua agent punya tombol Lepas
+        const actionBtn = `<button onclick="event.stopPropagation(); doUnassign('${a.id}')"
+            style="background:rgba(239,68,68,.08); color:#f87171; border:1px solid rgba(239,68,68,.2)"
+            class="text-[10px] font-bold px-2 py-0.5 rounded hover:bg-red-500/20 transition">
+            Lepas
+        </button>`;
 
         return `
         <div onclick="selectAgent('${a.id}')" style="cursor:pointer">
@@ -348,8 +349,7 @@ function renderAgentList() {
                     <p class="text-[11px] font-mono text-textMuted">${a.ip}</p>
                 </div>
                 <div class="flex items-center gap-1.5 flex-shrink-0">
-                    ${statusBadge}
-                    ${activeBadge}
+                    ${actionBtn}
                 </div>
             </div>
         </div>`;
@@ -362,7 +362,7 @@ function selectAgent(agentId) {
 }
 
 // ============================================================
-// ACTIONS — sambungkan ke route backend saat siap
+// ACTIONS
 // ============================================================
 function doAssign() {
     if (!selectedAgentId) {
@@ -370,18 +370,39 @@ function doAssign() {
         return;
     }
     const agent = ALL_AGENTS.find(a => String(a.id) === String(selectedAgentId));
+
+    // Update state: agent yang baru di-assign jadi currentAgentId
+    currentAgentId = selectedAgentId;
+    renderCurrentAgent();
+    renderAgentList();
+    lucide.createIcons();
+
     // TODO: ganti dengan form submit ke route('assignagent')
-    // dengan payload: user_id = currentUserId, agent_id = selectedAgentId
     closeModal();
     showToast('Agent "' + (agent ? agent.name : selectedAgentId) + '" berhasil di-assign.', 'success');
 }
 
-function doUnassign() {
+function doUnassign(agentId) {
     if (!confirm('Lepas agent dari user ini?')) return;
+
+    // Hapus agent dari ALL_AGENTS (hilang dari list)
+    const idx = ALL_AGENTS.findIndex(a => String(a.id) === String(agentId));
+    if (idx !== -1) ALL_AGENTS.splice(idx, 1);
+
+    // Kosongkan current agent jika yang dilepas adalah yang aktif
+    if (String(currentAgentId) === String(agentId)) {
+        currentAgentId  = null;
+        selectedAgentId = null;
+    }
+
+    // Update tampilan tanpa nutup modal
+    renderCurrentAgent();
+    filteredAgents = [...ALL_AGENTS];
+    renderAgentList();
+    lucide.createIcons();
+
     // TODO: ganti dengan form submit ke route('unassignagent')
-    // dengan payload: user_id = currentUserId
-    closeModal();
-    showToast('Agent berhasil dilepas.', 'error');
+    showToast('Agent berhasil dilepas.', 'success');
 }
 
 // ============================================================
