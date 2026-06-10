@@ -37,11 +37,12 @@
 
     @include('Customer.components.header')
 
-    <main class="flex-1 p-6 relative">
+    <main class="flex-1 p-3 sm:p-4 md:p-6 relative">
 
-        <div class="mb-6 flex items-center gap-3 animate-fade-in">
-            <div class="w-[3px] h-6 rounded-full accent-bar"></div>
-            <h2 class="text-textMain text-lg tracking-wide">
+        {{-- Welcome greeting --}}
+        <div class="mb-4 sm:mb-6 flex items-center gap-3 animate-fade-in">
+            <div class="w-[3px] h-6 rounded-full accent-bar flex-shrink-0"></div>
+            <h2 class="text-textMain text-base sm:text-lg tracking-wide truncate">
                 Welcome,
                 <span class="text-brand hover:text-brandHover cursor-pointer transition-colors">
                     {{ auth()->user()->name }}
@@ -49,10 +50,15 @@
             </h2>
         </div>
 
+        {{-- Password change alert - responsive positioning --}}
         @if(!auth()->user()->password_changed)
-            <div id="pwd-alert" class="alert-card absolute top-6 right-6 w-72 rounded-xl p-5 z-20 animate-fade-in">
+            <div id="pwd-alert"
+                class="alert-card
+                    w-full sm:w-72
+                    rounded-xl p-4 sm:p-5 z-20 animate-fade-in mb-4
+                    sm:absolute sm:top-6 sm:right-6 sm:mb-0">
                 <div class="flex items-center gap-2 mb-3">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center"
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
                         style="background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2)">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-400" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
@@ -62,7 +68,7 @@
                     </div>
                     <p class="text-xs font-semibold text-amber-400 tracking-wide">Password Notice</p>
                 </div>
-                <p class="text-[12px] text-textMuted mb-5 leading-relaxed">
+                <p class="text-[12px] text-textMuted mb-4 sm:mb-5 leading-relaxed">
                     You must change your current password for a new one
                 </p>
                 <div class="flex justify-end gap-2">
@@ -81,8 +87,9 @@
             </div>
         @endif
 
+        {{-- Wazuh offline banner --}}
         @if($wazuhOffline)
-            <div class="offline-banner mb-5 px-4 py-3 rounded-lg text-red-400 animate-fade-in">
+            <div class="offline-banner mb-4 sm:mb-5 px-3 sm:px-4 py-3 rounded-lg text-red-400 animate-fade-in">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                         style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2)">
@@ -100,33 +107,43 @@
             </div>
         @endif
 
-        <div class="mb-5 flex items-center gap-3 animate-fade-in">
+        {{-- Dashboard name divider --}}
+        <div class="mb-4 sm:mb-5 flex items-center gap-3 animate-fade-in">
             <div class="h-px flex-1" style="background: #262833"></div>
-            <div class="pill-divider flex items-center gap-2 px-4 py-1.5 rounded-full">
+            <div class="pill-divider flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full flex-shrink-0">
                 <div class="w-1.5 h-1.5 rounded-full pulse-dot animate-pulse"></div>
-                <h3 class="text-textMuted text-sm tracking-wide">
+                <h3 class="text-textMuted text-xs sm:text-sm tracking-wide truncate max-w-[160px] sm:max-w-none">
                     {{ $dashboard->nama_dasbor ?? 'No Dashboard Active' }}
                 </h3>
             </div>
             <div class="h-px flex-1" style="background: #262833"></div>
         </div>
 
-        <div class="grid grid-cols-12 gap-4">
+        {{-- Widget grid --}}
+        <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-3 sm:gap-4">
 
             @forelse($widgets as $item)
                 @php
                     $wKolom = $item->kolom ?? 6;
                     $wBaris = $item->baris ?? 2;
                     $wHeight = $wBaris * 85;
+
+                    // Responsive column spans:
+                    // xs (4-col grid): always full width (col-span-4)
+                    // sm (6-col grid): half or full depending on original kolom
+                    // md (8-col grid): scale proportionally
+                    // lg (12-col grid): original value
+                    $smSpan = $wKolom <= 4 ? 3 : 6;   // half or full on sm
+                    $mdSpan = min(8, max(4, (int)round($wKolom * 8 / 12))); // scale to 8-col
                 @endphp
 
-                <div class="col-span-{{ $wKolom }} hover-scale animate-fade-in">
+                <div class="col-span-4 sm:col-span-{{ $smSpan }} md:col-span-{{ $mdSpan }} lg:col-span-{{ $wKolom }} hover-scale animate-fade-in">
 
                     <p class="text-[10px] mb-2 ml-1 tracking-widest uppercase font-semibold" style="color: #787f99">
                         {{ $item->fitur->nama_fitur }}
                     </p>
 
-                    <div class="widget-card rounded-xl p-4 no-scrollbar flex flex-col {{ $item->fitur->nama_fitur === 'GeoIP Attack Map' ? '' : 'overflow-y-auto' }}"
+                    <div class="widget-card rounded-xl p-3 sm:p-4 no-scrollbar flex flex-col {{ $item->fitur->nama_fitur === 'GeoIP Attack Map' ? '' : 'overflow-y-auto' }}"
                         style="height: {{ $wHeight }}px; min-height: {{ $wHeight }}px;">
 
                         @if($item->fitur->nama_fitur === 'Agent Status')
@@ -182,8 +199,8 @@
 
             @empty
 
-                <div class="col-span-12 animate-fade-in">
-                    <div class="empty-card rounded-xl h-56 flex flex-col items-center justify-center gap-3">
+                <div class="col-span-4 sm:col-span-6 md:col-span-8 lg:col-span-12 animate-fade-in">
+                    <div class="empty-card rounded-xl h-48 sm:h-56 flex flex-col items-center justify-center gap-3">
                         <div class="w-10 h-10 rounded-lg flex items-center justify-center"
                             style="background: rgba(255,255,255,0.03); border: 1px solid #262833">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-textMuted" fill="none"
