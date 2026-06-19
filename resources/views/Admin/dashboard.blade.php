@@ -161,20 +161,17 @@
             <table class="w-full text-center text-sm">
                 <thead class="bg-surface text-textMuted text-xs uppercase tracking-wider border-b border-borderSubtle">
                     <tr>
-                        <th class="p-4 w-10"><input type="checkbox" class="accent-brand rounded bg-page border-borderSubtle"></th>
                         <th class="p-4 font-semibold">ID</th>
                         <th class="p-4 font-semibold">Name</th>
                         <th class="p-4 font-semibold">IP address</th>
                         <th class="p-4 font-semibold">Operating system</th>
                         <th class="p-4 font-semibold">Status</th>
-                        <th class="p-4 font-semibold text-right">Actions</th>
                     </tr>
                 </thead>
 
                 <tbody class="divide-y divide-borderSubtle bg-page/30">
                     @forelse($agents as $agent)
                     <tr class="hover:bg-surface/60 transition-colors">
-                        <td class="p-4"><input type="checkbox" class="accent-brand rounded"></td>
                         <td class="p-4 text-textMuted font-mono text-xs">{{ $agent['id'] }}</td>
                         <td class="p-4 font-semibold text-textMain">{{ $agent['name'] }}</td>
                         <td class="p-4 text-textMuted font-mono text-xs">{{ $agent['ip'] }}</td>
@@ -189,9 +186,6 @@
                             @else
                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-500/10 text-gray-400 border border-gray-500/20">{{ $agent['status'] }}</span>
                             @endif
-                        </td>
-                        <td class="p-4 text-right">
-                            <button class="text-brand hover:text-brandHover text-xs font-medium hover:underline">View</button>
                         </td>
                     </tr>
                     @empty
