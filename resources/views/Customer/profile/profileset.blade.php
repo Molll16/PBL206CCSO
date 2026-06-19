@@ -42,7 +42,7 @@
     </div>
   </div>
 
-  <div class="p-6 mx-auto w-full max-w-7xl flex-1">
+  <div class="p-6 mx-auto w-full flex-1">
 
     <!-- ===== PROFIL HEADER ===== -->
     <div class="flex items-center gap-6 mb-8 p-6 bg-surface border border-borderSubtle rounded-xl">
