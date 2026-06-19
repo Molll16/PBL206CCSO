@@ -59,72 +59,78 @@
     </div>
 
     <main class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-      <!-- ===== FORM UPDATE PROFIL ===== -->
+    
       <div class="bg-surface border border-borderSubtle rounded-xl p-6 space-y-5">
         <h3 class="text-sm font-semibold text-textMain flex items-center gap-2 border-b border-borderSubtle pb-4">
           <i data-lucide="user-cog" class="w-4 h-4 text-brand"></i> Personal Information
         </h3>
-
+    
         <form action="{{ route('profile.update') }}" method="POST" class="space-y-4">
           @csrf
-
+    
+          {{-- PERBAIKAN DI SINI: Ditambahkan kondisi !session('password_success') agar tidak bocor saat ganti password --}}
           @if(session('success') && !session('password_success'))
-            <div class="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+            <div
+              class="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
               <i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i>
               {{ session('success') }}
             </div>
           @endif
-
+    
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-textMuted uppercase tracking-wider">Full Name</label>
             <input type="text" name="name" value="{{ auth()->user()->name }}"
               class="bg-page border border-borderSubtle rounded-lg px-4 py-2.5 text-sm text-textMain focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all">
           </div>
-
+    
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-textMuted uppercase tracking-wider">Email</label>
             <input type="email" name="email" value="{{ auth()->user()->email }}"
               class="bg-page border border-borderSubtle rounded-lg px-4 py-2.5 text-sm text-textMain focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all">
           </div>
-
+    
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-textMuted uppercase tracking-wider">Personal Phone Number</label>
             <input type="text" name="no_telp" value="{{ auth()->user()->no_telp }}"
               class="bg-page border border-borderSubtle rounded-lg px-4 py-2.5 text-sm text-textMain focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all">
           </div>
-
-          <button type="submit" class="w-full bg-brand hover:bg-brandHover transition text-white px-5 py-2.5 rounded-lg font-semibold text-sm shadow-lg shadow-brand/20 flex items-center justify-center gap-2">
+    
+          <button type="submit"
+            class="w-full bg-brand hover:bg-brandHover transition text-white px-5 py-2.5 rounded-lg font-semibold text-sm shadow-lg shadow-brand/20 flex items-center justify-center gap-2">
             <i data-lucide="save" class="w-4 h-4"></i> Save Changes
           </button>
         </form>
       </div>
-
-      <!-- ===== FORM GANTI PASSWORD ===== -->
+    
       <div class="bg-surface border border-borderSubtle rounded-xl p-6 space-y-5">
         <h3 class="text-sm font-semibold text-textMain flex items-center gap-2 border-b border-borderSubtle pb-4">
           <i data-lucide="lock" class="w-4 h-4 text-brand"></i> Change Password
         </h3>
-
+    
         <form action="{{ route('changepw.update') }}" method="POST" class="space-y-4">
           @csrf
-
+          @method('PUT')
+    
+          {{-- PERBAIKAN DI SINI: Hanya mau tampil jika session memiliki token 'password_success' --}}
           @if(session('success') && session('password_success'))
-            <div class="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+            <div
+              class="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
               <i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i>
               {{ session('success') }}
             </div>
           @endif
-
+    
           @if(session('error'))
-            <div class="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+            <div
+              class="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
               <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
               {{ session('error') }}
             </div>
           @endif
-
+    
           @if($errors->any())
-            <div class="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+            <div
+              class="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
               <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
               @if($errors->first() == 'The new password field confirmation does not match.')
                 The password confirmation does not match.
@@ -135,31 +141,32 @@
               @endif
             </div>
           @endif
-
+    
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-textMuted uppercase tracking-wider">Current Password</label>
             <input type="password" name="current_password" placeholder="Enter current password" required
               class="bg-page border border-borderSubtle rounded-lg px-4 py-2.5 text-sm text-textMain placeholder-textMuted/50 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all">
           </div>
-
+    
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-textMuted uppercase tracking-wider">New Password</label>
             <input type="password" name="new_password" placeholder="Enter new password" required
               class="bg-page border border-borderSubtle rounded-lg px-4 py-2.5 text-sm text-textMain placeholder-textMuted/50 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all">
           </div>
-
+    
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-textMuted uppercase tracking-wider">Confirm New Password</label>
             <input type="password" name="new_password_confirmation" placeholder="Confirm new password" required
               class="bg-page border border-borderSubtle rounded-lg px-4 py-2.5 text-sm text-textMain placeholder-textMuted/50 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all">
           </div>
-
-          <button type="submit" class="w-full bg-brand hover:bg-brandHover transition text-white px-5 py-2.5 rounded-lg font-semibold text-sm shadow-lg shadow-brand/20 flex items-center justify-center gap-2">
+    
+          <button type="submit"
+            class="w-full bg-brand hover:bg-brandHover transition text-white px-5 py-2.5 rounded-lg font-semibold text-sm shadow-lg shadow-brand/20 flex items-center justify-center gap-2">
             <i data-lucide="key" class="w-4 h-4"></i> Update Password
           </button>
         </form>
       </div>
-
+    
     </main>
   </div>
 

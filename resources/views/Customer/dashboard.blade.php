@@ -171,7 +171,7 @@
                             @include('Customer.widgets.system_resources')
 
                         @elseif($item->fitur->nama_fitur === 'Failed Login Monitoring')
-                            @include('Customer.widgets.failed_login')
+                            @include('Customer.widgets.failed-login-monitoring')
 
                         @elseif($item->fitur->nama_fitur === 'Top Triggered Rules')
                             @include('Customer.widgets.top_triggered_rules')

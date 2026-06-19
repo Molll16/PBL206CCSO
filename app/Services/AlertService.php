@@ -8,26 +8,26 @@ class AlertService
 {
     protected $wazuh;
 
-    // CODE: Constructor untuk manggil koneksi API Wazuh.
-    // UNTUK: Menghubungkan otomatis service ini dengan data server Wazuh.
+    // Menghubungkan service ini dengan WazuhApiService untuk menarik data dari server Wazuh
     public function __construct(WazuhApiService $wazuh)
     {
         $this->wazuh = $wazuh;
     }
 
-    // CODE: Mengambil semua data log (alerts) mentah dari API Wazuh.
-    // UNTUK: Sumber data dasar utama, fungsi ini nantinya dipanggil oleh fungsi lain.
+    /**
+     * =========================================================================
+     * HELPER INTERNAL (Fungsi Pembantu agar Kode Ringkas & Bebas Garis Kuning)
+     * =========================================================================
+     */
+
+    // Mengambil semua data log mentah dari server Wazuh
     public function getAlerts(): array
     {
         $raw = $this->wazuh->getRawAlerts();
-        if (!empty($raw['error'])) {
-            return [];
-        }
-        return $this->mapAlerts($raw);
+        return empty($raw['error']) ? $this->mapAlerts($raw) : [];
     }
 
-    // CODE: Memetakan (mapping) struktur data JSON rumit dari Wazuh ke array rapi.
-    // UNTUK: Mengambil data penting saja (deskripsi, level bahaya, nama agen, waktu, user).
+    // Menyaring dan merapikan dokumen JSON Wazuh yang rumit ke array sederhana
     private function mapAlerts($data): array
     {
         if (!isset($data['hits']['hits']))
@@ -35,9 +35,17 @@ class AlertService
 
         $results = [];
         foreach ($data['hits']['hits'] as $item) {
-            $source = $item['_source'];
+            $source = $item['_source'] ?? [];
+
+            // Mencari deskripsi log (Fallback: cek deskripsi, jika kosong cek title, dst)
+            $description = $source['rule']['description'] ??
+                $source['rule']['title'] ??
+                $source['data']['win']['eventdata']['targetUserName'] ??
+                $source['data']['win']['system']['message'] ??
+                'Unknown Security Event';
+
             $results[] = [
-                'description' => $source['rule']['description'] ?? '-',
+                'description' => $description,
                 'level' => (int) ($source['rule']['level'] ?? 0),
                 'agent' => [
                     'name' => $source['agent']['name'] ?? 'unknown',
@@ -50,25 +58,115 @@ class AlertService
         return $results;
     }
 
-    // CODE: Mengambil data log terbaru milik customer (dibatasi jumlahnya) dengan filter per agen.
-    // WEB: Widget Kustomisasi Dashboard "Security Alerts Terbaru".
-    // UNTUK: Menampilkan daftar beberapa log ancaman paling baru dari 1 agen yang sedang aktif dipilih.
-    public function getLatestAlerts($limit = 5, $agentId = null)
+    // Fungsi Ringkas: Otomatis mencari daftar ID agen milik user yang sedang login (Menghemat puluhan baris kode!)
+    private function getMyAgentIds(?string $agentId = null): array
     {
-        $myAgents = $agentId ? [$agentId] : Agen::where('user_id', auth()->id())->pluck('id_wazuh_agen')->toArray();
+        if ($agentId) {
+            return [str_pad($agentId, 3, '0', STR_PAD_LEFT)];
+        }
+
+        $currentUserId = auth()->user()->id ?? null;
+
+        return Agen::where('user_id', $currentUserId)
+            ->get()
+            ->pluck('id_wazuh_agen')
+            ->map(fn($id) => str_pad((string) $id, 3, '0', STR_PAD_LEFT))
+            ->toArray();
+    }
+
+
+    /**
+     * =========================================================================
+     * FUNGSI UNTUK HALAMAN: DASHBOARD CUSTOMER / USER
+     * =========================================================================
+     */
+
+    // BAGIAN: Widget "Log Aktivitas Terbaru" (Menampilkan 5 atau beberapa log terakhir)
+    public function getLatestAlerts(int $limit = 5, ?string $agentId = null)
+    {
+        $myAgents = $this->getMyAgentIds($agentId);
 
         return collect($this->getAlerts())
             ->filter(fn($alert) => in_array($alert['agent']['id'] ?? null, $myAgents))
             ->take($limit);
     }
 
-    // CODE: Mengambil dan menyaring data log berdasarkan Tanggal Kalender (History) dan Tingkat Severity.
-    // WEB: Halaman View Logs / Daftar Log Monitoring Utama Customer (`daftarlog.blade.php`).
-    // UNTUK: Memasok data baris tabel agar bisa difilter tanggal kemarin (history) atau level tertentu (Low/Critical).
-    // NOTE: Jika parameter tanggal kosong, otomatis default ke hari ini (Otomatis reset otomatis dari 0 tiap ganti hari).
-    public function getFilteredAlerts($agentId = null, $date = null, $severity = null)
+    // BAGIAN: Widget "Threat Summary" / Ringkasan Ancaman (Donut/Pie Chart & List Top 5 Ancaman)
+    public function getThreatSummary(?string $agentId = null): array
     {
-        $myAgents = $agentId ? [$agentId] : Agen::where('user_id', auth()->id())->pluck('id_wazuh_agen')->toArray();
+        $myAgents = $this->getMyAgentIds($agentId);
+        $alerts = collect($this->getAlerts())->filter(fn($a) => in_array($a['agent']['id'] ?? null, $myAgents));
+        $totalEvents = $alerts->count();
+
+        // Mengelompokkan status berdasarkan level tingkat bahaya
+        $activeCount = $alerts->where('level', '>=', 10)->count();
+        $pendingCount = $alerts->whereBetween('level', [5, 9])->count();
+        $resolvedCount = $alerts->where('level', '<', 5)->count();
+
+        // Membuat data list Top 5 ancaman terbanyak beserta persentasenya
+        $categories = $totalEvents === 0 ? [] : $alerts->groupBy('description')->map(function ($items, $name) use ($totalEvents) {
+            $maxLevel = $items->max('level') ?? 0;
+            return [
+                'name' => $name,
+                'count' => $items->count(),
+                'percentage' => round(($items->count() / $totalEvents) * 100),
+                'severity' => $maxLevel >= 10 ? 'high' : ($maxLevel >= 5 ? 'medium' : 'low'),
+            ];
+        })->sortByDesc('count')->take(5)->values()->toArray();
+
+        return [
+            'active' => $activeCount,
+            'pending' => $pendingCount,
+            'resolved' => $resolvedCount,
+            'categories' => $categories
+        ];
+    }
+
+    // BAGIAN: Widget "Most Active Rules" (Progress Bar 3 Aturan Keamanan yang Paling Sering Terpicu)
+    public function getMostActiveRules(?string $agentId = null): array
+    {
+        try {
+            $myAgents = $this->getMyAgentIds($agentId);
+            $alerts = collect($this->getAlerts())->filter(fn($a) => in_array($a['agent']['id'] ?? null, $myAgents));
+
+            if ($alerts->count() === 0)
+                return [];
+
+            $groupedRules = $alerts->groupBy('description')->map(function ($items, $description) {
+                return [
+                    'desc' => $description,
+                    'count' => $items->count(),
+                    'level' => $items->first()['level'] ?? 0
+                ];
+            })->sortByDesc('count')->take(3)->values();
+
+            $maxCount = $groupedRules->first()['count'] ?? 1;
+
+            return $groupedRules->map(function ($rule) use ($maxCount) {
+                $color = $rule['level'] >= 10 ? 'bg-red-500' : ($rule['level'] < 5 ? 'bg-orange-500' : 'bg-amber-500');
+                return [
+                    'desc' => $rule['desc'],
+                    'count' => $rule['count'],
+                    'w' => round(($rule['count'] / $maxCount) * 100) . '%',
+                    'color' => $color
+                ];
+            })->toArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+
+    /**
+     * =========================================================================
+     * FUNGSI UNTUK HALAMAN: LOGS / FILTER & ANALYTICS
+     * =========================================================================
+     */
+
+    // BAGIAN: Halaman Utama "Daftar Log/Alerts" (Menampilkan tabel log dengan Filter Tanggal & Severity)
+    public function getFilteredAlerts(?string $agentId = null, ?string $date = null, ?string $severity = null)
+    {
+        $myAgents = $this->getMyAgentIds($agentId);
         $targetDate = $date ? $date : now()->format('Y-m-d');
 
         return collect($this->getAlerts())
@@ -83,18 +181,14 @@ class AlertService
                     return $alert['level'] >= 10 && $alert['level'] <= 12;
                 if ($severity === 'medium')
                     return $alert['level'] >= 5 && $alert['level'] <= 9;
-                if ($severity === 'low')
-                    return $alert['level'] < 5;
-                return true;
+                return $severity === 'low' ? $alert['level'] < 5 : true;
             })
             ->sortByDesc('time')
             ->values();
     }
 
-    // CODE: Menghitung total statistik log (Critical, High, Medium, Low) sesuai tanggal yang dipilih.
-    // WEB: Kotak Counter Angka & Grafik Lingkaran atas di halaman `daftarlog.blade.php`.
-    // UNTUK: Memastikan grafik lingkaran dan kotak angka ikut berubah naik/turun nilainya saat user memilih tanggal history.
-    public function getLogsAnalytics($agentId = null, $date = null): array
+    // BAGIAN: Widget "Counter Card Statistik" (Menampilkan kotak total angka: Critical, High, Med, Low)
+    public function getLogsAnalytics(?string $agentId = null, ?string $date = null): array
     {
         $targetDate = $date ? $date : now()->format('Y-m-d');
         $allAlertsForDate = $this->getFilteredAlerts($agentId, $targetDate, null);
@@ -108,9 +202,14 @@ class AlertService
         ];
     }
 
-    // CODE: Menghitung total seluruh log per hari selama 7 hari ke belakang.
-    // WEB: Halaman Dashboard Utama milik ADMIN (Grafik Chart Batang/Garis).
-    // UNTUK: Memasok data grafik (Labels hari & Angka total) supaya grafik tren mingguan muncul.
+
+    /**
+     * =========================================================================
+     * FUNGSI UNTUK HALAMAN: DASHBOARD UTAMA ADMIN
+     * =========================================================================
+     */
+
+    // BAGIAN: Grafik Batang / Area Chart (Menghitung tren total log per hari selama 7 hari terakhir)
     public function getWeeklyChartData(): array
     {
         $alerts = $this->getAlerts();
@@ -119,53 +218,14 @@ class AlertService
 
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->format('Y-m-d');
-            $label = now()->subDays($i)->format('D');
-
-            $total = collect($alerts)
-                ->filter(fn($item) => isset($item['time']) && str_contains($item['time'], $date))
-                ->count();
-
-            $chartLabels[] = $label;
-            $chartData[] = $total;
+            $chartLabels[] = now()->subDays($i)->format('D');
+            $chartData[] = collect($alerts)->filter(fn($item) => isset($item['time']) && str_contains($item['time'], $date))->count();
         }
 
         return [
             'labels' => $chartLabels,
             'data' => $chartData,
             'total' => array_sum($chartData)
-        ];
-    }
-
-    // CODE: Mengelompokkan jenis ancaman terbanyak per agen dan menghitung persentasenya.
-    // WEB: Widget Kustomisasi Dashboard "Threat Summary" (Kategori Ancaman).
-    // UNTUK: Menampilkan status ringkasan dan Top 5 serangan paling sering khusus dari agen pilihan.
-    public function getThreatSummary($agentId = null): array
-    {
-        $myAgents = $agentId ? [$agentId] : Agen::where('user_id', auth()->id())->pluck('id_wazuh_agen')->toArray();
-        $alerts = collect($this->getAlerts())->filter(fn($a) => in_array($a['agent']['id'] ?? null, $myAgents));
-        $totalEvents = $alerts->count();
-
-        $activeCount = $alerts->where('level', '>=', 10)->count();
-        $pendingCount = $alerts->whereBetween('level', [5, 9])->count();
-        $resolvedCount = $alerts->where('level', '<', 5)->count();
-
-        $categories = $totalEvents === 0 ? [] : $alerts->groupBy('description')
-            ->map(function ($items, $name) use ($totalEvents) {
-                $maxLevel = $items->max('level') ?? 0;
-                return [
-                    'name' => $name,
-                    'count' => $items->count(),
-                    'percentage' => round(($items->count() / $totalEvents) * 100),
-                    'severity' => $maxLevel >= 10 ? 'high' : ($maxLevel >= 5 ? 'medium' : 'low'),
-                ];
-            })
-            ->sortByDesc('count')->take(5)->values()->toArray();
-
-        return [
-            'active' => $activeCount,
-            'pending' => $pendingCount,
-            'resolved' => $resolvedCount,
-            'categories' => $categories
         ];
     }
 }

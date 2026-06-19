@@ -97,6 +97,7 @@
 
         <form action="{{ route('changepw.update') }}" method="POST" class="space-y-4">
           @csrf
+          @method('PUT')
 
           @if(session('success') && session('password_success'))
             <div class="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg text-sm flex items-center gap-2">

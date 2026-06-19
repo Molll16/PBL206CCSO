@@ -165,6 +165,8 @@ class ProfileController extends Controller
         ]);
 
         auth()->user()->update($request->only('name', 'email', 'no_telp'));
+
+        // Di sini biarkan hanya mengirim success saja, tanpa password_success
         return back()->with('success', 'Profile berhasil diupdate');
     }
 
@@ -186,7 +188,10 @@ class ProfileController extends Controller
             'password_changed' => true,
         ]);
 
-        return back()->with('success', 'Your password has been successfully updated!');
+        // PERBAIKAN DI SINI: Tambahkan ->with('password_success', true)
+        return back()
+            ->with('success', 'Your password has been successfully updated!')
+            ->with('password_success', true);
     }
 
     // ==========================================
