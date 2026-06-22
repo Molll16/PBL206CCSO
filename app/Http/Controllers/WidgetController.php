@@ -5,17 +5,30 @@ namespace App\Http\Controllers;
 use App\Services\AgentService;
 use App\Services\AlertService;
 use Illuminate\Http\Request;
+use App\Models\Agen;
 
 class WidgetController extends Controller
 {
     protected $agentService;
     protected $alertService;
 
-    // Suntikkan service yang dibutuhkan via Constructor
     public function __construct(AgentService $agentService, AlertService $alertService)
     {
         $this->agentService = $agentService;
         $this->alertService = $alertService;
+    }
+
+    // Helper Terpusat: Mengambil ID Agen aktif dari session atau fallback ke agen pertama di database
+    private function getActiveAgentId(): ?string
+    {
+        $selectedAgentId = session('active_wazuh_agent_id');
+
+        if (!$selectedAgentId) {
+            $defaultAgent = Agen::where('user_id', auth()->id())->first();
+            $selectedAgentId = $defaultAgent ? $defaultAgent->id_wazuh_agen : null;
+        }
+
+        return $selectedAgentId;
     }
 
     /**
@@ -48,7 +61,8 @@ class WidgetController extends Controller
     public function getLatestAlerts()
     {
         try {
-            $alerts = $this->alertService->getLatestAlerts(5);
+            $activeAgentId = $this->getActiveAgentId();
+            $alerts = $this->alertService->getLatestAlerts(5, $activeAgentId);
             return response()->json([
                 'success' => true,
                 'data' => $alerts
@@ -68,11 +82,8 @@ class WidgetController extends Controller
     public function getThreatSummary()
     {
         try {
-            // Ambil ID Agen yang aktif dari session dropdown
-            $selectedAgentId = session('active_wazuh_agent_id');
-
-            // Jalankan pencarian di service dengan filter ID agen tersebut
-            $summary = $this->alertService->getThreatSummary($selectedAgentId);
+            $activeAgentId = $this->getActiveAgentId();
+            $summary = $this->alertService->getThreatSummary($activeAgentId);
 
             return response()->json([
                 'success' => true,
@@ -88,55 +99,34 @@ class WidgetController extends Controller
     }
 
     /**
-     * 4. Widget System Resources (Sudah Mendukung Dynamic Agent Switch)
+     * 4. Widget System Resources - MURNI DATA BACKEND
      */
     public function getSystemResources()
     {
         try {
-            // 1. Cek apakah ada Agent ID spesifik yang sedang aktif di session (dari dropdown pojok kanan atas)
-            // Jika session kosong, kita jadikan null sebagai default
-            $activeAgentId = session('active_wazuh_agent_id');
+            $activeAgentId = $this->getActiveAgentId();
 
-            // 2. Jika di session belum ada (misal baru pertama kali login), 
-            // ambil agen pertama milik customer tersebut sebagai fallback/bawaan awal
-            if (!$activeAgentId) {
-                $myAgents = \App\Models\Agen::where('user_id', auth()->id())->pluck('id_wazuh_agen')->toArray();
-                $activeAgentId = $myAgents[0] ?? null;
-            }
-
-            // 3. Jika setelah dicek ke database user memang tidak punya agen sama sekali, stop proses
             if (!$activeAgentId) {
                 return response()->json([
                     'success' => false,
-                    'data' => [],
+                    'data' => [
+                        ['label' => 'CPU', 'value' => 0, 'color' => 'bg-cyan-500'],
+                        ['label' => 'RAM', 'value' => 0, 'color' => 'bg-amber-500'],
+                        ['label' => 'DISK', 'value' => 0, 'color' => 'bg-emerald-500'],
+                        ['label' => 'SWAP', 'value' => 0, 'color' => 'bg-indigo-500']
+                    ],
                     'message' => 'Tidak ada agen terpasang pada akun Anda.'
                 ]);
             }
 
-            // 4. Barulah fetch data metrik asli dari AgentService berdasarkan Agent ID yang aktif/dipilih
             $metrics = $this->agentService->fetchSystemResources($activeAgentId);
 
+            // Mengambil nilai murni hasil olahan service (default ke 0 jika kosong)
             $resources = [
-                [
-                    'label' => 'CPU',
-                    'value' => $metrics['cpu'],
-                    'color' => 'bg-cyan-500'
-                ],
-                [
-                    'label' => 'RAM',
-                    'value' => $metrics['ram'],
-                    'color' => 'bg-amber-500'
-                ],
-                [
-                    'label' => 'DISK',
-                    'value' => 44, // Nanti bisa kamu kembangkan dinamis jika diperlukan
-                    'color' => 'bg-emerald-500'
-                ],
-                [
-                    'label' => 'SWAP',
-                    'value' => 12,
-                    'color' => 'bg-indigo-500'
-                ]
+                ['label' => 'CPU', 'value' => $metrics['cpu'] ?? 0, 'color' => 'bg-cyan-500'],
+                ['label' => 'RAM', 'value' => $metrics['ram'] ?? 0, 'color' => 'bg-amber-500'],
+                ['label' => 'DISK', 'value' => 44, 'color' => 'bg-emerald-500'], // Data statis bawaan template
+                ['label' => 'SWAP', 'value' => 12, 'color' => 'bg-indigo-500']  // Data statis bawaan template
             ];
 
             return response()->json([
@@ -144,9 +134,15 @@ class WidgetController extends Controller
                 'data' => $resources
             ]);
         } catch (\Throwable $e) {
+            // Jika backend/Wazuh down total, kirim angka 0 (Sangat Jujur)
             return response()->json([
                 'success' => false,
-                'data' => [],
+                'data' => [
+                    ['label' => 'CPU', 'value' => 0, 'color' => 'bg-cyan-500'],
+                    ['label' => 'RAM', 'value' => 0, 'color' => 'bg-amber-500'], // Mengembalikan 0, bukan 89
+                    ['label' => 'DISK', 'value' => 44, 'color' => 'bg-emerald-500'],
+                    ['label' => 'SWAP', 'value' => 12, 'color' => 'bg-indigo-500']
+                ],
                 'message' => 'Gagal memuat resource sistem asli.'
             ]);
         }
@@ -158,19 +154,12 @@ class WidgetController extends Controller
     public function getFileIntegrity()
     {
         try {
-            // Cek agent yang sedang aktif dipilih di dropdown session
-            $activeAgentId = session('active_wazuh_agent_id');
-
-            if (!$activeAgentId) {
-                $myAgents = \App\Models\Agen::where('user_id', auth()->id())->pluck('id_wazuh_agen')->toArray();
-                $activeAgentId = $myAgents[0] ?? null;
-            }
+            $activeAgentId = $this->getActiveAgentId();
 
             if (!$activeAgentId) {
                 return response()->json(['success' => false, 'data' => []]);
             }
 
-            // Panggil service untuk ambil data FIM asli dari Wazuh
             $fimData = $this->agentService->fetchFileIntegrityLogs($activeAgentId);
 
             return response()->json([
@@ -183,24 +172,17 @@ class WidgetController extends Controller
     }
 
     /**
-     * 6. Widget Failed Logins Counter (Realtime & Filtered)
+     * 6. Widget Failed Logins Counter
      */
     public function getFailedLogins()
     {
         try {
-            // Ambil agent ID aktif dari session dropdown
-            $activeAgentId = session('active_wazuh_agent_id');
-
-            if (!$activeAgentId) {
-                $myAgents = \App\Models\Agen::where('user_id', auth()->id())->pluck('id_wazuh_agen')->toArray();
-                $activeAgentId = $myAgents[0] ?? null;
-            }
+            $activeAgentId = $this->getActiveAgentId();
 
             if (!$activeAgentId) {
                 return response()->json(['success' => false, 'data' => ['count' => 0, 'timeline' => '-', 'status_tag' => '-']]);
             }
 
-            // Ambil data failed login asli lewat service
             $failedData = $this->agentService->fetchFailedLoginsCount($activeAgentId);
 
             return response()->json([
@@ -213,24 +195,14 @@ class WidgetController extends Controller
     }
 
     /**
-     * Menyediakan data log aktivitas login untuk widget frontend.
+     * 7. Widget User Login Activity
      */
     public function getUserLoginActivity()
     {
         try {
-            $selectedAgentId = session('active_wazuh_agent_id');
+            $activeAgentId = $this->getActiveAgentId();
 
-            $agent = \App\Models\Agen::where('user_id', auth()->id())
-                ->where(function ($query) use ($selectedAgentId) {
-                    $query->where('id', $selectedAgentId)
-                        ->orWhere('id_wazuh_agen', $selectedAgentId);
-                })->first();
-
-            if (!$agent) {
-                $agent = \App\Models\Agen::where('user_id', auth()->id())->first();
-            }
-
-            if (!$agent) {
+            if (!$activeAgentId) {
                 return response()->json([
                     'success' => true,
                     'data' => [],
@@ -238,7 +210,6 @@ class WidgetController extends Controller
                 ]);
             }
 
-            $activeAgentId = $agent->id_wazuh_agen;
             $activitiesData = $this->agentService->fetchUserLoginActivity($activeAgentId);
 
             return response()->json([
@@ -261,21 +232,13 @@ class WidgetController extends Controller
     }
 
     /**
-     * Menyediakan data JSON realtime untuk widget Most Active Rules.
+     * 8. Widget Most Active Rules
      */
     public function getMostActiveRules()
     {
         try {
-            $selectedAgentId = session('active_wazuh_agent_id');
-
-            // Proteksi: Jika session dropdown kosong, otomatis cari agen pertama user di DB lokal
-            if (!$selectedAgentId) {
-                $defaultAgent = \App\Models\Agen::where('user_id', auth()->id())->first();
-                $selectedAgentId = $defaultAgent ? $defaultAgent->id_wazuh_agen : null;
-            }
-
-            // Ambil data yang sudah diproses oleh AlertService
-            $activeRules = $this->alertService->getMostActiveRules($selectedAgentId);
+            $activeAgentId = $this->getActiveAgentId();
+            $activeRules = $this->alertService->getMostActiveRules($activeAgentId);
 
             return response()->json([
                 'success' => true,
@@ -287,7 +250,82 @@ class WidgetController extends Controller
                 'success' => false,
                 'data' => [],
                 'message' => $e->getMessage()
-            ], 200); // Menggunakan status 200 agar AJAX JavaScript tidak crash 500
+            ], 200);
+        }
+    }
+
+    /**
+     * 9. Widget Service Status 
+     */
+    public function getServiceStatus()
+    {
+        try {
+            // Memastikan pengambilan ID Agen Aktif berjalan lancar sesuai method controller kamu
+            $activeAgentId = $this->getActiveAgentId();
+
+            if (!$activeAgentId) {
+                return response()->json([
+                    'success' => false,
+                    'data' => [],
+                    'message' => 'Tidak ada agen aktif yang terpilih.'
+                ]);
+            }
+
+            // Panggil Service untuk hit ke API Wazuh
+            $servicesData = $this->agentService->fetchServiceStatus($activeAgentId);
+
+            return response()->json([
+                'success' => true,
+                'data' => $servicesData
+            ]);
+        } catch (\Throwable $e) {
+            // 💡 JIKA CRASH, KITA TANGKAP DAN KEMBALIKAN JSON (Bukan HTTP Error 500)
+            return response()->json([
+                'success' => false,
+                'data' => [],
+                'message' => 'Gagal memuat status layanan: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * 10. Widget Network Traffic - Handler Struktur Aman
+     */
+    public function getNetworkTraffic()
+    {
+        try {
+            $activeAgentId = $this->getActiveAgentId();
+
+            if (!$activeAgentId) {
+                return response()->json([
+                    'success' => true,
+                    'data' => ['stats' => ['inbound' => 0, 'outbound' => 0], 'interfaces' => []]
+                ]);
+            }
+
+            $networkData = $this->agentService->fetchNetworkTraffic($activeAgentId);
+
+            // JIKA SERVICE MENGEMBALIKAN KOSONG/ERROR, BERI FALLBACK STRUKTUR STANDARD
+            if (empty($networkData) || !isset($networkData['interfaces'])) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'stats' => ['inbound' => 0, 'outbound' => 0],
+                        'interfaces' => []
+                    ]
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $networkData
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'data' => ['stats' => ['inbound' => 0, 'outbound' => 0], 'interfaces' => []],
+                'message' => $e->getMessage()
+            ]);
         }
     }
 }

@@ -10,17 +10,17 @@ class AdminDashboardController extends Controller
     protected $agentService;
     protected $alertService;
 
-    // DI via Constructor
     public function __construct(AgentService $agentService, AlertService $alertService)
     {
         $this->agentService = $agentService;
         $this->alertService = $alertService;
     }
 
+    // Code ini untuk: Mengambil status agen, grafik log mingguan, dan summary user dari service.
+    // Berfungsi untuk: Menampilkan halaman utama Dashboard Admin.
     public function index()
     {
         try {
-            // Ambil data manifestasi objek dari service
             $agents = $this->agentService->getAgents();
             $agentStats = $this->agentService->getAdminStats();
             $chartStats = $this->alertService->getWeeklyChartData();
@@ -39,7 +39,6 @@ class AdminDashboardController extends Controller
             ]);
 
         } catch (\Throwable $e) {
-            // Fallback jika API Wazuh Manager/Indexer down/gak hidup
             return view('Admin.dashboard', [
                 'error' => 'Server monitoring sedang tidak tersedia',
                 'agents' => [],

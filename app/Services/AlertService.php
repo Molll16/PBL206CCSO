@@ -8,36 +8,35 @@ class AlertService
 {
     protected $wazuh;
 
-    // Menghubungkan service ini dengan WazuhApiService untuk menarik data dari server Wazuh
     public function __construct(WazuhApiService $wazuh)
     {
         $this->wazuh = $wazuh;
     }
 
-    /**
-     * =========================================================================
-     * HELPER INTERNAL (Fungsi Pembantu agar Kode Ringkas & Bebas Garis Kuning)
-     * =========================================================================
-     */
+    // =========================================================================
+    // HELPER INTERNAL
+    // =========================================================================
 
-    // Mengambil semua data log mentah dari server Wazuh
+    // Code ini untuk: Mengambil semua data log mentah dari server Wazuh.
+    // Berfungsi untuk: Sumber data internal (tidak terikat halaman spesifik).
     public function getAlerts(): array
     {
         $raw = $this->wazuh->getRawAlerts();
         return empty($raw['error']) ? $this->mapAlerts($raw) : [];
     }
 
-    // Menyaring dan merapikan dokumen JSON Wazuh yang rumit ke array sederhana
+    // Code ini untuk: Menyaring dokumen JSON Wazuh ke array sederhana.
+    // Berfungsi untuk: Pembersihan data internal.
     private function mapAlerts($data): array
     {
-        if (!isset($data['hits']['hits']))
+        if (!isset($data['hits']['hits'])) {
             return [];
+        }
 
         $results = [];
         foreach ($data['hits']['hits'] as $item) {
             $source = $item['_source'] ?? [];
 
-            // Mencari deskripsi log (Fallback: cek deskripsi, jika kosong cek title, dst)
             $description = $source['rule']['description'] ??
                 $source['rule']['title'] ??
                 $source['data']['win']['eventdata']['targetUserName'] ??
@@ -58,10 +57,11 @@ class AlertService
         return $results;
     }
 
-    // Fungsi Ringkas: Otomatis mencari daftar ID agen milik user yang sedang login (Menghemat puluhan baris kode!)
+    // Code ini untuk: Mencari daftar ID agen milik user yang sedang login.
+    // Berfungsi untuk: Proteksi dan filter multi-tenant internal.
     private function getMyAgentIds(?string $agentId = null): array
     {
-        if ($agentId) {
+        if ($agentId && $agentId !== 'all') {
             return [str_pad($agentId, 3, '0', STR_PAD_LEFT)];
         }
 
@@ -74,14 +74,12 @@ class AlertService
             ->toArray();
     }
 
+    // =========================================================================
+    // HALAMAN: DASHBOARD CUSTOMER
+    // =========================================================================
 
-    /**
-     * =========================================================================
-     * FUNGSI UNTUK HALAMAN: DASHBOARD CUSTOMER / USER
-     * =========================================================================
-     */
-
-    // BAGIAN: Widget "Log Aktivitas Terbaru" (Menampilkan 5 atau beberapa log terakhir)
+    // Code ini untuk: Mengambil 5 log keamanan terbaru.
+    // Berfungsi untuk: Halaman Dashboard Customer, bagian widget "Alert Summary".
     public function getLatestAlerts(int $limit = 5, ?string $agentId = null)
     {
         $myAgents = $this->getMyAgentIds($agentId);
@@ -91,19 +89,18 @@ class AlertService
             ->take($limit);
     }
 
-    // BAGIAN: Widget "Threat Summary" / Ringkasan Ancaman (Donut/Pie Chart & List Top 5 Ancaman)
+    // Code ini untuk: Menghitung status tingkat bahaya log dan top 5 kategori ancaman.
+    // Berfungsi untuk: Halaman Dashboard Customer, bagian widget "Threat Summary" (Donut Chart & List).
     public function getThreatSummary(?string $agentId = null): array
     {
         $myAgents = $this->getMyAgentIds($agentId);
         $alerts = collect($this->getAlerts())->filter(fn($a) => in_array($a['agent']['id'] ?? null, $myAgents));
         $totalEvents = $alerts->count();
 
-        // Mengelompokkan status berdasarkan level tingkat bahaya
         $activeCount = $alerts->where('level', '>=', 10)->count();
         $pendingCount = $alerts->whereBetween('level', [5, 9])->count();
         $resolvedCount = $alerts->where('level', '<', 5)->count();
 
-        // Membuat data list Top 5 ancaman terbanyak beserta persentasenya
         $categories = $totalEvents === 0 ? [] : $alerts->groupBy('description')->map(function ($items, $name) use ($totalEvents) {
             $maxLevel = $items->max('level') ?? 0;
             return [
@@ -122,15 +119,17 @@ class AlertService
         ];
     }
 
-    // BAGIAN: Widget "Most Active Rules" (Progress Bar 3 Aturan Keamanan yang Paling Sering Terpicu)
+    // Code ini untuk: Mencari 3 aturan keamanan yang paling sering terpicu.
+    // Berfungsi untuk: Halaman Dashboard Customer, bagian widget "Most Active Rules" (Progress Bar).
     public function getMostActiveRules(?string $agentId = null): array
     {
         try {
             $myAgents = $this->getMyAgentIds($agentId);
             $alerts = collect($this->getAlerts())->filter(fn($a) => in_array($a['agent']['id'] ?? null, $myAgents));
 
-            if ($alerts->count() === 0)
+            if ($alerts->count() === 0) {
                 return [];
+            }
 
             $groupedRules = $alerts->groupBy('description')->map(function ($items, $description) {
                 return [
@@ -156,14 +155,12 @@ class AlertService
         }
     }
 
+    // =========================================================================
+    // HALAMAN: LOGS / FILTER & ANALYTICS
+    // =========================================================================
 
-    /**
-     * =========================================================================
-     * FUNGSI UNTUK HALAMAN: LOGS / FILTER & ANALYTICS
-     * =========================================================================
-     */
-
-    // BAGIAN: Halaman Utama "Daftar Log/Alerts" (Menampilkan tabel log dengan Filter Tanggal & Severity)
+    // Code ini untuk: Memfilter log berdasarkan tanggal, agen, dan tingkat keparahan (severity).
+    // Berfungsi untuk: Halaman Logs/Analytics, bagian tabel utama "Daftar Log/Alerts".
     public function getFilteredAlerts(?string $agentId = null, ?string $date = null, ?string $severity = null)
     {
         $myAgents = $this->getMyAgentIds($agentId);
@@ -171,7 +168,11 @@ class AlertService
 
         return collect($this->getAlerts())
             ->filter(fn($alert) => in_array($alert['agent']['id'] ?? null, $myAgents))
-            ->filter(fn($alert) => isset($alert['time']) && str_contains($alert['time'], $targetDate))
+            ->filter(function ($alert) use ($targetDate) {
+                if (!isset($alert['time']))
+                    return false;
+                return str_contains($alert['time'], $targetDate);
+            })
             ->filter(function ($alert) use ($severity) {
                 if (!$severity)
                     return true;
@@ -187,7 +188,8 @@ class AlertService
             ->values();
     }
 
-    // BAGIAN: Widget "Counter Card Statistik" (Menampilkan kotak total angka: Critical, High, Med, Low)
+    // Code ini untuk: Menghitung total angka statistik log harian (Critical, High, Medium, Low).
+    // Berfungsi untuk: Halaman Logs/Analytics, bagian card "Card Statistik".
     public function getLogsAnalytics(?string $agentId = null, ?string $date = null): array
     {
         $targetDate = $date ? $date : now()->format('Y-m-d');
@@ -202,14 +204,12 @@ class AlertService
         ];
     }
 
+    // =========================================================================
+    // HALAMAN: DASHBOARD UTAMA ADMIN
+    // =========================================================================
 
-    /**
-     * =========================================================================
-     * FUNGSI UNTUK HALAMAN: DASHBOARD UTAMA ADMIN
-     * =========================================================================
-     */
-
-    // BAGIAN: Grafik Batang / Area Chart (Menghitung tren total log per hari selama 7 hari terakhir)
+    // Code ini untuk: Menghitung tren total volume log harian selama 7 hari terakhir.
+    // Berfungsi untuk: Halaman Dashboard Utama Admin, bagian grafik batang/area chart.
     public function getWeeklyChartData(): array
     {
         $alerts = $this->getAlerts();

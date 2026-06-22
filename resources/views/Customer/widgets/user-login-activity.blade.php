@@ -36,7 +36,8 @@
                         return;
                     }
 
-                    container.innerHTML = '';
+                    // Menampung string HTML agar tidak membebani browser di dalam perulangan loop
+                    var htmlContent = '';
 
                     result.data.forEach(function (activity) {
                         var cardClasses = 'rounded-lg border px-3 py-2 ';
@@ -61,7 +62,7 @@
                             badgeClasses += 'border-cyan-500/30 text-cyan-400 bg-cyan-500/10';
                         }
 
-                        var row =
+                        htmlContent +=
                             '<div class="' + cardClasses + '">' +
                             '<div class="flex justify-between items-center">' +
                             '<div class="min-w-0 mr-3">' +
@@ -74,9 +75,10 @@
                             '</div>' +
                             '</div>' +
                             '</div>';
-
-                        container.innerHTML += row;
                     });
+
+                    // Terapkan semua data ke DOM sekaligus
+                    container.innerHTML = htmlContent;
                 })
                 .catch(function (error) {
                     console.error('Error loading user activities:', error);
@@ -88,10 +90,11 @@
                 });
         }
 
-        // Langsung eksekusi tanpa menunggu DOMContentLoaded
+        // Jalankan langsung dan atur interval polling data per 10 detik
         fetchUserLoginActivityData();
         setInterval(fetchUserLoginActivityData, 10000);
 
+        // Listener saat agen diganti dari dropdown dashboard global
         document.addEventListener('agentChanged', function () {
             var container = document.getElementById('user-login-activity-container');
             if (container) {

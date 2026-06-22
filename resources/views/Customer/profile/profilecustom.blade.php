@@ -63,18 +63,23 @@
           <i data-lucide="layout" class="w-4 h-4 text-brand"></i> Customization Stats
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      
           <div class="bg-surface border border-borderSubtle p-5 rounded-xl group cursor-default hover:border-brand/30 transition-all">
             <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-textMain transition-colors">Total Dashboards</p>
             <h2 class="text-3xl font-bold mt-2 text-textMain">{{ sprintf('%02d', $totalDashboard ?? 0) }}</h2>
           </div>
+      
           <div class="bg-surface border border-borderSubtle p-5 rounded-xl group cursor-default hover:border-brand/30 transition-all">
             <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-textMain transition-colors">Active Dashboards</p>
             <h2 class="text-3xl font-bold mt-2 text-textMain">{{ sprintf('%02d', $activeDashboard ?? 0) }}</h2>
           </div>
+      
           <div class="bg-surface border border-borderSubtle p-5 rounded-xl group cursor-default hover:border-brand/30 transition-all">
-            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-brand transition-colors">Dashboard In Use</p>
-            <h2 class="text-3xl font-bold mt-2 text-brand">ID: {{ $dashboardInUse }}</h2>
+            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-textMain transition-colors">Dashboard In Use</p>
+            <h2 class="text-3xl font-bold mt-2 text-textmain" title="{{ $dashboardNameInUse }}">
+              {{ $dashboardNameInUse }}</h2>
           </div>
+      
         </div>
       </div>
 
@@ -93,28 +98,30 @@
             <table class="w-full text-center text-sm">
               <thead class="bg-surface text-textMuted text-xs uppercase tracking-wider border-b border-borderSubtle">
                 <tr>
-                  <th class="p-4 font-semibold">ID</th>
                   <th class="p-4 font-semibold text-left">Dashboard Name</th>
                   <th class="p-4 font-semibold text-right">Status</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-borderSubtle bg-page/30">
                 @forelse($dashboards as $item)
-                <tr class="hover:bg-surface/60 transition-colors">
-                  <td class="p-4 text-textMuted font-mono text-xs">{{ sprintf('%02d', $item->id) }}</td>
-                  <td class="p-4 text-left font-semibold text-textMain translate-x-5">{{ $item->nama_dasbor }}</td>
-                  <td class="p-4 text-right">
-                    @if($item->status_dasbor === 'aktif')
-                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20">● In Use</span>
-                    @else
-                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-surface border border-borderSubtle text-textMuted">Active</span>
-                    @endif
-                  </td>
-                </tr>
+                  <tr class="hover:bg-surface/60 transition-colors">
+                    <td class="p-4 text-left font-semibold text-textMain translate-x-5">{{ $item->nama_dasbor }}</td>
+                    <td class="p-4 text-right">
+                      @if($item->status_dasbor === 'aktif')
+                        <span
+                          class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20">● In
+                          Use</span>
+                      @else
+                        <span
+                          class="px-2 py-0.5 rounded text-[10px] font-bold bg-surface border border-borderSubtle text-textMuted">Inactive</span>
+                      @endif
+                    </td>
+                  </tr>
                 @empty
-                <tr>
-                  <td colspan="3" class="text-center p-8 text-textMuted text-sm italic">Belum ada kustomisasi dashboard yang tersedia.</td>
-                </tr>
+                  <tr>
+                    <td colspan="3" class="text-center p-8 text-textMuted text-sm italic">Belum ada kustomisasi dashboard yang tersedia.
+                    </td>
+                  </tr>
                 @endforelse
               </tbody>
             </table>

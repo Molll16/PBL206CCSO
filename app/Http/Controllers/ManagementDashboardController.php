@@ -9,9 +9,8 @@ use App\Models\HasilKustom;
 
 class ManagementDashboardController extends Controller
 {
-    // CODE: Menyimpan susunan layout widget baru atau update layout yang lama.
-    // WEB: Halaman Kustomisasi -> Tombol "Save".
-    // UNTUK: Jika update, nama diperbarui dan widget lama dihapus dulu baru diisi ulang (Delete and Insert). Jika dashboard baru, sistem akan membuat record baru di database dengan status default 'nonaktif'.
+    // Code ini untuk: Menyimpan susunan layout kustomisasi widget baru atau memperbarui data lama.
+    // Berfungsi untuk: Aksi tombol "Save" pada kanvas kustomisasi dashboard Customer.
     public function save(Request $request)
     {
         if ($request->dashboard_id) {
@@ -45,9 +44,8 @@ class ManagementDashboardController extends Controller
         return response()->json(['success' => true]);
     }
 
-    // CODE: Mengambil data layout dashboard yang pernah disimpan sebelumnya untuk diedit kembali.
-    // WEB: Halaman List Dashboard -> Tombol "Edit" (Membuka kembali kanvas kustomisasi).
-    // UNTUK: Menampilkan kembali widget-widget di posisi grid semula (colSpan dan rowSpan) berdasarkan data dari database.
+    // Code ini untuk: Mengambil konfigurasi grid layout dashboard yang tersimpan untuk dimuat ulang.
+    // Berfungsi untuk: Menampilkan data pada halaman editor kustomisasi di panel Customer.
     public function edit($id)
     {
         $dashboard = DasborKustom::where('id', $id)
@@ -72,9 +70,8 @@ class ManagementDashboardController extends Controller
         return view('Customer.customize.kustom', compact('dashboard', 'fitur', 'hasil'));
     }
 
-    // CODE: Menghapus data dashboard beserta seluruh susunan widget di dalamnya.
-    // WEB: Halaman List Dashboard -> Tombol "Hapus/Delete".
-    // UNTUK: Membersihkan database. Record di tabel `hasil_kustoms` (widget) dihapus terlebih dahulu, baru kemudian row di `dasbor_kustoms` (parent) ikut dihapus.
+    // Code ini untuk: Menghapus satu template dashboard beserta seluruh relasi susunan widget di dalamnya.
+    // Berfungsi untuk: Tombol aksi "Hapus/Delete Dashboard" pada panel list Customer.
     public function destroy($id)
     {
         $dashboard = DasborKustom::where('id', $id)
@@ -87,9 +84,8 @@ class ManagementDashboardController extends Controller
         return redirect()->route('pilih-dasbor');
     }
 
-    // CODE: Mengubah status dashboard yang dipilih menjadi 'aktif' dan me-nonaktifkan yang lain.
-    // WEB: Halaman List Dashboard -> Tombol "Gunakan/Use Dashboard".
-    // UNTUK: Menentukan dashboard kustomisasi mana yang berhak tampil di halaman utama ketika Customer pertama kali login.
+    // Code ini untuk: Mengaktifkan satu template dashboard terpilih dan me-nonaktifkan yang lainnya.
+    // Berfungsi untuk: Tombol aksi "Gunakan/Use Dashboard" pada menu pilihan dashboard Customer.
     public function use($id)
     {
         DasborKustom::where('user_id', auth()->id())
