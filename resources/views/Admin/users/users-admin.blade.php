@@ -78,7 +78,7 @@
 
         {{-- Current Agent --}}
         <div class="px-5 pt-4 pb-2">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-textMuted mb-2">Agent Aktif</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-textMuted mb-2">Active Agent</p>
 
             <div id="current-agent-box"
                  class="hidden flex items-center gap-3 p-3 rounded-xl border border-borderSubtle bg-page/40">
@@ -92,36 +92,36 @@
             <div id="no-agent-box"
                  class="hidden flex items-center gap-2 p-3 rounded-xl border border-dashed border-borderSubtle text-xs text-textMuted">
                 <i data-lucide="unlink" class="w-4 h-4 flex-shrink-0"></i>
-                <span>Belum ada agent yang di-assign ke user ini</span>
+                <span>No agent assigned to this user</span>
             </div>
         </div>
 
         {{-- Agent List --}}
         <div class="px-5 pb-2">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-textMuted mb-2 mt-3">Pilih Agent</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-textMuted mb-2 mt-3">Select Agent</p>
 
             <div class="relative mb-3">
                 <i data-lucide="search"
                    class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-textMuted pointer-events-none"></i>
                 <input id="agent-search" type="text"
-                       placeholder="Cari nama atau IP..."
+                       placeholder="Search name or IP..."
                        oninput="filterAgents(this.value)"
                        class="w-full pl-8 pr-4 py-2 text-xs rounded-lg border border-borderSubtle bg-page text-textMain placeholder-textMuted focus:outline-none focus:border-brand/50 transition">
             </div>
 
             <div id="agent-list" class="agent-scroll space-y-1.5 max-h-48 overflow-y-auto pr-0.5"></div>
-            <p id="no-result" class="hidden text-center text-xs text-textMuted py-4">Tidak ada agent ditemukan</p>
+            <p id="no-result" class="hidden text-center text-xs text-textMuted py-4">No agents found</p>
         </div>
 
         {{-- Footer --}}
         <div class="flex items-center justify-end gap-2 px-5 py-4 border-t border-borderSubtle bg-page/20">
             <button onclick="closeModal()"
                     class="px-4 py-2 rounded-lg text-xs font-medium border border-borderSubtle text-textMuted hover:bg-borderSubtle hover:text-textMain transition">
-                Batal
+                Cancel
             </button>
             <button onclick="doAssign()"
                     class="px-5 py-2 rounded-lg text-xs font-semibold text-white bg-brand hover:bg-brandHover shadow-lg shadow-brand/20 transition-all duration-200">
-                Simpan
+                Save
             </button>
         </div>
 
@@ -172,12 +172,12 @@
 
         <div class="flex justify-between items-center">
             <div>
-                <h2 class="text-2xl font-bold tracking-tight text-textMain">Manajemen User</h2>
-                <p class="text-sm text-textMuted mt-1">Kelola hak akses dan akun pengguna</p>
+                <h2 class="text-2xl font-bold tracking-tight text-textMain">User Management</h2>
+                <p class="text-sm text-textMuted mt-1">Manage user permissions and accounts</p>
             </div>
             <a href="{{ route('adduser') }}">
                 <button class="bg-brand hover:bg-brandHover text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-lg shadow-brand/20 transition-all duration-200">
-                    + Tambah User Baru
+                    + Add New User
                 </button>
             </a>
         </div>
@@ -187,17 +187,15 @@
                 <table class="w-full text-center border-collapse">
                     <thead>
                         <tr class="border-b border-borderSubtle bg-page/30 text-[11px] font-bold uppercase tracking-wider text-textMuted">
-                            <th class="py-3 px-5">ID</th>
                             <th class="py-3 px-5">Username</th>
                             <th class="py-3 px-5">Email</th>
                             <th class="py-3 px-5">Role</th>
-                            <th class="py-3 px-5 text-right">Aksi</th>
+                            <th class="py-3 px-5 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-borderSubtle text-xs text-textMain">
                         @foreach($users as $user)
                         <tr class="hover:bg-page/40 transition-colors">
-                            <td class="py-3.5 px-5 text-textMuted font-mono">#{{ $user->id }}</td>
                             <td class="py-3.5 px-5 font-semibold text-textMain">{{ $user->username }}</td>
                             <td class="py-3.5 px-5 text-textMuted">{{ $user->email }}</td>
                             <td class="py-3.5 px-5">

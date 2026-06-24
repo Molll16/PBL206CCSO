@@ -39,7 +39,7 @@
 
         <main class="p-8 max-w-2xl mx-auto space-y-6">
             <div>
-                <h2 class="text-2xl font-bold tracking-tight text-textMain">Konfigurasikan Agen pada Customer</h2>
+                <h2 class="text-2xl font-bold tracking-tight text-textMain">Configure Agent Assignment</h2>
             </div>
 
             @if(session('success'))
@@ -91,11 +91,11 @@
                     <div class="pt-4 border-t border-borderSubtle flex justify-end gap-3">
                         <button type="button" onclick="history.back()"
                             class="bg-surface border border-borderSubtle px-5 py-2.5 rounded-lg text-xs text-textMain font-medium hover:bg-borderSubtle transition-all">
-                            Batal
+                            Cancel
                         </button>
                         <button type="submit"
                             class="bg-brand hover:bg-brandHover text-white text-xs font-semibold px-5 py-2.5 rounded-lg shadow-lg shadow-brand/20 transition-all duration-200">
-                            Tugaskan Sekarang
+                            Assign Now
                         </button>
                     </div>
                 </form>

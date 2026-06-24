@@ -37,7 +37,7 @@
                 class="lg:col-span-4 bg-surface border border-borderSubtle rounded-xl p-5 flex flex-col items-center justify-center min-h-[220px]">
                 <p
                     class="text-xs font-semibold uppercase tracking-wider text-textMuted self-start mb-2 flex items-center gap-2">
-                    <i data-lucide="pie-chart" class="w-4 h-4 text-brand"></i> Distribusi Alert
+                    <i data-lucide="pie-chart" class="w-4 h-4 text-brand"></i> Alert Distribution
                 </p>
                 <div class="w-full max-w-[150px] relative flex items-center justify-center">
                     <canvas id="alertPieChart"></canvas>
@@ -74,7 +74,7 @@
                 <div class="relative">
                     <select name="severity" onchange="this.form.submit()"
                         class="w-full appearance-none bg-[#121318] border border-[#262833] rounded-lg px-3 py-2 text-xs text-[#f1f3f9] focus:outline-none focus:border-[#6366f1] cursor-pointer pr-8">
-                        <option value="">Semua Level</option>
+                        <option value="">All Levels</option>
                         <option value="critical" {{ ($selectedSeverity ?? '') == 'critical' ? 'selected' : '' }}>Critical</option>
                         <option value="high" {{ ($selectedSeverity ?? '') == 'high' ? 'selected' : '' }}>High</option>
                         <option value="medium" {{ ($selectedSeverity ?? '') == 'medium' ? 'selected' : '' }}>Medium</option>
@@ -88,7 +88,7 @@
         
             {{-- Filter Input Tanggal (History/Hari ini) --}}
             <div class="flex flex-col gap-1.5 flex-1 min-w-[160px] sm:flex-none">
-                <label class="text-[11px] text-[#787f99] font-bold uppercase tracking-wider">Tanggal</label>
+                <label class="text-[11px] text-[#787f99] font-bold uppercase tracking-wider">Date</label>
                 <input type="date" name="date" value="{{ $selectedDate ?? now()->format('Y-m-d') }}"
                     onchange="this.form.submit()"
                     class="w-full bg-[#121318] border border-[#262833] rounded-lg px-3 py-2 text-xs text-[#f1f3f9] focus:outline-none focus:border-[#6366f1] [color-scheme:dark] cursor-pointer">
@@ -120,12 +120,12 @@
                 <table class="w-full text-left text-xs border-collapse">
                     <thead>
                         <tr class="bg-surface text-textMuted uppercase font-semibold border-b border-borderSubtle">
-                            <th class="p-4">Waktu</th>
+                            <th class="p-4">Time</th>
                             <th class="p-4">Level</th>
                             <th class="p-4">Agent</th>
                             <th class="p-4">User</th>
-                            <th class="p-4">Deskripsi Ancaman</th>
-                            <th class="p-4 text-right">Aksi</th>
+                            <th class="p-4">Threat Description</th>
+                            <th class="p-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-borderSubtle bg-page/10">
@@ -157,8 +157,8 @@
                                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center p-8 text-textMuted italic">Tidak ada data log pada
-                                    kriteria filter ini.</td>
+                                <td colspan="6" class="text-center p-8 text-textMuted italic">No log data available for
+                                    the selected filter criteria.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -168,8 +168,8 @@
             {{-- FOOTER PAGINATION SLIDE (Maksimal 20 Baris Data Otomatis Muncul Navigasi Halaman) --}}
             @if($alerts->hasPages())
                 <div class="p-4 border-t border-borderSubtle bg-page/20 flex justify-between items-center text-xs">
-                    <span class="text-textMuted">Menampilkan data {{ $alerts->firstItem() }} - {{ $alerts->lastItem() }}
-                        dari {{ $alerts->total() }} logs</span>
+                    <span class="text-textMuted">Showing data {{ $alerts->firstItem() }} - {{ $alerts->lastItem() }}
+                        of {{ $alerts->total() }} logs</span>
                     <div class="flex gap-2">
                         @if($alerts->onFirstPage())
                             <span
@@ -197,8 +197,7 @@
             class="bg-surface border border-borderSubtle rounded-2xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl">
             <div class="p-5 border-b border-borderSubtle flex justify-between items-center bg-page/40">
                 <div>
-                    <h2 class="text-sm font-bold text-textMain">Detail Log Keamanan</h2>
-                    <p class="text-[10px] text-textMuted">Struktur Data Mapped JSON dari Wazuh API</p>
+                    <h2 class="text-sm font-bold text-textMain">Alert Details</h2>
                 </div>
                 <button onclick="closeModal()" class="text-textMuted hover:text-textMain"><i data-lucide="x"
                         class="w-4 h-4"></i></button>
@@ -210,16 +209,16 @@
                         <span id="modalAgent" class="text-textMain font-semibold">-</span>
                     </div>
                     <div class="flex justify-between border-b border-borderSubtle pb-2">
-                        <span class="text-textMuted">Waktu Kejadian:</span>
+                        <span class="text-textMuted">Event Time:</span>
                         <span id="modalTime" class="text-textMain font-mono">-</span>
                     </div>
                     <div class="flex justify-between border-b border-borderSubtle pb-2">
-                        <span class="text-textMuted">User Terpapar:</span>
+                        <span class="text-textMuted">User Affected:</span>
                         <span id="modalUser" class="text-yellow-400 font-mono">-</span>
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-[11px] font-bold text-brand uppercase mb-1">Deskripsi Ancaman</h3>
+                    <h3 class="text-[11px] font-bold text-brand uppercase mb-1">Threat Description</h3>
                     <div class="bg-page border border-borderSubtle rounded-lg p-3 text-xs text-textMuted leading-relaxed"
                         id="modalDesc">-</div>
                 </div>

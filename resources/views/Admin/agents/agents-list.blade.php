@@ -55,7 +55,7 @@
                     class="bg-[#222428] border border-white/10 p-5 rounded-xl hover:border-cyan-400/30 transition-all duration-300 group">
                     <p
                         class="text-xs font-semibold uppercase tracking-wider text-gray-400 group-hover:text-gray-300 transition-colors">
-                        Total Agent
+                        Total Agents
                     </p>
                     <h2 class="text-4xl font-bold mt-2 text-cyan-400 tracking-tight">
                         {{ $totalAgents }}
@@ -77,13 +77,13 @@
 
             <div class="flex justify-between items-center">
                 <div>
-                    <h2 class="text-2xl font-bold tracking-tight text-textMain">Agen Terdaftar (Wazuh)</h2>
-                    <p class="text-sm text-textMuted mt-1">Daftar entitas perangkat server dan workstation yang terhubung</p>
+                    <h2 class="text-2xl font-bold tracking-tight text-textMain">Registered Agents</h2>
+                    <p class="text-sm text-textMuted mt-1">List of connected server and workstation devices</p>
                 </div>
                 <a href="{{ route('assignagent') }}">
                     <button
                         class="bg-brand hover:bg-brandHover text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-lg shadow-brand/20 transition-all duration-200">
-                        + Tugaskan Agen
+                        + Assign Agent
                     </button>
                 </a>
             </div>

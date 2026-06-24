@@ -37,8 +37,8 @@
 
   <main class="p-8 max-w-2xl mx-auto space-y-6">
     <div>
-      <h2 class="text-2xl font-bold tracking-tight text-textMain">Tambah User Baru</h2>
-      <p class="text-sm text-textMuted mt-1">Daftarkan akun Customer</p>
+      <h2 class="text-2xl font-bold tracking-tight text-textMain">Add New User</h2>
+      <p class="text-sm text-textMuted mt-1">Register a new customer account</p>
     </div>
 
     @if($errors->any())
@@ -54,41 +54,41 @@
         @csrf
 
         <div>
-          <label class="block text-xs font-semibold text-textMuted uppercase tracking-wider mb-2">Nama Lengkap</label>
-          <input type="text" name="name" required placeholder="Masukkan nama lengkap Anda..." 
+          <label class="block text-xs font-semibold text-textMuted uppercase tracking-wider mb-2">Full Name</label>
+          <input type="text" name="name" required placeholder="Enter your full name..." 
             class="w-full rounded-lg px-4 py-2.5 text-sm border border-borderSubtle bg-page text-textMain placeholder-textMuted outline-none focus:border-brand focus:ring-1 focus:ring-brand transition duration-200">
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-textMuted uppercase tracking-wider mb-2">Username</label>
-          <input type="text" name="username" required placeholder="Masukkan nama pengguna..." 
+          <input type="text" name="username" required placeholder="Enter your username..." 
             class="w-full rounded-lg px-4 py-2.5 text-sm border border-borderSubtle bg-page text-textMain placeholder-textMuted outline-none focus:border-brand focus:ring-1 focus:ring-brand transition duration-200">
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-textMuted uppercase tracking-wider mb-2">Alamat Email</label>
+          <label class="block text-xs font-semibold text-textMuted uppercase tracking-wider mb-2">Email Address</label>
           <input type="email" name="email" required placeholder="name@company.com" 
             class="w-full rounded-lg px-4 py-2.5 text-sm border border-borderSubtle bg-page text-textMain placeholder-textMuted outline-none focus:border-brand focus:ring-1 focus:ring-brand transition duration-200">
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-textMuted uppercase tracking-wider mb-2">Phone Number</label>
-          <input type="text" name="no_telp" required placeholder="Masukkan nomor telepon..." 
+          <input type="text" name="no_telp" required placeholder="Enter phone number..." 
             class="w-full rounded-lg px-4 py-2.5 text-sm border border-borderSubtle bg-page text-textMain placeholder-textMuted outline-none focus:border-brand focus:ring-1 focus:ring-brand transition duration-200">
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-textMuted uppercase tracking-wider mb-2">Kata Sandi</label>
+          <label class="block text-xs font-semibold text-textMuted uppercase tracking-wider mb-2">Password</label>
           <input type="password" name="password" required placeholder="" 
             class="w-full rounded-lg px-4 py-2.5 text-sm border border-borderSubtle bg-page text-textMain placeholder-textMuted outline-none focus:border-brand focus:ring-1 focus:ring-brand transition duration-200">
         </div>
 
         <div class="pt-4 border-t border-borderSubtle flex justify-end gap-3">
           <button type="button" onclick="history.back()" class="bg-surface border border-borderSubtle px-5 py-2.5 rounded-lg text-xs text-textMain font-medium hover:bg-borderSubtle transition-all">
-            Batal
+            Cancel
           </button>
           <button type="submit" class="bg-brand hover:bg-brandHover text-white text-xs font-semibold px-5 py-2.5 rounded-lg shadow-lg shadow-brand/20 transition-all duration-200">
-            Simpan Akun
+            Save Account
           </button>
         </div>
       </form>

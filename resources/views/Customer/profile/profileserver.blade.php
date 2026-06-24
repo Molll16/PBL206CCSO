@@ -60,19 +60,19 @@
       <!-- ===== AGENT LOG STATS ===== -->
       <div>
         <h3 class="text-sm font-semibold text-textMain mb-3 flex items-center gap-2">
-          <i data-lucide="activity" class="w-4 h-4 text-brand"></i> Agent Log
+          <i data-lucide="activity" class="w-4 h-4 text-brand"></i> Server Log Stats
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="bg-surface border border-borderSubtle p-5 rounded-xl group cursor-default hover:border-brand/30 transition-all">
-            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-textMain transition-colors">Total Agents</p>
+            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-textMain transition-colors">Total Servers</p>
             <h2 class="text-3xl font-bold mt-2 text-textMain">{{ sprintf('%02d', $agentsTotal ?? 0) }}</h2>
           </div>
           <div class="bg-surface border border-borderSubtle p-5 rounded-xl group cursor-default hover:border-green-500/30 transition-all">
-            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-green-400 transition-colors">Active Agents</p>
+            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-green-400 transition-colors">Active Servers</p>
             <h2 class="text-3xl font-bold mt-2 text-green-400">{{ sprintf('%02d', $activeAgents ?? 0) }}</h2>
           </div>
           <div class="bg-surface border border-borderSubtle p-5 rounded-xl group cursor-default hover:border-red-500/30 transition-all">
-            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-red-400 transition-colors">Disconnect Agents</p>
+            <p class="text-xs text-textMuted uppercase tracking-wider font-semibold group-hover:text-red-400 transition-colors">Disconnect Servers</p>
             <h2 class="text-3xl font-bold mt-2 text-red-400">{{ sprintf('%02d', $disconnectAgents ?? 0) }}</h2>
           </div>
         </div>
@@ -83,7 +83,7 @@
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-sm font-semibold text-textMain flex items-center gap-2">
             <i data-lucide="server" class="w-4 h-4 text-brand"></i>
-            Agents
+            Servers
             <span
               class="text-[10px] bg-page border border-borderSubtle px-2 py-0.5 rounded-full text-textMuted">{{ count($agents) }}</span>
           </h3>
@@ -102,8 +102,8 @@
               </thead>
               <tbody class="divide-y divide-borderSubtle bg-page/30">
                 @php
-                  // Membaca session agen aktif, default mengambil dari agen pertama jika session belum terbentuk
-                  $sessionActiveAgentId = session('active_wazuh_agent_id', collect($agents)->first()->id_wazuh ?? null);
+// Membaca session agen aktif, default mengambil dari agen pertama jika session belum terbentuk
+$sessionActiveAgentId = session('active_wazuh_agent_id', collect($agents)->first()->id_wazuh ?? null);
                 @endphp
       
                 @forelse($agents as $agent)
@@ -145,8 +145,7 @@
                   </tr>
                 @empty
                   <tr>
-                    <td colspan="4" class="text-center p-8 text-textMuted text-sm italic">Tidak ada server atau agent yang
-                      terdaftar pada akun Anda.</td>
+                    <td colspan="4" class="text-center p-8 text-textMuted text-sm italic">No servers are registered to your account.</td>
                   </tr>
                 @endforelse
               </tbody>
