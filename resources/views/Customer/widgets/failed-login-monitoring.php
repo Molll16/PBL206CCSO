@@ -1,4 +1,3 @@
-{{-- resources/views/Customer/widgets/failed-login-monitoring.blade.php --}}
 
 <div class="flex flex-col h-full justify-between select-none p-1">
     <div class="flex items-center gap-2">
