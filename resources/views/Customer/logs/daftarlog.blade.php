@@ -86,16 +86,8 @@
                 </div>
             </div>
         
-            {{-- Filter Input Tanggal (History/Hari ini) --}}
-            <div class="flex flex-col gap-1.5 flex-1 min-w-[160px] sm:flex-none">
-                <label class="text-[11px] text-[#787f99] font-bold uppercase tracking-wider">Date</label>
-                <input type="date" name="date" value="{{ $selectedDate ?? now()->format('Y-m-d') }}"
-                    onchange="this.form.submit()"
-                    class="w-full bg-[#121318] border border-[#262833] rounded-lg px-3 py-2 text-xs text-[#f1f3f9] focus:outline-none focus:border-[#6366f1] [color-scheme:dark] cursor-pointer">
-            </div>
-        
             {{-- Tombol Reset Filter jika sedang aktif --}}
-            @if(request('severity') || request('date'))
+            @if(request('severity'))
                 <div class="pb-0.5">
                     <a href="{{ url()->current() }}"
                         class="inline-flex items-center gap-1.5 text-xs text-[#787f99] hover:text-[#f1f3f9] border border-[#262833] bg-[#121318]/50 px-3 py-2 rounded-lg transition-all">
@@ -104,12 +96,13 @@
                 </div>
             @endif
         </form>
-
+        
         {{-- 2. TABEL LOGS --}}
         <div class="bg-surface border border-borderSubtle rounded-xl overflow-hidden shadow-sm">
             <div class="p-4 border-b border-borderSubtle bg-page/30 flex justify-between items-center">
+                {{-- Judul header tabel disesuaikan menjadi Live Stream, kolom TIME di dalam tabel tetap aman --}}
                 <span class="text-xs font-bold uppercase text-textMuted">Alerts Logs:
-                    {{ date('d M Y', strtotime($selectedDate)) }} (Total: {{ $alerts->total() }})</span>
+                    Live Stream (Total: {{ $alerts->total() }})</span>
                 <button onclick="location.reload()"
                     class="bg-brand text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5">
                     <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh

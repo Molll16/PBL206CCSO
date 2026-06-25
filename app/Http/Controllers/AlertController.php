@@ -37,22 +37,21 @@ class AlertController extends Controller
         return $this->alertService->getLatestAlerts(5, $activeAgentId);
     }
 
-    // Code ini untuk: Mengambil log terfilter, kalkulasi statistik card harian, dan memproses pagination.
-    // Berfungsi untuk: Menampilkan halaman utama menu "Logs / Filter & Analytics" di sisi Customer.
+    // Code ini untuk: Mengambil log terfilter, kalkulasi statistik card, dan memproses pagination.
+    // Berfungsi untuk: Menampilkan halaman utama menu "Alert page" di sisi Customer.
     public function index(Request $request)
     {
         // 1. Ambil ID agen aktif dari session
         $activeAgentId = $this->getActiveAgentId();
 
         // 2. Menangkap parameter request filter dari element HTML Form di Blade
-        $selectedDate = $request->input('date', now()->format('Y-m-d'));
         $selectedSeverity = $request->input('severity');
 
-        // 3. Ambil data hitungan angka counter card statistik berdasarkan tanggal terpilih
-        $analyticsData = $this->alertService->getLogsAnalytics($activeAgentId, $selectedDate);
+        // 3. Ambil data hitungan angka counter card statistik
+        $analyticsData = $this->alertService->getLogsAnalytics($activeAgentId);
 
-        // 4. Ambil data baris log yang sudah disaring berdasarkan tanggal dan severity
-        $allFilteredAlerts = $this->alertService->getFilteredAlerts($activeAgentId, $selectedDate, $selectedSeverity);
+        // 4. Ambil data baris log yang sudah disaring berdasarkan severity
+        $allFilteredAlerts = $this->alertService->getFilteredAlerts($activeAgentId, $selectedSeverity);
 
         // 5. Membuat pagination manual dari data array (20 baris per halaman)
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
@@ -70,7 +69,6 @@ class AlertController extends Controller
         // 6. Mengirim data statistik dan hasil paginasi ke view Blade
         return view('Customer.logs.daftarlog', array_merge($analyticsData, [
             'alerts' => $paginatedAlerts,
-            'selectedDate' => $selectedDate,
             'selectedSeverity' => $selectedSeverity
         ]));
     }

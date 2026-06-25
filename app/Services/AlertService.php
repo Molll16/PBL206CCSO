@@ -159,20 +159,14 @@ class AlertService
     // HALAMAN: LOGS / FILTER & ANALYTICS
     // =========================================================================
 
-    // Code ini untuk: Memfilter log berdasarkan tanggal, agen, dan tingkat keparahan (severity).
-    // Berfungsi untuk: Halaman Logs/Analytics, bagian tabel utama "Daftar Log/Alerts".
-    public function getFilteredAlerts(?string $agentId = null, ?string $date = null, ?string $severity = null)
+    // Code ini untuk: Memfilter log berdasarkan agen, dan tingkat keparahan (severity).
+    // Berfungsi untuk: Halaman Alert Customer, bagian tabel utama "Daftar Log/Alerts".
+    public function getFilteredAlerts(?string $agentId = null, ?string $severity = null)
     {
         $myAgents = $this->getMyAgentIds($agentId);
-        $targetDate = $date ? $date : now()->format('Y-m-d');
 
         return collect($this->getAlerts())
             ->filter(fn($alert) => in_array($alert['agent']['id'] ?? null, $myAgents))
-            ->filter(function ($alert) use ($targetDate) {
-                if (!isset($alert['time']))
-                    return false;
-                return str_contains($alert['time'], $targetDate);
-            })
             ->filter(function ($alert) use ($severity) {
                 if (!$severity)
                     return true;
@@ -188,19 +182,18 @@ class AlertService
             ->values();
     }
 
-    // Code ini untuk: Menghitung total angka statistik log harian (Critical, High, Medium, Low).
+    // Code ini untuk: Menghitung total angka statistik log (Critical, High, Medium, Low).
     // Berfungsi untuk: Halaman Logs/Analytics, bagian card "Card Statistik".
-    public function getLogsAnalytics(?string $agentId = null, ?string $date = null): array
+    public function getLogsAnalytics(?string $agentId = null): array
     {
-        $targetDate = $date ? $date : now()->format('Y-m-d');
-        $allAlertsForDate = $this->getFilteredAlerts($agentId, $targetDate, null);
+        $allAlerts = $this->getFilteredAlerts($agentId, null);
 
         return [
-            'totalAlerts' => $allAlertsForDate->count(),
-            'criticalAlerts' => $allAlertsForDate->where('level', '>=', 13)->count(),
-            'highAlerts' => $allAlertsForDate->whereBetween('level', [10, 12])->count(),
-            'mediumAlerts' => $allAlertsForDate->whereBetween('level', [5, 9])->count(),
-            'lowAlerts' => $allAlertsForDate->where('level', '<', 5)->count(),
+            'totalAlerts' => $allAlerts->count(),
+            'criticalAlerts' => $allAlerts->where('level', '>=', 13)->count(),
+            'highAlerts' => $allAlerts->whereBetween('level', [10, 12])->count(),
+            'mediumAlerts' => $allAlerts->whereBetween('level', [5, 9])->count(),
+            'lowAlerts' => $allAlerts->where('level', '<', 5)->count(),
         ];
     }
 
