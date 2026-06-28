@@ -36,15 +36,15 @@ return [
     ],
 
     'wazuh' => [
-        'url' => env('WAZUH_URL'),
-        'user' => env('WAZUH_USER'),
-        'pass' => env('WAZUH_PASS'),
+        'url' => env('WAZUH_URL', 'https://192.168.56.106:55000'),
+        'user' => env('WAZUH_USER', 'wazuh-wui'),
+        'pass' => env('WAZUH_PASS', '7EnRDknX3CqKGJsWUo7lyJ?y1GdTmAk?'),
     ],
 
     'indexer' => [
-        'url' => env('INDEXER_URL'),
-        'user' => env('INDEXER_USER'),
-        'pass' => env('INDEXER_PASS'),
+        'url' => env('INDEXER_URL', 'https://192.168.56.106:9200'),
+        'user' => env('INDEXER_USER', 'admin'),
+        'pass' => env('INDEXER_PASS', 'BeGt0qZi8IIzpmXgHmz9FLr7p*sxgN6L'),
     ],
 
 ];
