@@ -18,7 +18,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     // ================================
     // DASHBOARD
     // ================================
-    Route::get('/dashboard',
+    Route::get(
+        '/dashboard',
         [AdminDashboardController::class, 'index']
     )->name('dashboard-admin');
 
@@ -28,32 +29,38 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     // ================================
 
     // LIST CUSTOMER
-    Route::get('/users',
+    Route::get(
+        '/users',
         [CustomerController::class, 'index']
     )->name('usersadmin');
 
     // FORM CREATE CUSTOMER
-    Route::get('/users/create',
+    Route::get(
+        '/users/create',
         [CustomerController::class, 'create']
     )->name('adduser');
 
     // SIMPAN CUSTOMER
-    Route::post('/users/create',
+    Route::post(
+        '/users/create',
         [CustomerController::class, 'store']
     )->name('customers.store');
 
     // FORM EDIT CUSTOMER
-    Route::get('/customers/{id}/edit',
+    Route::get(
+        '/customers/{id}/edit',
         [CustomerController::class, 'edit']
     )->name('customers.edit');
 
     // UPDATE CUSTOMER
-    Route::put('/customers/{id}',
+    Route::put(
+        '/customers/{id}',
         [CustomerController::class, 'update']
     )->name('customers.update');
 
     // DELETE CUSTOMER
-    Route::delete('/customers/{id}',
+    Route::delete(
+        '/customers/{id}',
         [CustomerController::class, 'destroy']
     )->name('customers.destroy');
 
@@ -61,20 +68,30 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     // ================================
     // AGENT
     // ================================
-    Route::get('/agents',
+    Route::get(
+        '/agents',
         [AgentController::class, 'agents']
     )->name('agents-list');
 
-    Route::get('/assign-agent',
+    // Code ini untuk: Menghubungkan halaman detail agen admin dengan controller
+    // Berfungsi pada halaman: List Agent Admin saat tombol View diklik
+    Route::get(
+        '/agent/{id}',
+        [AgentController::class, 'showDetailAgent']
+    )->name('admin.agent.show');
+
+    Route::get(
+        '/assign-agent',
         [AgentController::class, 'assignAgentPage']
     )->name('assignagent');
 
-    Route::post('/assign-agent/save',
+    Route::post(
+        '/assign-agent/save',
         [AgentController::class, 'saveAssignAgent']
     )->name('assignagent.save');
 
     // Daftarkan di dalam middleware admin/auth kamu yang mengatur halaman agent list
-    Route::get('/admin/agents/sync-refresh', [AgentController::class, 'refreshSync'])->name('agents.refresh');
+    Route::get('/agents/sync-refresh', [AgentController::class, 'refreshSync'])->name('agents.refresh');
 
 
     // ======== //
@@ -100,6 +117,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
             [ProfileController::class, 'update']
         )->name('profile.update');
 
+        // UPDATE PASSWORD
         Route::post(
             '/change-password',
             [ProfileController::class, 'updatePassword']

@@ -93,37 +93,54 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-center border-collapse">
                         <thead>
-                            <tr class="border-b border-borderSubtle bg-page/30 text-[11px] font-bold uppercase tracking-wider text-textMuted">
+                            <tr
+                                class="border-b border-borderSubtle bg-page/30 text-[11px] font-bold uppercase tracking-wider text-textMuted">
                                 <th class="py-3 px-5">ID</th>
                                 <th class="py-3 px-5">Name</th>
                                 <th class="py-3 px-5">IP</th>
                                 <th class="py-3 px-5">Status</th>
                                 <th class="py-3 px-5">OS</th>
                                 <th class="py-3 px-5">Added On</th>
+                                <th class="py-3 px-5 text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-borderSubtle text-xs text-textMain">
                             @forelse($agents as $agent)
-                            <tr class="hover:bg-page/40 transition-colors">
-                                <td class="py-3.5 px-5 text-textMuted font-mono">{{ $agent['id'] }}</td>
-                                <td class="py-3.5 px-5 font-semibold text-brand">{{ $agent['name'] }}</td>
-                                <td class="py-3.5 px-5 text-textMuted font-mono">{{ $agent['ip'] ?? '-' }}</td>
+                                <tr class="hover:bg-page/40 transition-colors">
+                                    <td class="py-3.5 px-5 text-textMuted font-mono">{{ $agent['id'] }}</td>
+                                    <td class="py-3.5 px-5 font-semibold text-brand">{{ $agent['name'] }}</td>
+                                    <td class="py-3.5 px-5 text-textMuted font-mono">{{ $agent['ip'] ?? '-' }}</td>
 
-                                <td class="py-3.5 px-5">
-                                    @if($agent['status'] == 'active')
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20">● Active</span>
-                                    @else
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">● Offline</span>
-                                    @endif
-                                </td>
+                                    <td class="py-3.5 px-5">
+                                        @if($agent['status'] == 'active')
+                                            <span
+                                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20">●
+                                                Active</span>
+                                        @else
+                                            <span
+                                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">●
+                                                Offline</span>
+                                        @endif
+                                    </td>
 
-                                <td class="py-3.5 px-5 text-textMuted">{{ $agent['os']['name'] ?? '-' }}</td>
-                                <td class="py-3.5 px-5 text-textMuted">{{ \Carbon\Carbon::parse($agent['dateAdd'])->format('d M Y H:i') }}</td>
-                            </tr>
+                                    <td class="py-3.5 px-5 text-textMuted">{{ $agent['os']['name'] ?? '-' }}</td>
+                                    <td class="py-3.5 px-5 text-textMuted">{{ \Carbon\Carbon::parse($agent['dateAdd'])->format('d M Y H:i') }}
+                                    </td>
+
+                                    <td class="py-3.5 px-5 text-center">
+                                        <div class="flex items-center justify-center">
+                                            <a href="{{ route('admin.agent.show', $agent['id']) }}"
+                                                class="p-2 bg-brand/10 hover:bg-brand text-brand hover:text-white rounded-lg transition-all duration-200 flex items-center justify-center group"
+                                                title="View Details">
+                                                <i data-lucide="eye" class="w-4 h-4 transition-transform group-hover:scale-110"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
                             @empty
-                            <tr>
-                                <td colspan="6" class="py-10 text-center text-textMuted">No Agent Found</td>
-                            </tr>
+                                <tr>
+                                    <td colspan="7" class="py-10 text-center text-textMuted">No Agent Found</td>
+                                </tr>
                             @endforelse
                         </tbody>
                     </table>

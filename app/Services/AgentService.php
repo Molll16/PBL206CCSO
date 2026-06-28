@@ -7,7 +7,9 @@ use App\Models\User;
 
 /**
  * Class AgentService
- * Menjadi penghubung utama antara aplikasi Laravel kita dengan API Server Wazuh.
+ * Code ini untuk: Menghubungkan backend aplikasi Laravel dengan API Endpoint Server Wazuh secara terpusat.
+ * Berfungsi pada halaman: Halaman Admin (Dashboard & Detail Agen) dan Halaman Customer (Dashboard & Logs).
+ * Dibagian fitur: Integrasi data SIEM, pemantauan resource perangkat keras, log aktivitas user, audit FIM, dan status jaringan.
  */
 class AgentService
 {
@@ -19,33 +21,31 @@ class AgentService
     }
 
     /**
-     * Mengambil semua daftar agen tanpa filter langsung dari server Wazuh.
+     * Code ini untuk: Menarik seluruh daftar agen mentah dari server Wazuh.
+     * Berfungsi pada halaman: Manajemen Agen Admin & Sinkronisasi Agen Customer.
      */
     public function getAgents()
     {
-        $response = $this->wazuh->agents();
-        return $response['data']['affected_items'] ?? [];
+        return $this->wazuh->agents()['data']['affected_items'] ?? [];
     }
 
     /**
-     * Mencari agen yang masih kosong atau belum dipakai oleh pelanggan manapun.
+     * Code ini untuk: Menyaring agen Wazuh yang belum di-pairing (belum dimiliki) oleh customer manapun.
+     * Berfungsi pada halaman: Form Tambah/Edit Agen di sisi Administrator.
      */
     public function getAvailableAgents()
     {
-        $agents = $this->getAgents();
-
-        // Ambil semua ID agen yang sudah terdaftar di database kita
         $assignedAgents = Agen::pluck('id_wazuh_agen')->toArray();
 
-        // Saring agen yang ID-nya TIDAK ADA di dalam database kita
-        return collect($agents)
+        return collect($this->getAgents())
             ->whereNotIn('id', $assignedAgents)
             ->values()
             ->toArray();
     }
 
     /**
-     * Menghitung total status operasional seluruh agen secara global (untuk halaman Admin).
+     * Code ini untuk: Menghitung akumulasi status operasional (Active, Disconnected, dll) seluruh mesin agen.
+     * Berfungsi pada halaman: Dashboard Utama Panel Admin.
      */
     public function getAdminStats(): array
     {
@@ -61,132 +61,107 @@ class AgentService
     }
 
     /**
-     * Menghitung berapa agen yang online dan offline khusus milik pelanggan yang sedang login.
+     * Code ini untuk: Menghitung status online/offline agen spesifik milik satu customer yang sedang login.
+     * Berfungsi pada halaman: Dashboard Utama Panel Customer.
      */
     public function getCustomerStats(): array
     {
-        // 1. Ambil daftar ID agen milik user yang sedang login saat ini
         $myAgents = Agen::where('user_id', auth()->id())->pluck('id_wazuh_agen')->toArray();
-
-        // 2. Ambil data dari Wazuh, lalu saring yang hanya milik user ini
         $agents = collect($this->getAgents())->whereIn('id', $myAgents);
-
-        // 3. Kelompokkan berdasarkan status aktif atau tidak
-        $onlineCount = $agents->filter(fn($a) => strtolower($a['status'] ?? '') === 'active')->count();
+        $online = $agents->filter(fn($a) => strtolower($a['status'] ?? '') === 'active')->count();
 
         return [
-            'online' => $onlineCount,
-            'offline' => $agents->count() - $onlineCount, // Total dikurangi yang online otomatis jadi jumlah yang offline
+            'online' => $online,
+            'offline' => $agents->count() - $online,
             'total' => $agents->count(),
         ];
     }
 
     /**
-     * Membuat ringkasan data akun pelanggan beserta jumlah agen yang mereka miliki.
+     * Code ini untuk: Merangkum total akun pelanggan terdaftar beserta jumlah mesin proteksi yang disewa.
+     * Berfungsi pada halaman: Manajemen Pengguna (Customer Management) Admin.
      */
     public function getCustomerManagementSummary(): array
     {
-        // Menggunakan withCount agar Laravel otomatis menghitung jumlah relasi agen tiap user
         $users = User::where('role', 'customer')->withCount('agents')->get();
 
         return [
             'users' => $users,
             'totalUsers' => $users->count(),
-            'totalAssignedAgents' => $users->sum('agents_count'), // Jumlahkan semua kolom agents_count
+            'totalAssignedAgents' => $users->sum('agents_count'),
         ];
     }
 
     /**
-     * Mengambil metrik penggunaan perangkat keras (CPU & RAM) dari komputer target.
+     * Code ini untuk: Menarik dan mengalkulasi metrik pemakaian hardware (CPU % & RAM %) real-time dari komputer target.
+     * Berfungsi pada halaman: Detail Monitoring Perangkat Utama Agen (Admin & Customer).
      */
     public function fetchSystemResources($agentId): array
     {
         try {
-            // Hilangkan angka 0 di depan ID Agen (contoh: "001" menjadi "1")
-            $cleanAgentId = ltrim($agentId, '0') ?: '0';
-
-            // Minta data hardware ke API Wazuh
-            $response = $this->wazuh->get("/agents/{$cleanAgentId}/wdb/hardware");
+            $cleanId = ltrim($agentId, '0') ?: '0';
+            $response = $this->wazuh->get("/agents/{$cleanId}/wdb/hardware");
             $hardware = $response['data']['affected_items'][0] ?? null;
 
-            // Jika data dari Wazuh kosong atau bukan array, langsung return 0
-            if (!$hardware || !is_array($hardware)) {
+            if (!$hardware || !is_array($hardware))
                 return ['cpu' => 0, 'ram' => 0];
-            }
 
-            // --- PILIH DATA RAM ---
-            // Menggunakan operator '??' (Null Coalescing) untuk otomatis memilih key mana yang isinya ada
+            // Kalkulasi RAM Pemakaian
             $ramTotalStr = $hardware['host']['memory']['total'] ?? $hardware['ram_total'] ?? null;
             $ramFreeStr = $hardware['host']['memory']['free'] ?? $hardware['ram_free'] ?? null;
+            $ramPercent = 0;
 
-            $ramUsagePercentage = 0;
             if ($ramTotalStr && $ramFreeStr) {
-                // Buang huruf seperti 'GB' atau 'MB' agar tersisa angka saja
-                $ramTotal = floatval(preg_replace('/[^0-9.]/', '', $ramTotalStr));
-                $ramFree = floatval(preg_replace('/[^0-9.]/', '', $ramFreeStr));
-
-                if ($ramTotal > 0) {
-                    $ramUsagePercentage = round((($ramTotal - $ramFree) / $ramTotal) * 100);
-                }
+                $total = floatval(preg_replace('/[^0-9.]/', '', $ramTotalStr));
+                $free = floatval(preg_replace('/[^0-9.]/', '', $ramFreeStr));
+                $ramPercent = $total > 0 ? round((($total - $free) / $total) * 100) : 0;
             }
 
-            // --- PILIH DATA CPU ---
+            // Pembersihan Nilai CPU
             $rawCpu = $hardware['host']['cpu']['usage'] ?? $hardware['cpu_usage'] ?? $hardware['cpu_load'] ?? 0;
-            // Bersihkan teks non-angka pada nilai CPU
             $cpuValue = floatval(preg_replace('/[^0-9.]/', '', $rawCpu));
-
-            // Jika nilainya desimal kecil (0.0 - 1.0), ubah ke bentuk persen (dikali 100)
             $cpuValue = ($cpuValue > 0 && $cpuValue <= 1) ? round($cpuValue * 100) : round($cpuValue);
 
+            // Menghilangkan helper luar dengan membatasi nilai 0 - 100 memakai bawaan PHP
             return [
-                'cpu' => (int) clamp($cpuValue, 0, 100),
-                'ram' => (int) clamp($ramUsagePercentage, 0, 100),
+                'cpu' => (int) max(0, min(100, $cpuValue)),
+                'ram' => (int) max(0, min(100, $ramPercent)),
             ];
-
         } catch (\Throwable $e) {
-            return ['cpu' => 0, 'ram' => 0]; // Pengaman jika koneksi atau API Wazuh bermasalah
+            return ['cpu' => 0, 'ram' => 0];
         }
     }
 
     /**
-     * Ambil log FIM secara real-time dari database core Wazuh.
+     * Code ini untuk: Mengaudit log integritas perubahan berkas (File Integrity Monitoring) yang terjadi di dalam direktori sensitif.
+     * Berfungsi pada halaman: Tabel Fitur Audit FIM Log Komputer Agen.
      */
     public function fetchFileIntegrityLogs($agentId): array
     {
         try {
             $id = $agentId;
-            $altId = ltrim($id, '0') ?: '0';
-
-            // 1. UBAH DISINI: Hilangkan "/pci", tembak ke endpoint syscheck utama sesuai gambar Postman yang sukses
             $res = $this->wazuh->get("/syscheck/{$id}?limit=5");
             $rows = $res['data']['affected_items'] ?? $res['affected_items'] ?? [];
 
-            // 2. Fallback jika ID asli kosong, coba dengan format ID tanpa angka 0 di depan
             if (empty($rows)) {
-                $res = $this->wazuh->get("/syscheck/{$altId}");
+                $res = $this->wazuh->get("/syscheck/" . (ltrim($id, '0') ?: '0'));
                 $rows = $res['data']['affected_items'] ?? $res['affected_items'] ?? [];
             }
 
-            // Jika memang kosong dari server Wazuh, langsung kembalikan array kosong
-            if (empty($rows) || !is_array($rows)) {
+            if (empty($rows) || !is_array($rows))
                 return [];
-            }
 
             $list = [];
             foreach ($rows as $v) {
                 $time = $v['date'] ?? $v['mtime'] ?? null;
-
                 $list[] = [
                     'path' => $v['file'] ?? 'Unknown File',
                     'agent' => 'Agent ' . $id,
-                    // Mengubah format ISO 8601 (dari API) ke Jam:Menit WIB
                     'time' => $time ? date('H:i', strtotime($time)) . ' WIB' : 'Baru saja',
                     'status' => strtolower($v['event'] ?? 'modified')
                 ];
             }
-
             return $list;
-
         } catch (\Throwable $e) {
             \Log::error("Wazuh FIM Log Error: " . $e->getMessage());
             return [];
@@ -194,22 +169,20 @@ class AgentService
     }
 
     /**
-     * Menghitung berapa kali terjadi kegagalan login (Authentication Failed).
+     * Code ini untuk: Menghitung total akumulasi logs insiden kegagalan otentikasi masuk sistem (brute force attempt).
+     * Berfungsi pada halaman: Widget Ringkasan Alert Keamanan & Status Ancaman.
      */
     public function fetchFailedLoginsCount($agentId): array
     {
         try {
-            // Cari alert yang mengandung kata 'failed' pada tingkat bahaya level 5
             $response = $this->wazuh->get("/alerts?limit=1&level=5&search=failed&q=agent.id={$agentId}");
             $totalCount = $response['data']['total_affected_items'] ?? 0;
 
-            // Tentukan label status berdasarkan jumlah kegagalan login
             $statusTag = 'Normal';
-            if ($totalCount > 100) {
+            if ($totalCount > 100)
                 $statusTag = 'Spike Detected';
-            } elseif ($totalCount > 20) {
+            elseif ($totalCount > 20)
                 $statusTag = 'Warning';
-            }
 
             return [
                 'count' => $totalCount,
@@ -222,66 +195,52 @@ class AgentService
     }
 
     /**
-     * Ambil 5 riwayat aktivitas log dari core db agen wazuh.
+     * Code ini untuk: Mengaudit data riwayat sesi masuk log user lokal (aktivitas root/administrator).
+     * Berfungsi pada halaman: Komponen Tabel Riwayat Aktivitas Pengguna (User Login Activity).
      */
     public function fetchUserLoginActivity($agentId): array
     {
         try {
             $id = $agentId;
-            $altId = ltrim($id, '0') ?: '0';
-
-            // 1. Coba ambil data dari endpoint syscheck (pci)
             $res = $this->wazuh->get("/syscheck/{$id}/pci");
             $rows = $res['data']['affected_items'] ?? $res['affected_items'] ?? [];
 
-            // Fallback ke ID alternatif jika kosong
             if (empty($rows)) {
-                $res = $this->wazuh->get("/syscheck/{$altId}/pci");
+                $res = $this->wazuh->get("/syscheck/" . (ltrim($id, '0') ?: '0') . "/pci");
                 $rows = $res['data']['affected_items'] ?? $res['affected_items'] ?? [];
             }
 
-            // 2. Jika masih kosong, coba endpoint rootcheck
             if (empty($rows)) {
                 $res = $this->wazuh->get("/rootcheck/{$id}/alerts?limit=10");
                 $rows = $res['data']['affected_items'] ?? $res['affected_items'] ?? [];
             }
 
-            if (empty($rows) || !is_array($rows)) {
+            if (empty($rows) || !is_array($rows))
                 return [];
-            }
 
             $list = [];
             foreach ($rows as $v) {
                 $user = $v['user'] ?? $v['owner'] ?? $v['uid'] ?? 'SYSTEM';
 
-                // Lewati akun background bawaan Windows
-                if (str_ends_with($user, '$') || strtoupper($user) === 'ANONYMOUS LOGON') {
+                if (str_ends_with($user, '$') || strtoupper($user) === 'ANONYMOUS LOGON')
                     continue;
-                }
 
-                // Tentukan deskripsi aktivitas singkat
                 $file = $v['file'] ?? '';
                 $act = !empty($file) ? "Audit: " . basename($file) : ($v['event'] ?? $v['description'] ?? 'System Event');
-
-                // Tentukan format jam log
                 $time = $v['date'] ?? $v['mtime'] ?? $v['scan_time'] ?? null;
-                $clock = $time ? date('H:i', strtotime($time)) . ' WIB' : 'Real-time';
 
                 $list[] = [
                     'user' => $user,
                     'activity' => $act,
                     'ip' => 'Local Event',
                     'status' => 'success',
-                    'time' => $clock
+                    'time' => $time ? date('H:i', strtotime($time)) . ' WIB' : 'Real-time'
                 ];
 
-                if (count($list) >= 5) {
+                if (count($list) >= 5)
                     break;
-                }
             }
-
             return $list;
-
         } catch (\Throwable $e) {
             \Log::error("Wazuh Core Activity Error: " . $e->getMessage());
             return [];
@@ -289,33 +248,23 @@ class AgentService
     }
 
     /**
-     * Memeriksa status aplikasi/service penting di dalam OS komputer target (Nginx, MySQL, dll).
+     * Code ini untuk: Memetakan status proses aplikasi kritis di server target (Nginx, MySQL, SSH, PHP Engine).
+     * Berfungsi pada halaman: Tabel Status Kontrol Service Monitoring.
      */
     public function fetchServiceStatus($agentId): array
     {
         try {
-            // Gunakan ID agen asli bawaan (misal "001") tanpa memotong angka 0 di depan
-            $cleanAgentId = $agentId;
-
-            // Ambil daftar proses yang sedang berjalan dari komputer target via API Syscollector
-            $response = $this->wazuh->get("/syscollector/{$cleanAgentId}/processes?limit=500");
-
-            // Ekstraksi array data proses menggunakan operator Null Coalescing bertumpuk yang aman
+            $response = $this->wazuh->get("/syscollector/{$agentId}/processes?limit=500");
             $processes = $response['data']['affected_items'] ?? $response['affected_items'] ?? $response['data'] ?? [];
 
-            // Jika API Wazuh mengembalikan data kosong, kita coba fallback (cadangan) pakai format ID tanpa angka 0
             if (empty($processes)) {
-                $fallbackId = ltrim($agentId, '0') ?: '0';
-                $responseFallback = $this->wazuh->get("/syscollector/{$fallbackId}/processes?limit=500");
-                $processes = $responseFallback['data']['affected_items'] ?? $responseFallback['affected_items'] ?? $responseFallback['data'] ?? [];
+                $response = $this->wazuh->get("/syscollector/" . (ltrim($agentId, '0') ?: '0') . "/processes?limit=500");
+                $processes = $response['data']['affected_items'] ?? $response['affected_items'] ?? $response['data'] ?? [];
             }
 
-            // Jika setelah dicoba kedua format ID tetap kosong, return array kosong agar tidak error
-            if (empty($processes) || !is_array($processes)) {
+            if (empty($processes) || !is_array($processes))
                 return [];
-            }
 
-            // Target service yang ingin kita pantau statusnya di dalam OS komputer agen
             $monitoredServices = [
                 'nginx' => ['name' => 'Nginx Web Server', 'port' => '80, 443', 'search' => ['nginx']],
                 'mysql' => ['name' => 'MySQL Database', 'port' => '3306', 'search' => ['mysql', 'mysqld', 'mariadb']],
@@ -328,8 +277,6 @@ class AgentService
             $result = [];
             foreach ($monitoredServices as $info) {
                 $isRunning = false;
-
-                // COCOKKAN KATA KUNCI: Cari apakah ada nama atau command proses yang aktif di background
                 foreach ($processes as $proc) {
                     $procName = strtolower($proc['name'] ?? '');
                     $procCmd = strtolower($proc['cmd'] ?? '');
@@ -337,7 +284,7 @@ class AgentService
                     foreach ($info['search'] as $keyword) {
                         if (str_contains($procName, $keyword) || str_contains($procCmd, $keyword)) {
                             $isRunning = true;
-                            break 2; // Keluar dari perulangan karena service sudah dipastikan running
+                            break 2;
                         }
                     }
                 }
@@ -348,9 +295,7 @@ class AgentService
                     'status' => $isRunning ? 'running' : 'stopped'
                 ];
             }
-
             return $result;
-
         } catch (\Throwable $e) {
             \Log::error("Wazuh Service Monitoring Error: " . $e->getMessage());
             return [];
@@ -358,12 +303,12 @@ class AgentService
     }
 
     /**
-     * Memantau dan mengalkulasi aktivitas kartu jaringan (Network Interface).
+     * Code ini untuk: Menghitung total lalu lintas data jaringan (Inbound/Outbound GB) beserta memetakan kartu jaringan yang UP/DOWN.
+     * Berfungsi pada halaman: Widget Metrik Monitoring Jaringan (Network Traffic).
      */
     public function fetchNetworkTraffic($agentId): array
     {
         try {
-            // Ambil data adapter jaringan langsung dari API Wazuh Syscollector
             $response = $this->wazuh->get("/syscollector/{$agentId}/netiface?limit=50");
             $interfaces = $response['data']['affected_items'] ?? $response['affected_items'] ?? $response['data'] ?? [];
 
@@ -376,29 +321,20 @@ class AgentService
             $totalOutboundBytes = 0;
 
             foreach ($interfaces as $iface) {
-                $name = $iface['name'] ?? 'unknown';
-
-                // PILIH DATA BYTES (Ambil angka lalu lintas data masuk dan keluar)
                 $rxBytes = $iface['rx']['bytes'] ?? $iface['rx_bytes'] ?? 0;
                 $txBytes = $iface['tx']['bytes'] ?? $iface['tx_bytes'] ?? 0;
 
                 $totalInboundBytes += $rxBytes;
                 $totalOutboundBytes += $txBytes;
 
-                // FORMAT SATUAN DATA: Ubah ukuran byte menjadi Megabyte (M) atau Gigabyte (G)
                 $speedFormatted = ($rxBytes > 1073741824)
                     ? round($rxBytes / 1073741824, 1) . 'G'
                     : round($rxBytes / 1048576, 0) . 'M';
 
-                // Identitas jaringan: Ambil IP, jika tidak ada ambil MAC Address, atau jenis adapternya
-                $subText = $iface['ipv4']['address'] ?? $iface['mac'] ?? $iface['adapter'] ?? '-';
-
-                $rawState = $iface['state'] ?? $iface['status'] ?? 'up';
-
                 $networkInterfaces[] = [
-                    'name' => $name,
-                    'ip' => $subText,
-                    'direction' => (strtolower($rawState) === 'down') ? 'down' : 'up',
+                    'name' => $iface['name'] ?? 'unknown',
+                    'ip' => $iface['ipv4']['address'] ?? $iface['mac'] ?? $iface['adapter'] ?? '-',
+                    'direction' => (strtolower($iface['state'] ?? $iface['status'] ?? 'up') === 'down') ? 'down' : 'up',
                     'speed' => $speedFormatted
                 ];
             }
@@ -410,20 +346,9 @@ class AgentService
                 ],
                 'interfaces' => $networkInterfaces
             ];
-
         } catch (\Throwable $e) {
             \Log::error("Wazuh Network Monitoring Error parsing: " . $e->getMessage());
             return ['stats' => ['inbound' => 0, 'outbound' => 0], 'interfaces' => []];
         }
-    }
-}
-
-/**
- * Fungsi Pembantu Mandiri (Helper) untuk memastikan nilai angka tetap berada di batas minimum dan maksimum.
- */
-if (!function_exists('clamp')) {
-    function clamp($value, $min, $max)
-    {
-        return max($min, min($max, $value));
     }
 }
