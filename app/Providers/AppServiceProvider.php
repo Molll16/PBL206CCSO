@@ -5,7 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Agen; // <-- Pastikan namespace model Agen kamu sudah benar di sini
+use App\Models\Agen;
+use Illuminate\Support\Facades\URL; // ◄ TAMBAHKAN IMPORT INI
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // ◄ TAMBAHKAN BARIS INI (Memaksa semua aset/link Laravel pakai HTTPS di Cloudflare Tunnel)
+        URL::forceScheme('https');
+
         // Menyuntikkan data $list_agen otomatis ke file header di setiap halaman customer
         View::composer('*', function ($view) {
             if (Auth::check()) {
