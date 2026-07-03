@@ -32,39 +32,19 @@
     </a>
 
     <div>
-      <button onclick="toggleSubmenu('customization-menu', 'chevron-customization')"
-        class="w-full flex items-center justify-between px-3 py-2 rounded-md text-xs text-textMuted hover:bg-page hover:text-textMain transition-all border-l-[3px] border-transparent group">
-        <div class="flex items-center gap-2.5">
-          <img src="/db/custom.png" class="w-3.5 opacity-80" alt="">
-          Customization
-        </div>
-        <svg id="chevron-customization" class="w-3 h-3 text-textMuted transition-transform duration-300" fill="none"
-          stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-      <div id="customization-menu" class="hidden bg-page/50 rounded-md mx-1.5 mt-0.5 py-1 border border-borderSubtle/50">
-        <a href="{{ route('pilih-dasbor') }}"
-          class="flex items-center pl-8 pr-3 py-1.5 text-[11px] text-textMuted hover:text-brand hover:bg-surface transition-colors rounded mx-1.5">Visualize</a>
-      </div>
+      <a href="{{ route('pilih-dasbor') }}"
+        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs text-textMuted hover:bg-page hover:text-textMain transition-all border-l-[3px] border-transparent group">
+        <img src="/db/custom.png" class="w-3.5 opacity-80" alt="">
+        Customization
+      </a>
     </div>
 
     <div>
-      <button onclick="toggleSubmenu('agent-menu', 'chevron-agent')"
-        class="w-full flex items-center justify-between px-3 py-2 rounded-md text-xs text-textMuted hover:bg-page hover:text-textMain transition-all border-l-[3px] border-transparent group">
-        <div class="flex items-center gap-2.5">
-          <img src="/db/agent.png" class="w-3.5 opacity-80" alt="">
-          Alerts
-        </div>
-        <svg id="chevron-agent" class="w-3 h-3 text-textMuted transition-transform duration-300" fill="none"
-          stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-      <div id="agent-menu" class="hidden bg-page/50 rounded-md mx-1.5 mt-0.5 py-1 border border-borderSubtle/50">
-        <a href="{{ route('daftarlog') }}"
-          class="flex items-center pl-8 pr-3 py-1.5 text-[11px] text-textMuted hover:text-brand hover:bg-surface transition-colors rounded mx-1.5">List Alerts</a>
-      </div>
+      <a href="{{ route('daftarlog') }}"
+        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs text-textMuted hover:bg-page hover:text-textMain transition-all border-l-[3px] border-transparent group">
+        <img src="/db/agent.png" class="w-3.5 opacity-80" alt="">
+        Alerts
+      </a>
     </div>
 
   </nav>
