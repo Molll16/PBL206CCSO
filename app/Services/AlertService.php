@@ -48,7 +48,7 @@ class AlertService
                 'level' => (int) ($source['rule']['level'] ?? 0),
                 'agent' => [
                     'name' => $source['agent']['name'] ?? 'unknown',
-                    'id' => $source['agent']['id'] ?? null
+                    'id' => isset($source['agent']['id']) ? (string) intval($source['agent']['id']) : null // Pembersihan padding ID Wazuh
                 ],
                 'time' => $source['@timestamp'] ?? null,
                 'user' => $source['data']['srcuser'] ?? $source['data']['dstuser'] ?? 'unknown',
@@ -59,18 +59,24 @@ class AlertService
 
     // Code ini untuk: Mencari daftar ID agen milik user yang sedang login.
     // Berfungsi untuk: Proteksi dan filter multi-tenant internal.
-    private function getMyAgentIds(?string $agentId = null): array
+    private function getMyAgentIds($agentId = null): array
     {
+        // Jika parameter berupa array (dari opsi 'all' di session)
+        if (is_array($agentId)) {
+            return array_map(fn($id) => (string) intval($id), $agentId);
+        }
+
+        // Jika single ID dan bukan 'all'
         if ($agentId && $agentId !== 'all') {
-            return [str_pad($agentId, 3, '0', STR_PAD_LEFT)];
+            return [(string) intval($agentId)];
         }
 
         $currentUserId = auth()->user()->id ?? null;
 
+        // Mengambil semua ID agen milik user, dikonversi ke string angka murni (tanpa padding)
         return Agen::where('user_id', $currentUserId)
-            ->get()
             ->pluck('id_wazuh_agen')
-            ->map(fn($id) => str_pad((string) $id, 3, '0', STR_PAD_LEFT))
+            ->map(fn($id) => (string) intval($id))
             ->toArray();
     }
 
@@ -80,7 +86,7 @@ class AlertService
 
     // Code ini untuk: Mengambil 5 log keamanan terbaru.
     // Berfungsi untuk: Halaman Dashboard Customer, bagian widget "Alert Summary".
-    public function getLatestAlerts(int $limit = 5, ?string $agentId = null)
+    public function getLatestAlerts(int $limit = 5, $agentId = null)
     {
         $myAgents = $this->getMyAgentIds($agentId);
 
@@ -91,7 +97,7 @@ class AlertService
 
     // Code ini untuk: Menghitung status tingkat bahaya log dan top 5 kategori ancaman.
     // Berfungsi untuk: Halaman Dashboard Customer, bagian widget "Threat Summary" (Donut Chart & List).
-    public function getThreatSummary(?string $agentId = null): array
+    public function getThreatSummary($agentId = null): array
     {
         $myAgents = $this->getMyAgentIds($agentId);
         $alerts = collect($this->getAlerts())->filter(fn($a) => in_array($a['agent']['id'] ?? null, $myAgents));
@@ -121,7 +127,7 @@ class AlertService
 
     // Code ini untuk: Mencari 3 aturan keamanan yang paling sering terpicu.
     // Berfungsi untuk: Halaman Dashboard Customer, bagian widget "Most Active Rules" (Progress Bar).
-    public function getMostActiveRules(?string $agentId = null): array
+    public function getMostActiveRules($agentId = null): array
     {
         try {
             $myAgents = $this->getMyAgentIds($agentId);
@@ -161,7 +167,7 @@ class AlertService
 
     // Code ini untuk: Memfilter log berdasarkan agen, dan tingkat keparahan (severity).
     // Berfungsi untuk: Halaman Alert Customer, bagian tabel utama "Daftar Log/Alerts".
-    public function getFilteredAlerts(?string $agentId = null, ?string $severity = null)
+    public function getFilteredAlerts($agentId = null, ?string $severity = null)
     {
         $myAgents = $this->getMyAgentIds($agentId);
 
@@ -184,7 +190,7 @@ class AlertService
 
     // Code ini untuk: Menghitung total angka statistik log (Critical, High, Medium, Low).
     // Berfungsi untuk: Halaman Logs/Analytics, bagian card "Card Statistik".
-    public function getLogsAnalytics(?string $agentId = null): array
+    public function getLogsAnalytics($agentId = null): array
     {
         $allAlerts = $this->getFilteredAlerts($agentId, null);
 

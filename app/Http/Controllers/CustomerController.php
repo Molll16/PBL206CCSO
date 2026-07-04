@@ -67,27 +67,6 @@ class CustomerController extends Controller
         return view('Admin.users.edit-customer', ['user' => $user]);
     }
 
-    public function update(Request $request, $id)
-    {
-        $user = User::where('role', 'customer')->findOrFail($id);
-
-        $request->validate([
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'name' => 'required',
-            'username' => 'required|unique:users,username,' . $user->id,
-            'no_telp' => 'required',
-        ]);
-
-        $user->update([
-            'name' => $request->name,
-            'username' => $request->username,
-            'email' => $request->email,
-            'no_telp' => $request->no_telp,
-        ]);
-
-        return redirect()->route('usersadmin')->with('success', 'Customer berhasil diupdate');
-    }
-
     public function destroy($id)
     {
         User::where('role', 'customer')->findOrFail($id)->delete();

@@ -16,10 +16,15 @@ class AlertController extends Controller
         $this->alertService = $alertService;
     }
 
-    // Code ini untuk: Mengambil ID agen Wazuh yang sedang aktif dipantau.
+    // Code ini untuk: Mengambil ID agen Wazuh yang sedang aktif dipantau (Mendukung opsi 'all').
     // Berfungsi untuk: Pengecekan session internal (Helper).
-    private function getActiveAgentId(): ?string
+    private function getActiveAgentId()
     {
+        // Jika user memilih memantau semua agen miliknya sendiri
+        if (session('active_wazuh_agent_id') === 'all') {
+            return Agen::where('user_id', auth()->id())->pluck('id_wazuh_agen')->toArray();
+        }
+
         $allMyAgents = Agen::where('user_id', auth()->id())->get();
 
         return session(
@@ -41,7 +46,7 @@ class AlertController extends Controller
     // Berfungsi untuk: Menampilkan halaman utama menu "Alert page" di sisi Customer.
     public function index(Request $request)
     {
-        // 1. Ambil ID agen aktif dari session
+        // 1. Ambil ID/Array ID agen aktif dari session khusus milik user login
         $activeAgentId = $this->getActiveAgentId();
 
         // 2. Menangkap parameter request filter dari element HTML Form di Blade
@@ -71,5 +76,32 @@ class AlertController extends Controller
             'alerts' => $paginatedAlerts,
             'selectedSeverity' => $selectedSeverity
         ]));
+    }
+
+    // ==========================================
+    // 4. FITUR SWITCH AGENT LOGIC
+    // ==========================================
+    // Code ini untuk: Mengubah session target ID agen yang aktif dipantau.
+    public function switchAgent(Request $request)
+    {
+        $request->validate([
+            'agent_id' => 'required|string'
+        ]);
+
+        if ($request->agent_id === 'all') {
+            session(['active_wazuh_agent_id' => 'all']);
+            return back()->with('success', 'Berhasil beralih ke semua agen.');
+        }
+
+        $isValidAgent = Agen::where('user_id', auth()->id())
+            ->where('id_wazuh_agen', $request->agent_id)
+            ->exists();
+
+        if ($isValidAgent) {
+            session(['active_wazuh_agent_id' => $request->agent_id]);
+            return back()->with('success', 'Berhasil beralih ke agen ' . $request->agent_id);
+        }
+
+        return back()->with('error', 'Akses agen tidak diizinkan.');
     }
 }
