@@ -29,51 +29,17 @@
       Dashboard
     </a>
 
-    <div>
-      <button onclick="toggleSubmenu('customization-menu', 'chevron-customization')"
-        class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm text-textMuted hover:bg-page hover:text-textMain transition-all border-l-[3px] border-transparent group">
-        <div class="flex items-center gap-3">
-          <img src="/db/custom.png" class="w-4 opacity-80" alt="">
-          User Management
-        </div>
-        <svg id="chevron-customization" class="w-4 h-4 text-textMuted transition-transform duration-300" fill="none"
-          stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
+    <a href="{{ route('usersadmin') }}"
+      class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all border-l-[3px] {{ request()->routeIs('usersadmin') || request()->routeIs('adduser') ? 'border-brand bg-brand/10 text-brand font-medium' : 'border-transparent text-textMuted hover:bg-page hover:text-textMain' }}">
+      <img src="/db/custom.png" class="w-4 opacity-80" alt="">
+      User Management
+    </a>
 
-      <div id="customization-menu" class="hidden bg-page/50 rounded-lg mx-2 mt-1 py-2 border border-borderSubtle/50">
-        <a href="{{ route('adduser') }}"
-          class="flex items-center pl-10 pr-4 py-2 text-xs text-textMuted hover:text-brand hover:bg-surface transition-colors rounded-md mx-2">Add
-          User</a>
-        <a href="{{ route('usersadmin') }}"
-          class="flex items-center pl-10 pr-4 py-2 text-xs text-textMuted hover:text-brand hover:bg-surface transition-colors rounded-md mx-2">Manage
-          Users</a>
-      </div>
-    </div>
-
-    <div>
-      <button onclick="toggleSubmenu('agent-menu', 'chevron-agent')"
-        class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm text-textMuted hover:bg-page hover:text-textMain transition-all border-l-[3px] border-transparent group">
-        <div class="flex items-center gap-3">
-          <img src="/db/agent.png" class="w-4 opacity-80" alt="">
-          Agents Management
-        </div>
-        <svg id="chevron-agent" class="w-4 h-4 text-textMuted transition-transform duration-300" fill="none"
-          stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      <div id="agent-menu" class="hidden bg-page/50 rounded-lg mx-2 mt-1 py-2 border border-borderSubtle/50">
-        <a href="{{ route('agents-list') }}"
-          class="flex items-center pl-10 pr-4 py-2 text-xs text-textMuted hover:text-brand hover:bg-surface transition-colors rounded-md mx-2">Agents
-          List</a>
-        <a href="{{ route('assignagent') }}"
-          class="flex items-center pl-10 pr-4 py-2 text-xs text-textMuted hover:text-brand hover:bg-surface transition-colors rounded-md mx-2">Assign
-          Agent</a>
-      </div>
-    </div>
+    <a href="{{ route('agents-list') }}"
+      class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all border-l-[3px] {{ request()->routeIs('agents-list') || request()->routeIs('assignagent') ? 'border-brand bg-brand/10 text-brand font-medium' : 'border-transparent text-textMuted hover:bg-page hover:text-textMain' }}">
+      <img src="/db/agent.png" class="w-4 opacity-80" alt="">
+      Agents Management
+    </a>
 
   </nav>
 </aside>
@@ -121,9 +87,9 @@
           <a href="{{ route('profile-setting-admin') }}"
             class="block px-4 py-2.5 text-xs text-textMuted hover:bg-page hover:text-brand transition-colors">
             Profile Settings</a>
-          <a href="{{ route('adduser') }}"
+          <a href="{{ route('usersadmin') }}"
             class="block px-4 py-2.5 text-xs text-textMuted hover:bg-page hover:text-brand transition-colors">
-            Add User</a>
+            Manage Users</a>
           <div class="h-px bg-borderSubtle my-1"></div>
           <a href="{{ route('login') }}"
             class="block px-4 py-2.5 text-xs text-red-400 font-semibold hover:bg-red-500/10 transition-colors">
@@ -135,10 +101,10 @@
 </header>
 
 <script>
+  // Fungsi fungsi pembukaan sidebar bawaan tetap dipertahankan
   function openSidebar() {
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
-
     sidebar.classList.remove('-translate-x-full');
     backdrop.classList.remove('opacity-0', 'pointer-events-none');
     backdrop.classList.add('opacity-100', 'pointer-events-auto');
@@ -147,29 +113,13 @@
   function closeSidebar() {
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
-
     sidebar.classList.add('-translate-x-full');
     backdrop.classList.add('opacity-0', 'pointer-events-none');
     backdrop.classList.remove('opacity-100', 'pointer-events-auto');
   }
 
-  function toggleSubmenu(menuId, chevronId) {
-    const menu = document.getElementById(menuId);
-    const chevron = document.getElementById(chevronId);
-
-    if (menu.classList.contains('hidden')) {
-      menu.classList.remove('hidden');
-      chevron.classList.add('rotate-180');
-    } else {
-      menu.classList.add('hidden');
-      chevron.classList.remove('rotate-180');
-    }
-  }
-
   function toggleManage(event) {
-    // Mencegah trigger click langsung ke document root window
     if (event) event.stopPropagation();
-
     const menu = document.getElementById('manage-menu');
     const chevron = document.getElementById('arrow-manage');
 
@@ -184,14 +134,12 @@
     }
   }
 
-  // SCRIPT PENUTUP OTOMATIS SAAT KLIK DI LUAR MENU DROPDOWN
   window.addEventListener('click', function (e) {
     const menu = document.getElementById('manage-menu');
     const chevron = document.getElementById('arrow-manage');
     const wrapper = document.querySelector('.id-dropdown-wrapper');
 
     if (menu && !menu.classList.contains('hidden')) {
-      // Jika yang di-klik bukan tombol pemicu atau isi dalam kotak menu
       if (wrapper && !wrapper.contains(e.target)) {
         menu.classList.add('hidden');
         if (chevron) chevron.classList.remove('rotate-180');

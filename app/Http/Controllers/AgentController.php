@@ -15,15 +15,36 @@ class AgentController extends Controller
         $this->agentService = $agentService;
     }
 
-    // Code ini untuk: Menampilkan seluruh daftar agen yang terhubung ke Wazuh Server.
-    // Berfungsi untuk: Halaman Admin.agents.agents-list, bagian tabel utama daftar agen.
+    // Code ini untuk: Menampilkan daftar seluruh agen dari server Wazuh sekaligus mencocokkannya dengan data kepemilikan customer di database lokal Laravel.
+    // Berfungsi pada halaman: Halaman Panel Admin - Agents List (Admin.agents.agents-list).
+    // Dibagian fitur: Tabel Utama Daftar Agen, untuk memantau status operasional agen SIEM dan melihat akun customer mana yang menguasai mesin tersebut.
     public function agents()
     {
-        $agents = $this->agentService->getAgents();
+        $wazuhAgents = $this->agentService->getAgents();
         $stats = $this->agentService->getCustomerManagementSummary();
 
+        $localAgents = Agen::with('user')->get()->keyBy('id_wazuh_agen');
+
+        $agents = array_map(function ($agent) use ($localAgents) {
+            $agentId = $agent['id'] ?? null;
+
+            // Cek apakah ID agen ini tercatat di database lokal kita
+            if ($agentId && isset($localAgents[$agentId])) {
+                $localData = $localAgents[$agentId];
+                $agent['assigned_to'] = [
+                    'name' => $localData->user->name ?? 'Unknown Customer',
+                    'user_id' => $localData->user_id
+                ];
+            } else {
+                $agent['assigned_to'] = null;
+            }
+
+            return $agent;
+        }, $wazuhAgents);
+
+        // 4. Kembalikan data yang sudah di-mapping ke View
         return view('Admin.agents.agents-list', [
-            'agents' => $agents,
+            'agents' => $agents, // Menggunakan array yang sudah lengkap dengan 'assigned_to'
             'totalUsers' => $stats['totalUsers'],
             'totalAgents' => count($agents),
             'totalAssignedAgents' => $stats['totalAssignedAgents'],
@@ -143,5 +164,32 @@ class AgentController extends Controller
 
             'recentAlerts' => $recentAlerts
         ]);
+    }
+
+    // Code ini untuk: Ngubah status agen jadi 'disconnect' di database lokal, tanpa ngehapus data agen dari sistem Laravel ataupun server Wazuh.
+    // Berfungsi pada halaman: Halaman Admin - Bagian list manajemen user (Admin/Manage Users).
+    // Dibagian fitur: Edit, Tombol "Lepas" agen di dalam modal, biar admin bisa nonaktifkan agen dari user tersebut tanpa menghapus datanya.
+    public function detachAgent(Request $request)
+    {
+        // 1. Validasi input buat mastiin ID agen yang mau dilepas itu dikirim dan gak kosong
+        $request->validate([
+            'agent_id' => ['required'],
+        ]);
+
+        // 2. Cari data agen di database lokal kita berdasarkan ID Agen dari Wazuh
+        $agent = Agen::where('id_wazuh_agen', $request->agent_id)->first();
+
+        // 3. Jaga-jaga kalau data agennya ternyata gak ketemu atau gak terdaftar di database lokal
+        if (!$agent) {
+            return back()->with('error', 'Data agen tidak ditemukan di database lokal.');
+        }
+
+        // 4. Ubah statusnya jadi 'disconnect'. Kepemilikan (user_id) tetep dibiarin utuh, cuma statusnya aja yang berubah
+        $agent->update([
+            'status' => 'disconnect'
+        ]);
+
+        // 5. Refresh halaman dan tampilin notifikasi kalau agen udah berhasil dilepas
+        return back()->with('success', 'Agen ' . $agent->nama_agen . ' berhasil dinonaktifkan (status: disconnect).');
     }
 }

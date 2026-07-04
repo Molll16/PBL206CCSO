@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Agen;
 use App\Services\AgentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -12,33 +11,45 @@ class CustomerController extends Controller
 {
     protected $agentService;
 
+    // Code ini untuk: Menghubungkan Controller dengan AgentService agar bisa mengambil data statistik dashboard
+    // Berfungsi pada halaman: List Customer Admin dan Add Customer Admin
     public function __construct(AgentService $agentService)
     {
         $this->agentService = $agentService;
     }
 
+    // Code ini untuk: Menampilkan halaman utama manajemen user beserta tabel daftar customer
+    // Berfungsi pada halaman: List Customer Admin (saat admin membuka menu ini)
+    // Fitur: Menampilkan Data (Read) nama lengkap, username, email, dan nomor telepon
     public function index()
     {
-        // Memanfaatkan data terpusat dari service, menghindari duplikasi query Eloquent
         $stats = $this->agentService->getCustomerManagementSummary();
 
+        $users = User::where('role', 'customer')->get();
+
         return view('Admin.users.users-admin', [
-            'users' => $stats['users'],
-            'totalUsers' => $stats['totalUsers'],
-            'totalAssignedAgents' => Agen::count(),
+            'users' => $users,
+            'totalUsers' => $stats['totalUsers'] ?? $users->count(),
+            'totalAssignedAgents' => $stats['totalAssignedAgents'] ?? 0,
         ]);
     }
 
+    // Code ini untuk: Menampilkan halaman formulir kosong untuk menambah data customer baru
+    // Berfungsi pada halaman: Form Add New User (saat admin klik tombol + Add New User)
+    // Fitur: Menampilkan Form Tambah User
     public function create()
     {
         $stats = $this->agentService->getCustomerManagementSummary();
 
         return view('Admin.users.adduser-admin', [
-            'totalUsers' => $stats['totalUsers'],
-            'totalAssignedAgents' => $stats['totalAssignedAgents'],
+            'totalUsers' => $stats['totalUsers'] ?? 0,
+            'totalAssignedAgents' => $stats['totalAssignedAgents'] ?? 0,
         ]);
     }
 
+    // Code ini untuk: Memproses validasi data inputan form dan menyimpannya ke database
+    // Berfungsi pada fitur: Tombol "Simpan / Tambah Akun" di halaman Add New User
+    // Fitur: Menambahkan Data Baru (Create)
     public function store(Request $request)
     {
         $request->validate([
@@ -46,7 +57,7 @@ class CustomerController extends Controller
             'name' => 'required',
             'username' => 'required|unique:users,username',
             'password' => 'required|min:6',
-            'no_telp' => 'required',
+            'no_telp' => 'required|numeric|unique:users,no_telp', 
         ]);
 
         User::create([
@@ -61,15 +72,13 @@ class CustomerController extends Controller
         return redirect()->route('usersadmin')->with('success', 'Akun customer berhasil dibuat.');
     }
 
-    public function edit($id)
-    {
-        $user = User::where('role', 'customer')->findOrFail($id);
-        return view('Admin.users.edit-customer', ['user' => $user]);
-    }
-
+    // Code ini untuk: Menghapus data akun customer tertentu dari database berdasarkan ID
+    // Berfungsi pada fitur: Tombol "Hapus" di dalam baris tabel daftar customer
+    // Fitur: Menghapus Data (Delete)
     public function destroy($id)
     {
         User::where('role', 'customer')->findOrFail($id)->delete();
+
         return redirect()->route('usersadmin')->with('success', 'Customer berhasil dihapus');
     }
 }
