@@ -29,6 +29,9 @@ class AuthController extends Controller
         // Coba login dengan kredensial yang diberikan
         if (Auth::attempt($credentials)) {
 
+            // AMAN: Hapus session active agent dari user sebelumnya jika login langsung tanpa logout
+            $request->session()->forget('active_wazuh_agent_id');
+
             $request->session()->regenerate();
 
             // Redirect ke dashboard sesuai dengan role user yang login
@@ -48,6 +51,9 @@ class AuthController extends Controller
     // Menangani proses logout
     public function logout(Request $request)
     {
+        // AMAN: Hapus session active agent secara spesifik sebelum session dihancurkan
+        $request->session()->forget('active_wazuh_agent_id');
+
         Auth::logout();
 
         $request->session()->invalidate();

@@ -20,17 +20,28 @@ class AlertController extends Controller
     // Berfungsi untuk: Pengecekan session internal (Helper).
     private function getActiveAgentId()
     {
-        // Jika user memilih memantau semua agen miliknya sendiri
-        if (session('active_wazuh_agent_id') === 'all') {
-            return Agen::where('user_id', auth()->id())->pluck('id_wazuh_agen')->toArray();
+        $userId = auth()->id();
+        // Ambil semua agen milik user yang sedang login saat ini
+        $myAgents = Agen::where('user_id', $userId)->get();
+
+        if ($myAgents->isEmpty()) {
+            return null; // Jaga-jaga kalau user belum punya agen sama sekali
         }
 
-        $allMyAgents = Agen::where('user_id', auth()->id())->get();
+        $myAgentIds = $myAgents->pluck('id_wazuh_agen')->toArray();
+        $lastViewedAgent = session('active_wazuh_agent_id');
 
-        return session(
-            'active_wazuh_agent_id',
-            $allMyAgents->first()->id_wazuh_agen ?? null
-        );
+        // KUNCI PENGAMAN: Jika ada session agen terakhir, dan ID tersebut MEMANG milik user ini
+        if ($lastViewedAgent && in_array($lastViewedAgent, $myAgentIds)) {
+            return $lastViewedAgent; // Gunakan agen terakhir yang dia lihat
+        }
+
+        // FALLBACK: Jika ganti akun (session agen lama bukan milik user ini) atau session kosong
+        // Set session baru ke agen pertama milik user tersebut
+        $defaultAgent = $myAgents->first()->id_wazuh_agen;
+        session(['active_wazuh_agent_id' => $defaultAgent]);
+
+        return $defaultAgent;
     }
 
     // Code ini untuk: Mengambil 5 data log alert terbaru berdasarkan agen yang aktif.

@@ -88,13 +88,17 @@
         @csrf
         <select name="agent_id" onchange="document.getElementById('form-header-switch-agent').submit()"
           class="bg-page border border-borderSubtle rounded-md px-1 sm:px-2 py-1 text-[11px] font-semibold text-textMain hover:border-brand focus:outline-none cursor-pointer transition-all w-[55px] sm:w-[100px] md:w-[140px] lg:w-auto truncate">
-          @if(isset($list_agen))
+      
+          @if(isset($list_agen) && count($list_agen) > 0)
             @foreach($list_agen as $agen)
-              <option value="{{ $agen->id_wazuh_agen }}" {{ session('active_wazuh_agent_id', $agen->id_wazuh_agen) == $agen->id_wazuh_agen ? 'selected' : '' }}>
+              <option value="{{ $agen->id_wazuh_agen }}" {{ session('active_wazuh_agent_id') == $agen->id_wazuh_agen ? 'selected' : '' }}>
                 🖥️ {{ $agen->nama_agen ?? $agen->id_wazuh_agen }}
               </option>
             @endforeach
+          @else
+            <option value="">Gak ada agen aktif</option>
           @endif
+      
         </select>
       </form>
 
