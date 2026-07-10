@@ -96,7 +96,7 @@
               </option>
             @endforeach
           @else
-            <option value="">Gak ada agen aktif</option>
+            <option value="">Server Offline</option>
           @endif
       
         </select>

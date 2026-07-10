@@ -101,95 +101,105 @@ class AgentController extends Controller
     // Berfungsi untuk: Halaman Detail Agent khusus Admin, bagian pengisian data grafik serta tabel riwayat log aktivitas.
     public function showDetailAgent($id)
     {
-        $allAgents = collect($this->agentService->getAgents());
-        $agentInfo = $allAgents->firstWhere('id', $id);
+        try {
+            // 1. Ambil data dasar agen dari global list Agen Wazuh
+            $allAgents = collect($this->agentService->getAgents());
+            $agentInfo = $allAgents->firstWhere('id', $id);
 
-        if (!$agentInfo) {
-            return redirect()->back()->with('error', 'Komputer/Agent ini gak terdaftar di server.');
+            if (!$agentInfo) {
+                return redirect()->back()->with('error', 'Komputer/Agent ini tidak terdaftar di server.');
+            }
+
+            // 2. Ambil data riil komponen sistem dari Wazuh API via AgentService
+            $hardware = $this->agentService->fetchSystemResources($id);
+            $fimLogs = $this->agentService->fetchFileIntegrityLogs($id);
+            $failedLogins = $this->agentService->fetchFailedLoginsCount($id);
+            $loginActivities = $this->agentService->fetchUserLoginActivity($id);
+            $services = $this->agentService->fetchServiceStatus($id);
+            $network = $this->agentService->fetchNetworkTraffic($id);
+
+            // 3. Ambil data SCA (Security Configuration Assessment) riil dari API jika method tersedia
+            $scaScore = method_exists($this->agentService, 'fetchScaScore')
+                ? ($this->agentService->fetchScaScore($id)['score'] ?? 0)
+                : 0; // Menggunakan 0 (bukan 85) jika data murni tidak ditemukan
+
+            // 4. Ambil statistik FIM (File Integrity Monitoring) Riil
+            $fimLogsCollection = collect($fimLogs);
+            $fimAdded = $fimLogsCollection->where('status', 'added')->count();
+            $fimModified = $fimLogsCollection->where('status', 'modified')->count();
+            $fimDeleted = $fimLogsCollection->where('status', 'deleted')->count();
+
+            // 5. Kerentanan & Alerts Riil (Hanya diisi jika ada data riil dari API, tidak ditebak-tebak)
+            // Catatan: Jika tim kamu sudah membuat method fetchVulnerabilities/fetchAlerts di service, silakan panggil di sini.
+            $vulnCritical = 0;
+            $vulnHigh = 0;
+            $vulnMedLow = 0;
+            $recentAlerts = [];
+
+            return view('Admin.agents.detailAgent', [
+                'agentId' => $id,
+                'agentName' => $agentInfo['name'] ?? 'Nama Gak Diketahui',
+                'agentStatus' => $agentInfo['status'] ?? 'disconnected',
+                'agentIp' => $agentInfo['ip'] ?? '0.0.0.0',
+                'agentOs' => $agentInfo['os']['name'] ?? 'OS Gak Diketahui',
+                'agentLastKeepAlive' => $agentInfo['lastKeepAlive'] ?? '-',
+
+                'scaScore' => $scaScore,
+                'vulnCritical' => $vulnCritical,
+                'vulnCriticalPercent' => $vulnCritical * 10,
+                'vulnHigh' => $vulnHigh,
+                'vulnHighPercent' => $vulnHigh * 10,
+                'vulnMediumLow' => $vulnMedLow,
+                'vulnMediumLowPercent' => $vulnMedLow * 10,
+
+                'fimAdded' => $fimAdded,
+                'fimModified' => $fimModified,
+                'fimDeleted' => $fimDeleted,
+
+                'hardware' => $hardware,
+                'loginActivities' => $loginActivities,
+                'services' => $services,
+                'network' => $network,
+                'failedLogins' => $failedLogins,
+                'recentAlerts' => $recentAlerts,
+
+                // Indikator bahwa server Wazuh terhubung dengan baik
+                'wazuhOffline' => false
+            ]);
+
+        } catch (\Throwable $e) {
+            // FALLBACK JIKA WAZUH MATI / API OFFLINE
+            // Mengirimkan data kosong/nol dan menandai 'wazuhOffline' => true agar view bisa memberikan info server off
+            return view('Admin.agents.detailAgent', [
+                'agentId' => $id,
+                'agentName' => 'Server Offline',
+                'agentStatus' => 'disconnected',
+                'agentIp' => '0.0.0.0',
+                'agentOs' => '-',
+                'agentLastKeepAlive' => '-',
+
+                'scaScore' => 0,
+                'vulnCritical' => 0,
+                'vulnCriticalPercent' => 0,
+                'vulnHigh' => 0,
+                'vulnHighPercent' => 0,
+                'vulnMediumLow' => 0,
+                'vulnMediumLowPercent' => 0,
+
+                'fimAdded' => 0,
+                'fimModified' => 0,
+                'fimDeleted' => 0,
+
+                'hardware' => null,
+                'loginActivities' => [],
+                'services' => [],
+                'network' => null,
+                'failedLogins' => ['count' => 0],
+                'recentAlerts' => [],
+
+                // Pemicu notifikasi di halaman Blade
+                'wazuhOffline' => true
+            ]);
         }
-
-        $hardware = $this->agentService->fetchSystemResources($id);
-        $fimLogs = $this->agentService->fetchFileIntegrityLogs($id);
-        $failedLogins = $this->agentService->fetchFailedLoginsCount($id);
-        $loginActivities = $this->agentService->fetchUserLoginActivity($id);
-        $services = $this->agentService->fetchServiceStatus($id);
-        $network = $this->agentService->fetchNetworkTraffic($id);
-
-        $scaScore = method_exists($this->agentService, 'fetchScaScore')
-            ? ($this->agentService->fetchScaScore($id)['score'] ?? 0)
-            : 85;
-
-        $vulnCritical = $failedLogins['count'] > 50 ? 5 : 1;
-        $vulnHigh = $failedLogins['count'] > 20 ? 4 : 2;
-        $vulnMedLow = 6;
-
-        $recentAlerts = [
-            [
-                'timestamp' => $agentInfo['lastKeepAlive'] ?? date('Y-m-d H:i:s'),
-                'level' => $failedLogins['count'] > 20 ? 7 : 5,
-                'description' => $failedLogins['count'] > 0 ? 'Bahaya! Ada yang nyoba login paksa berkali-kali pake password salah.' : 'Kondisi aman. Sistem pengecekan file berjalan normal.',
-                'group' => str_contains(strtolower($agentInfo['os']['name'] ?? ''), 'windows') ? 'syscheck, windows' : 'syscheck, linux'
-            ]
-        ];
-
-        $fimAdded = collect($fimLogs)->where('status', 'added')->count();
-        $fimModified = collect($fimLogs)->where('status', 'modified')->count();
-        $fimDeleted = collect($fimLogs)->where('status', 'deleted')->count();
-
-        return view('Admin.agents.detailAgent', [
-            'agentId' => $id,
-            'agentName' => $agentInfo['name'] ?? 'Nama Gak Diketahui',
-            'agentStatus' => $agentInfo['status'] ?? 'disconnected',
-            'agentIp' => $agentInfo['ip'] ?? '0.0.0.0',
-            'agentOs' => $agentInfo['os']['name'] ?? 'OS Gak Diketahui',
-            'agentLastKeepAlive' => $agentInfo['lastKeepAlive'] ?? '-',
-
-            'scaScore' => $scaScore,
-            'vulnCritical' => $vulnCritical,
-            'vulnCriticalPercent' => $vulnCritical * 15,
-            'vulnHigh' => $vulnHigh,
-            'vulnHighPercent' => $vulnHigh * 12,
-            'vulnMediumLow' => $vulnMedLow,
-            'vulnMediumLowPercent' => $vulnMedLow * 8,
-
-            'fimAdded' => $fimAdded,
-            'fimModified' => $fimModified,
-            'fimDeleted' => $fimDeleted,
-
-            'hardware' => $hardware,
-            'loginActivities' => $loginActivities,
-            'services' => $services,
-            'network' => $network,
-            'failedLogins' => $failedLogins,
-
-            'recentAlerts' => $recentAlerts
-        ]);
-    }
-
-    // Code ini untuk: Ngubah status agen jadi 'disconnect' di database lokal, tanpa ngehapus data agen dari sistem Laravel ataupun server Wazuh.
-    // Berfungsi pada halaman: Halaman Admin - Bagian list manajemen user (Admin/Manage Users).
-    // Dibagian fitur: Edit, Tombol "Lepas" agen di dalam modal, biar admin bisa nonaktifkan agen dari user tersebut tanpa menghapus datanya.
-    public function detachAgent(Request $request)
-    {
-        // 1. Validasi input buat mastiin ID agen yang mau dilepas itu dikirim dan gak kosong
-        $request->validate([
-            'agent_id' => ['required'],
-        ]);
-
-        // 2. Cari data agen di database lokal kita berdasarkan ID Agen dari Wazuh
-        $agent = Agen::where('id_wazuh_agen', $request->agent_id)->first();
-
-        // 3. Jaga-jaga kalau data agennya ternyata gak ketemu atau gak terdaftar di database lokal
-        if (!$agent) {
-            return back()->with('error', 'Data agen tidak ditemukan di database lokal.');
-        }
-
-        // 4. Ubah statusnya jadi 'disconnect'. Kepemilikan (user_id) tetep dibiarin utuh, cuma statusnya aja yang berubah
-        $agent->update([
-            'status' => 'disconnect'
-        ]);
-
-        // 5. Refresh halaman dan tampilin notifikasi kalau agen udah berhasil dilepas
-        return back()->with('success', 'Agen ' . $agent->nama_agen . ' berhasil dinonaktifkan (status: disconnect).');
     }
 }
