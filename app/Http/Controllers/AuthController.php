@@ -11,15 +11,20 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Mail\ResetPasswordMail;
 
+// Class ini untuk: Menangani seluruh proses autentikasi user (login, logout) dan alur lupa/reset password.
+// Berfungsi pada: Halaman Login, dan alur "Lupa Password" (kirim email → form reset → simpan password baru).
+// Dibagian fitur: Autentikasi session, redirect berbasis role (admin/customer), serta reset password via token email.
 class AuthController extends Controller
 {
-    // Menampilkan form login
+    // Code ini untuk: Menampilkan halaman form login.
+    // Berfungsi untuk: Halaman Login (route awal sebelum user masuk ke sistem).
     public function showLoginForm()
     {
         return view('login');
     }
 
-    // Menangani proses login
+    // Code ini untuk: Memproses validasi kredensial dan login user, lalu redirect sesuai role.
+    // Berfungsi untuk: Halaman Login, bagian aksi tombol submit form.
     public function login(Request $request)
     {
         $request->validate([
@@ -35,12 +40,12 @@ class AuthController extends Controller
         // Coba login dengan kredensial yang diberikan
         if (Auth::attempt($credentials)) {
 
-            // AMAN: Hapus session active agent dari user sebelumnya jika login langsung tanpa logout
+            // Hapus session agen aktif dari user sebelumnya, jaga-jaga kalau ada login langsung tanpa logout dulu
             $request->session()->forget('active_wazuh_agent_id');
 
             $request->session()->regenerate();
 
-            // Redirect ke dashboard sesuai dengan role user yang login
+            // Redirect ke dashboard sesuai role user yang login
             if (Auth::user()->role == 'admin') {
                 return redirect()->route('dashboard-admin');
             }
@@ -54,10 +59,11 @@ class AuthController extends Controller
         );
     }
 
-    // Menangani proses logout
+    // Code ini untuk: Memproses logout user dan membersihkan session terkait.
+    // Berfungsi untuk: Tombol "Logout" di halaman Admin maupun Customer.
     public function logout(Request $request)
     {
-        // AMAN: Hapus session active agent secara spesifik sebelum session dihancurkan
+        // Hapus session agen aktif secara spesifik sebelum session dihancurkan
         $request->session()->forget('active_wazuh_agent_id');
 
         Auth::logout();
@@ -69,96 +75,92 @@ class AuthController extends Controller
     }
 
     // =========================================================================
-    // 🛠️ FITUR BARU: LOGIKA PROSES RESET PASSWORD (LUPA PASSWORD)
+    // FITUR: LOGIKA PROSES RESET PASSWORD (LUPA PASSWORD)
     // =========================================================================
 
-    /**
-     * 1. Memproses input email dari pop-up dan mengirimkan link rahasia ke Gmail
-     */
+    // Code ini untuk: Memproses input email dari pop-up "Lupa Password" dan mengirimkan link reset ke Gmail user.
+    // Berfungsi untuk: Halaman Login, bagian modal/pop-up "Forgot Password".
     public function sendResetLinkEmail(Request $request)
     {
         $request->validate([
             'email' => 'required|email'
         ]);
 
-        // Cek keberadaan email kustomer di database lokal
+        // Cek keberadaan email customer di database lokal
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Alamat email tidak terdaftar di sistem kami.'
+                'message' => 'The email address is not registered in our system.'
             ], 404);
         }
 
         // Buat token pengaman unik
         $token = Str::random(60);
 
-        // Simpan token ke dalam tabel internal bawaan Laravel (password_reset_tokens)
+        // Simpan token ke tabel bawaan Laravel (password_reset_tokens), token di-hash agar aman
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $request->email],
             [
-                'token' => Hash::make($token), // Di-hash agar aman
+                'token' => Hash::make($token),
                 'created_at' => now()
             ]
         );
 
         try {
-            // Kirim Gmail menggunakan mailable ResetPasswordMail
+            // Kirim email menggunakan mailable ResetPasswordMail
             Mail::to($request->email)->send(new ResetPasswordMail($token, $request->email));
 
             return response()->json([
                 'success' => true,
-                'message' => 'Link reset password berhasil dikirim ke Gmail Anda.'
+                'message' => 'Password reset link has been sent to your email.'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengirim email, silakan cek setting .env: ' . $e->getMessage()
+                'message' => 'Failed to send email, please check .env settings: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    /**
-     * 2. Menampilkan halaman formulir pembuatan password baru (saat link di Gmail diklik)
-     */
+    // Code ini untuk: Menampilkan halaman formulir pembuatan password baru saat link di email diklik.
+    // Berfungsi untuk: Halaman Reset Password (dibuka dari link yang dikirim ke Gmail user).
     public function showResetForm(Request $request, $token)
     {
-        // Kita arahkan ke dalam folder bernama 'auth' dan file bernama 'reset-password-form.blade.php'
         return view('resetPassword', [
             'token' => $token,
             'email' => $request->email
         ]);
     }
 
-    /**
-     * 3. Menyimpan data perubahan password baru ke database
-     */
+    // Code ini untuk: Memvalidasi token dan menyimpan perubahan password baru ke database.
+    // Berfungsi untuk: Halaman Reset Password, bagian aksi tombol submit form password baru.
     public function updatePassword(Request $request)
     {
         $request->validate([
             'token' => 'required',
             'email' => 'required|email',
-            'password' => 'required|min:6|confirmed', // Kolom input password_confirmation wajib ada di form nanti
+            'password' => 'required|min:6|confirmed', // Kolom input password_confirmation wajib ada di form
         ]);
 
-        // Ambil record token yang ada di database
+        // Ambil record token yang tersimpan di database
         $record = DB::table('password_reset_tokens')->where('email', $request->email)->first();
 
-        // Validasi kecocokan tokennya
+        // Validasi kecocokan token
         if (!$record || !Hash::check($request->token, $record->token)) {
-            return back()->with('error', 'Token reset password tidak valid atau sudah kedaluwarsa.');
+            return back()->with('error', 'Token reset password not valid or has expired. Please request a new password reset link.');
         }
 
-        // Perbarui password user ke database
+        // Perbarui password user di database
         User::where('email', $request->email)->update([
             'password' => Hash::make($request->password)
         ]);
 
-        // Hapus token yang lama agar tidak bisa dipakai ulang
+        // Hapus token lama agar tidak bisa dipakai ulang
         DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
-        // Lempar kembali ke halaman login utama dengan flash message sukses
-        return redirect('/login')->with('success', 'Password berhasil diperbarui! Silakan login kembali.');
+        // Kembali ke halaman login dengan flash message sukses
+        return redirect('/login')->with('success', 'password has been successfully updated. You can now log in with your new password.');
     }
 }

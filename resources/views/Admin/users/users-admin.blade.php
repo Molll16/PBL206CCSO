@@ -42,6 +42,24 @@
                 </div>
             </div>
 
+            {{-- Alert notifikasi sukses (setelah tambah/hapus customer) --}}
+            @if(session('success'))
+                <div
+                    class="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+                    <i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i>
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            {{-- Alert notifikasi error (kalau ada) --}}
+            @if(session('error'))
+                <div
+                    class="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+                    {{ session('error') }}
+                </div>
+            @endif
+
             {{-- Header Table --}}
             <div class="flex justify-between items-center">
                 <div>
@@ -74,12 +92,14 @@
                                 <tr class="hover:bg-page/40 transition-colors">
                                     {{-- Mengasumsikan properti nama pada table users adalah 'name' atau 'nama_lengkap' --}}
                                     <td class="py-3.5 px-5 text-left font-semibold text-white">
-                                        {{ $user->name ?? $user->nama_lengkap ?? '-' }}</td>
+                                        {{ $user->name ?? $user->nama_lengkap ?? '-' }}
+                                    </td>
                                     <td class="py-3.5 px-5 font-medium text-textMain">{{ $user->username }}</td>
                                     <td class="py-3.5 px-5 text-textMuted">{{ $user->email }}</td>
                                     {{-- Mengasumsikan properti no hp adalah 'phone', 'no_hp', atau 'telepon' --}}
                                     <td class="py-3.5 px-5 text-textMuted">
-                                        {{ $user->no_telp ?? $user->no_hp ?? $user->no_telp ?? '-' }}</td>
+                                        {{ $user->no_telp ?? $user->no_hp ?? $user->no_telp ?? '-' }}
+                                    </td>
                                     <td class="py-3.5 px-5 text-right">
                                         <form action="{{ route('customers.destroy', $user->id) }}" method="POST"
                                             class="inline-block">

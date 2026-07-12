@@ -7,6 +7,7 @@ use App\Services\AlertService;
 use Illuminate\Http\Request;
 use App\Models\Agen;
 
+// Controller buat endpoint API widget-widget di Dashboard Customer
 class WidgetController extends Controller
 {
     protected $agentService;
@@ -18,7 +19,7 @@ class WidgetController extends Controller
         $this->alertService = $alertService;
     }
 
-    // Helper Terpusat: Mengambil ID Agen aktif dari session atau fallback ke agen pertama di database
+    // Ambil ID agen yang lagi aktif dipantau, kalau session kosong pakai agen pertama punya user
     private function getActiveAgentId(): ?string
     {
         $selectedAgentId = session('active_wazuh_agent_id');
@@ -31,9 +32,7 @@ class WidgetController extends Controller
         return $selectedAgentId;
     }
 
-    /**
-     * 1. Widget Status Agen (Online/Offline)
-     */
+    // Widget status agen online/offline - Dashboard Customer
     public function getAgentStatus()
     {
         try {
@@ -50,18 +49,21 @@ class WidgetController extends Controller
             return response()->json([
                 'success' => false,
                 'data' => ['online' => 0, 'offline' => 0, 'total' => 0],
-                'message' => 'Gagal memuat status agen.'
+                'message' => 'Failed to fetch agent status: Connection issue occurred.'
             ]);
         }
     }
 
-    /**
-     * 2. Widget Security Alerts Terbaru (Limit 5)
-     */
+    // Widget alert keamanan terbaru - Dashboard Customer
     public function getLatestAlerts()
     {
         try {
             $activeAgentId = $this->getActiveAgentId();
+
+            if (!$activeAgentId) {
+                return response()->json(['success' => false, 'data' => [], 'message' => 'Tidak ada agen aktif.']);
+            }
+
             $alerts = $this->alertService->getLatestAlerts(5, $activeAgentId);
             return response()->json([
                 'success' => true,
@@ -71,14 +73,12 @@ class WidgetController extends Controller
             return response()->json([
                 'success' => false,
                 'data' => [],
-                'message' => 'Gagal memuat alert keamanan.'
+                'message' => 'Failed to fetch security alerts: Connection issue occurred.'
             ]);
         }
     }
 
-    /**
-     * 3. Widget Threat Summary (Kategori Ancaman)
-     */
+    // Widget threat summary (donut chart & list kategori ancaman) - Dashboard Customer
     public function getThreatSummary()
     {
         try {
@@ -93,14 +93,12 @@ class WidgetController extends Controller
             return response()->json([
                 'success' => false,
                 'data' => ['active' => 0, 'pending' => 0, 'resolved' => 0, 'categories' => []],
-                'message' => $e->getMessage()
+                'message' => 'Failed to fetch threat summary: ' . $e->getMessage()
             ]);
         }
     }
 
-    /**
-     * 4. Widget System Resources - MURNI DATA BACKEND
-     */
+    // Widget pemakaian CPU/RAM/Disk/Swap - Dashboard Customer
     public function getSystemResources()
     {
         try {
@@ -115,18 +113,18 @@ class WidgetController extends Controller
                         ['label' => 'DISK', 'value' => 0, 'color' => 'bg-emerald-500'],
                         ['label' => 'SWAP', 'value' => 0, 'color' => 'bg-indigo-500']
                     ],
-                    'message' => 'Tidak ada agen terpasang pada akun Anda.'
+                    'message' => 'Failed to fetch system resources: No registered agent for this account.'
                 ]);
             }
 
             $metrics = $this->agentService->fetchSystemResources($activeAgentId);
 
-            // Mengambil nilai murni hasil olahan service (default ke 0 jika kosong)
+            // disk & swap pakai data riil kalau ada di metrics, kalau gak ada ya 0 (bukan data karangan)
             $resources = [
                 ['label' => 'CPU', 'value' => $metrics['cpu'] ?? 0, 'color' => 'bg-cyan-500'],
                 ['label' => 'RAM', 'value' => $metrics['ram'] ?? 0, 'color' => 'bg-amber-500'],
-                ['label' => 'DISK', 'value' => 44, 'color' => 'bg-emerald-500'], // Data statis bawaan template
-                ['label' => 'SWAP', 'value' => 12, 'color' => 'bg-indigo-500']  // Data statis bawaan template
+                ['label' => 'DISK', 'value' => $metrics['disk'] ?? 0, 'color' => 'bg-emerald-500'],
+                ['label' => 'SWAP', 'value' => $metrics['swap'] ?? 0, 'color' => 'bg-indigo-500']
             ];
 
             return response()->json([
@@ -134,30 +132,27 @@ class WidgetController extends Controller
                 'data' => $resources
             ]);
         } catch (\Throwable $e) {
-            // Jika backend/Wazuh down total, kirim angka 0 (Sangat Jujur)
             return response()->json([
                 'success' => false,
                 'data' => [
                     ['label' => 'CPU', 'value' => 0, 'color' => 'bg-cyan-500'],
-                    ['label' => 'RAM', 'value' => 0, 'color' => 'bg-amber-500'], // Mengembalikan 0, bukan 89
-                    ['label' => 'DISK', 'value' => 44, 'color' => 'bg-emerald-500'],
-                    ['label' => 'SWAP', 'value' => 12, 'color' => 'bg-indigo-500']
+                    ['label' => 'RAM', 'value' => 0, 'color' => 'bg-amber-500'],
+                    ['label' => 'DISK', 'value' => 0, 'color' => 'bg-emerald-500'],
+                    ['label' => 'SWAP', 'value' => 0, 'color' => 'bg-indigo-500']
                 ],
-                'message' => 'Gagal memuat resource sistem asli.'
+                'message' => 'Failed to fetch system resources: Connection lost.'
             ]);
         }
     }
 
-    /**
-     * 5. Widget File Integrity Monitoring (FIM)
-     */
+    // Widget File Integrity Monitoring (FIM) - Dashboard Customer
     public function getFileIntegrity()
     {
         try {
             $activeAgentId = $this->getActiveAgentId();
 
             if (!$activeAgentId) {
-                return response()->json(['success' => false, 'data' => []]);
+                return response()->json(['success' => false, 'data' => [], 'message' => 'Failed to fetch FIM data: Inactive agent.']);
             }
 
             $fimData = $this->agentService->fetchFileIntegrityLogs($activeAgentId);
@@ -167,13 +162,11 @@ class WidgetController extends Controller
                 'data' => $fimData
             ]);
         } catch (\Throwable $e) {
-            return response()->json(['success' => false, 'data' => []]);
+            return response()->json(['success' => false, 'data' => [], 'message' => 'Failed to fetch FIM data.']);
         }
     }
 
-    /**
-     * 6. Widget Failed Logins Counter
-     */
+    // Widget failed login counter - Dashboard Customer
     public function getFailedLogins()
     {
         try {
@@ -190,13 +183,11 @@ class WidgetController extends Controller
                 'data' => $failedData
             ]);
         } catch (\Throwable $e) {
-            return response()->json(['success' => false, 'data' => ['count' => 0, 'timeline' => '-', 'status_tag' => '-']]);
+            return response()->json(['success' => false, 'data' => ['count' => 0, 'timeline' => 'Connection lost', 'status_tag' => 'Offline']]);
         }
     }
 
-    /**
-     * 7. Widget User Login Activity
-     */
+    // Widget riwayat login user lokal - Dashboard Customer
     public function getUserLoginActivity()
     {
         try {
@@ -206,7 +197,7 @@ class WidgetController extends Controller
                 return response()->json([
                     'success' => true,
                     'data' => [],
-                    'message' => 'Tidak ada agen terdaftar untuk akun ini'
+                    'message' => 'Failed to fetch user login activity: No registered agent for this account.'
                 ]);
             }
 
@@ -216,24 +207,17 @@ class WidgetController extends Controller
                 'success' => true,
                 'data' => $activitiesData
             ]);
-
         } catch (\Throwable $e) {
-            \Log::error('[Widget] getUserLoginActivity error: ' . $e->getMessage(), [
-                'user_id' => auth()->id(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
+            \Log::error('[Widget] getUserLoginActivity error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'data' => [],
-                'message' => $e->getMessage()
-            ], 200);
+                'message' => 'Failed to fetch login activity: Server is not responding.'
+            ]);
         }
     }
 
-    /**
-     * 8. Widget Most Active Rules
-     */
+    // Widget rule keamanan paling sering kepicu - Dashboard Customer
     public function getMostActiveRules()
     {
         try {
@@ -244,34 +228,29 @@ class WidgetController extends Controller
                 'success' => true,
                 'data' => $activeRules
             ]);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
                 'data' => [],
-                'message' => $e->getMessage()
-            ], 200);
+                'message' => 'Failed to fetch active rules: ' . $e->getMessage()
+            ]);
         }
     }
 
-    /**
-     * 9. Widget Service Status 
-     */
+    // Widget status service (Nginx, MySQL, SSH, dll) - Dashboard Customer
     public function getServiceStatus()
     {
         try {
-            // Memastikan pengambilan ID Agen Aktif berjalan lancar sesuai method controller kamu
             $activeAgentId = $this->getActiveAgentId();
 
             if (!$activeAgentId) {
                 return response()->json([
                     'success' => false,
                     'data' => [],
-                    'message' => 'Tidak ada agen aktif yang terpilih.'
+                    'message' => 'Failed to fetch service status: No active agent selected.'
                 ]);
             }
 
-            // Panggil Service untuk hit ke API Wazuh
             $servicesData = $this->agentService->fetchServiceStatus($activeAgentId);
 
             return response()->json([
@@ -279,18 +258,15 @@ class WidgetController extends Controller
                 'data' => $servicesData
             ]);
         } catch (\Throwable $e) {
-            // 💡 JIKA CRASH, KITA TANGKAP DAN KEMBALIKAN JSON (Bukan HTTP Error 500)
             return response()->json([
                 'success' => false,
                 'data' => [],
-                'message' => 'Gagal memuat status layanan: ' . $e->getMessage()
+                'message' => 'Failed to fetch service status: Network issue occurred.'
             ]);
         }
     }
 
-    /**
-     * 10. Widget Network Traffic - Handler Struktur Aman
-     */
+    // Widget network traffic (inbound/outbound + status interface) - Dashboard Customer
     public function getNetworkTraffic()
     {
         try {
@@ -305,14 +281,10 @@ class WidgetController extends Controller
 
             $networkData = $this->agentService->fetchNetworkTraffic($activeAgentId);
 
-            // JIKA SERVICE MENGEMBALIKAN KOSONG/ERROR, BERI FALLBACK STRUKTUR STANDARD
             if (empty($networkData) || !isset($networkData['interfaces'])) {
                 return response()->json([
                     'success' => true,
-                    'data' => [
-                        'stats' => ['inbound' => 0, 'outbound' => 0],
-                        'interfaces' => []
-                    ]
+                    'data' => ['stats' => ['inbound' => 0, 'outbound' => 0], 'interfaces' => []]
                 ]);
             }
 
@@ -324,8 +296,86 @@ class WidgetController extends Controller
             return response()->json([
                 'success' => false,
                 'data' => ['stats' => ['inbound' => 0, 'outbound' => 0], 'interfaces' => []],
-                'message' => $e->getMessage()
+                'message' => 'Failed to fetch network traffic: Connection lost.'
             ]);
+        }
+    }
+
+    // Widget log firewall - Dashboard Customer
+    public function getFirewallEvents()
+    {
+        try {
+            $activeAgentId = $this->getActiveAgentId();
+
+            if (!$activeAgentId) {
+                return response()->json([
+                    'success' => false,
+                    'data' => [],
+                    'message' => 'Failed to fetch firewall events: No active agent selected.'
+                ]);
+            }
+
+            $events = $this->agentService->fetchFirewallEvents($activeAgentId);
+
+            return response()->json([
+                'success' => true,
+                'data' => $events
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('[Widget] getFirewallEvents error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'data' => [],
+                'message' => 'Failed to fetch firewall events: Connection failed.'
+            ]);
+        }
+    }
+
+    // Widget active connections - Dashboard Customer
+    // Perbaikan: sebelumnya baca session key yang salah ('active_agent_id'), sekarang pakai getActiveAgentId() biar konsisten
+    public function getActiveConnections(Request $request)
+    {
+        try {
+            $agentId = $this->getActiveAgentId() ?? '000';
+
+            $data = $this->agentService->fetchActiveConnections($agentId);
+
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+
+        } catch (\Throwable $e) {
+            \Log::error("Widget Active Connections Controller Error: " . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch active connections: Connection failed.'
+            ], 500);
+        }
+    }
+
+    // Widget GeoIP attack map - Dashboard Customer
+    // Perbaikan: sama kayak getActiveConnections(), session key-nya salah, sekarang dibenerin
+    public function getGeoAttacks(Request $request)
+    {
+        try {
+            $agentId = $this->getActiveAgentId() ?? '000';
+
+            $data = $this->agentService->fetchGeoAttacks($agentId);
+
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+
+        } catch (\Throwable $e) {
+            \Log::error("Widget GeoIP Attack Map Controller Error: " . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch geo-attacks: Connection failed.'
+            ], 500);
         }
     }
 }

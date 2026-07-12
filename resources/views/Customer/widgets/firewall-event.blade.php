@@ -1,92 +1,59 @@
-@php
-$firewall_events = [
-
-    [
-        'title' => 'SSH Brute Force',
-        'description' => 'Multiple failed login attempts detected',
-        'severity' => 'HIGH',
-        'ip' => '192.168.1.101',
-        'port' => '22',
-        'status' => 'BLOCKED',
-        'color' => 'red'
-    ],
-
-    [
-        'title' => 'Port Scanning',
-        'description' => 'Suspicious port scanning activity detected',
-        'severity' => 'MEDIUM',
-        'ip' => '10.10.10.8',
-        'port' => '443',
-        'status' => 'SUSPICIOUS',
-        'color' => 'yellow'
-    ]
-];
-@endphp
-
-<div class="h-full flex flex-col">
-
-    <div class="flex-1 overflow-y-auto space-y-2 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
-
-        @foreach($firewall_events as $event)
-
-            <div class="
-                rounded-lg border px-3 py-2
-                {{ $event['color'] == 'red'
-                    ? 'border-red-500/30 bg-red-500/10'
-                    : 'border-yellow-500/30 bg-yellow-500/10'
-                }}
-            ">
-
-                <div class="flex justify-between items-center">
-
-                    <div class="min-w-0 mr-3">
-
-                        <p class="
-                            text-xs font-medium truncate
-                            {{ $event['color'] == 'red'
-                                ? 'text-red-400'
-                                : 'text-yellow-400'
-                            }}
-                        ">
-                            {{ $event['title'] }}
-                        </p>
-
-                        <p class="text-[11px] text-gray-400 truncate">
-                            {{ $event['ip'] }} • Port {{ $event['port'] }}
-                        </p>
-
-                    </div>
-
-                    <div class="shrink-0 text-right">
-
-                        <span class="
-                            px-2 py-0.5 rounded text-[10px] border
-                            {{ $event['color'] == 'red'
-                                ? 'border-red-500/30 text-red-400 bg-red-500/10'
-                                : 'border-yellow-500/30 text-yellow-400 bg-yellow-500/10'
-                            }}
-                        ">
-                            {{ $event['severity'] }}
-                        </span>
-
-                        <p class="
-                            text-[10px] mt-1
-                            {{ $event['color'] == 'red'
-                                ? 'text-red-300'
-                                : 'text-yellow-300'
-                            }}
-                        ">
-                            {{ $event['status'] }}
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        @endforeach
-
+<div class="card shadow-sm border-0 mb-4 bg-dark text-light">
+    <div id="firewall-error-msg" class="alert alert-danger mx-3 mt-3 d-none border-0"
+        style="background: rgba(220,53,69,0.15); color: #ea5455;"></div>
+    <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;" id="firewall-events-list">
+        <div class="text-center py-4 text-muted">
+            <div class="spinner-border spinner-border-sm text-info mb-1"></div>
+            <p class="mb-0 small">Loading firewall events...</p>
+        </div>
     </div>
-
 </div>
+
+<style>
+    #firewall-events-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #firewall-events-list::-webkit-scrollbar-track {
+        background: #1e1e2f;
+    }
+
+    #firewall-events-list::-webkit-scrollbar-thumb {
+        background: #393953;
+        border-radius: 4px;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const list = document.getElementById('firewall-events-list'), errBox = document.getElementById('firewall-error-msg');
+
+        fetch("{{ route('widget.firewall-events') }}").then(r => r.json()).then(res => {
+            if (!res.success) throw new Error(res.message || 'Koneksi Server Wazuh Terputus');
+            if (!res.data || res.data.length === 0) {
+                list.innerHTML = `<div class="text-center py-5 text-muted"><i class="fas fa-check-circle text-success mb-1 fa-2x"></i><p class="mb-0 small">No suspicious logs found.</p></div>`;
+                return;
+            }
+
+            const styles = { red: { b: 'bg-danger text-danger', i: 'fa-bug' }, yellow: { b: 'bg-warning text-warning', i: 'fa-exclamation-triangle' }, default: { b: 'bg-primary text-primary', i: 'fa-info-circle' } };
+            list.innerHTML = res.data.map(ev => {
+                const cfg = styles[ev.color] || styles.default;
+                return `
+                    <div class="p-3 border-bottom border-secondary d-flex justify-content-between align-items-start gap-2" style="background: #1a1a27;">
+                        <div class="d-flex gap-2" style="max-width: 85%;">
+                            <i class="fas ${cfg.i} ${cfg.b.split(' ')[1]} mt-1"></i>
+                            <div>
+                                <h6 class="mb-1 text-white-50 small font-weight-bold">Tag: <span class="text-info">${ev.title}</span></h6>
+                                <p class="mb-0 text-muted small" style="background: #13131f; padding: 6px 10px; border-radius: 4px; border-left: 3px solid #393953; word-break: break-all;">${ev.description}</p>
+                            </div>
+                        </div>
+                        <span class="badge bg-opacity-10 ${cfg.b} font-weight-bold" style="font-size: 0.65rem;">${ev.severity}</span>
+                    </div>`;
+            }).join('');
+        }).catch(err => {
+            errBox.innerHTML = `<i class="fas fa-exclamation-triangle me-1"></i> ${err.message}`;
+            errBox.classList.remove('d-none');
+            list.innerHTML = `<div class="text-center py-5 text-danger"><i class="fas fa-wifi-slash mb-1 text-muted fa-2x"></i><p class="mb-0 small font-weight-bold">Offline</p></div>`;
+        });
+    });
+</script>

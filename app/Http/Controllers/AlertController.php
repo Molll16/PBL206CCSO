@@ -7,6 +7,9 @@ use App\Services\AlertService;
 use App\Models\Agen;
 use Illuminate\Pagination\LengthAwarePaginator;
 
+// Class ini untuk: Menangani seluruh aksi HTTP terkait tampilan log/alert keamanan di sisi Customer.
+// Berfungsi pada: Halaman Alert/Logs Customer, endpoint API internal, dan fitur ganti agen aktif (switch agent).
+// Dibagian fitur: Daftar log dengan filter & pagination, serta pengelolaan session agen yang sedang dipantau user.
 class AlertController extends Controller
 {
     protected $alertService;
@@ -16,8 +19,8 @@ class AlertController extends Controller
         $this->alertService = $alertService;
     }
 
-    // Code ini untuk: Mengambil ID agen Wazuh yang sedang aktif dipantau (Mendukung opsi 'all').
-    // Berfungsi untuk: Pengecekan session internal (Helper).
+    // Code ini untuk: Mengambil ID agen Wazuh yang sedang aktif dipantau user (mendukung opsi 'all').
+    // Berfungsi untuk: Helper internal, dipakai oleh getAlerts() dan index() di class ini.
     private function getActiveAgentId()
     {
         $userId = auth()->id();
@@ -31,12 +34,12 @@ class AlertController extends Controller
         $myAgentIds = $myAgents->pluck('id_wazuh_agen')->toArray();
         $lastViewedAgent = session('active_wazuh_agent_id');
 
-        // KUNCI PENGAMAN: Jika ada session agen terakhir, dan ID tersebut MEMANG milik user ini
+        // KUNCI PENGAMAN: session dipakai hanya jika ID tersebut memang milik user ini
         if ($lastViewedAgent && in_array($lastViewedAgent, $myAgentIds)) {
             return $lastViewedAgent; // Gunakan agen terakhir yang dia lihat
         }
 
-        // FALLBACK: Jika ganti akun (session agen lama bukan milik user ini) atau session kosong
+        // FALLBACK: jika ganti akun (session agen lama bukan milik user ini) atau session kosong
         // Set session baru ke agen pertama milik user tersebut
         $defaultAgent = $myAgents->first()->id_wazuh_agen;
         session(['active_wazuh_agent_id' => $defaultAgent]);
@@ -45,7 +48,7 @@ class AlertController extends Controller
     }
 
     // Code ini untuk: Mengambil 5 data log alert terbaru berdasarkan agen yang aktif.
-    // Berfungsi untuk: Endpoint API internal.
+    // Berfungsi untuk: Endpoint API internal (dipanggil via AJAX/fetch dari frontend).
     public function getAlerts()
     {
         $activeAgentId = $this->getActiveAgentId();
@@ -57,10 +60,10 @@ class AlertController extends Controller
     // Berfungsi untuk: Menampilkan halaman utama menu "Alert page" di sisi Customer.
     public function index(Request $request)
     {
-        // 1. Ambil ID/Array ID agen aktif dari session khusus milik user login
+        // 1. Ambil ID agen aktif dari session khusus milik user login
         $activeAgentId = $this->getActiveAgentId();
 
-        // 2. Menangkap parameter request filter dari element HTML Form di Blade
+        // 2. Menangkap parameter request filter dari form HTML di Blade
         $selectedSeverity = $request->input('severity');
 
         // 3. Ambil data hitungan angka counter card statistik
@@ -89,10 +92,8 @@ class AlertController extends Controller
         ]));
     }
 
-    // ==========================================
-    // 4. FITUR SWITCH AGENT LOGIC
-    // ==========================================
-    // Code ini untuk: Mengubah session target ID agen yang aktif dipantau.
+    // Code ini untuk: Mengubah session target ID agen yang aktif dipantau (mendukung opsi single agen atau 'all').
+    // Berfungsi untuk: Komponen Dropdown "Switch Agent" di halaman Alert/Logs Customer.
     public function switchAgent(Request $request)
     {
         $request->validate([
@@ -101,18 +102,19 @@ class AlertController extends Controller
 
         if ($request->agent_id === 'all') {
             session(['active_wazuh_agent_id' => 'all']);
-            return back()->with('success', 'Berhasil beralih ke semua agen.');
+            return back()->with('success', 'Successfully switched to all agents.');
         }
 
+        // Validasi: agen yang dipilih harus benar-benar milik user yang sedang login
         $isValidAgent = Agen::where('user_id', auth()->id())
             ->where('id_wazuh_agen', $request->agent_id)
             ->exists();
 
         if ($isValidAgent) {
             session(['active_wazuh_agent_id' => $request->agent_id]);
-            return back()->with('success', 'Berhasil beralih ke agen ' . $request->agent_id);
+            return back()->with('success', 'Successfully switched to agent ' . $request->agent_id);
         }
 
-        return back()->with('error', 'Akses agen tidak diizinkan.');
+        return back()->with('error', 'Agent access not allowed.');
     }
 }

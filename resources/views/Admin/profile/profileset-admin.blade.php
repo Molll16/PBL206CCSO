@@ -64,10 +64,10 @@
         <h3 class="text-sm font-semibold text-textMain flex items-center gap-2 border-b border-borderSubtle pb-4">
           <i data-lucide="user-cog" class="w-4 h-4 text-brand"></i> Personal Information
         </h3>
-    
+      
         <form action="{{ route('profile.update') }}" method="POST" class="space-y-4">
           @csrf
-    
+      
           {{-- PERBAIKAN DI SINI: Ditambahkan kondisi !session('password_success') agar tidak bocor saat ganti password --}}
           @if(session('success') && !session('password_success'))
             <div
@@ -76,29 +76,24 @@
               {{ session('success') }}
             </div>
           @endif
-    
+      
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-textMuted uppercase tracking-wider">Full Name</label>
-            <input type="text" name="name" value="{{ auth()->user()->name }}"
-              class="bg-page border border-borderSubtle rounded-lg px-4 py-2.5 text-sm text-textMain focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all">
+            <input type="text" name="name" value="{{ auth()->user()->name }}" readonly
+              class="bg-page border border-borderSubtle rounded-lg px-4 py-2.5 text-sm text-textMain focus:outline-none cursor-not-allowed opacity-70">
           </div>
-    
+      
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-textMuted uppercase tracking-wider">Email</label>
-            <input type="email" name="email" value="{{ auth()->user()->email }}"
-              class="bg-page border border-borderSubtle rounded-lg px-4 py-2.5 text-sm text-textMain focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all">
+            <input type="email" name="email" value="{{ auth()->user()->email }}" readonly
+              class="bg-page border border-borderSubtle rounded-lg px-4 py-2.5 text-sm text-textMain focus:outline-none cursor-not-allowed opacity-70">
           </div>
-    
+      
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-textMuted uppercase tracking-wider">Personal Phone Number</label>
-            <input type="text" name="no_telp" value="{{ auth()->user()->no_telp }}"
-              class="bg-page border border-borderSubtle rounded-lg px-4 py-2.5 text-sm text-textMain focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all">
+            <input type="text" name="no_telp" value="{{ auth()->user()->no_telp }}" readonly
+              class="bg-page border border-borderSubtle rounded-lg px-4 py-2.5 text-sm text-textMain focus:outline-none cursor-not-allowed opacity-70">
           </div>
-    
-          <button type="submit"
-            class="w-full bg-brand hover:bg-brandHover transition text-white px-5 py-2.5 rounded-lg font-semibold text-sm shadow-lg shadow-brand/20 flex items-center justify-center gap-2">
-            <i data-lucide="save" class="w-4 h-4"></i> Save Changes
-          </button>
         </form>
       </div>
     

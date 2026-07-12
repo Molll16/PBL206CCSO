@@ -32,11 +32,12 @@ Route::prefix('customer')->middleware('auth')->group(function () {
         Route::get('/file-integrity', [WidgetController::class, 'getFileIntegrity'])->name('widget.file-integrity');
         Route::get('/failed-logins', [WidgetController::class, 'getFailedLogins'])->name('widget.failed-login-monitoring');
         Route::get('/user-login-activity', [WidgetController::class, 'getUserLoginActivity'])->name('widget.user-login-activity');
-
-        // 🛠️ PERBAIKAN: Menghilangkan kata '/widget' yang double
         Route::get('/most-active-rules', [WidgetController::class, 'getMostActiveRules'])->name('widget.active-rules');
         Route::get('/service-status', [WidgetController::class, 'getServiceStatus'])->name('widget-service-status');
         Route::get('/network-traffic', [WidgetController::class, 'getNetworkTraffic'])->name('widget-network-traffic');
+        Route::get('/firewall-events', [WidgetController::class, 'getFirewallEvents'])->name('widget.firewall-events');
+        Route::get('/active-connections', [WidgetController::class, 'getActiveConnections'])->name('widget.active-connections');
+        Route::get('/geo-attacks', [WidgetController::class, 'getGeoAttacks'])->name('widget.geo-attacks');
     });
 
     // CUSTOM DASHBOARD MANAGEMENT

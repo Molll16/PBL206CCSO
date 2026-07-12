@@ -7,20 +7,23 @@ use App\Services\AgentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
+// Class ini untuk: Menangani manajemen data akun customer (CRUD) dari sisi Admin.
+// Berfungsi pada: Halaman Admin - Users/Customer Management.
+// Dibagian fitur: Menampilkan daftar customer, form tambah customer baru, simpan data baru, dan hapus data customer.
 class CustomerController extends Controller
 {
     protected $agentService;
 
-    // Code ini untuk: Menghubungkan Controller dengan AgentService agar bisa mengambil data statistik dashboard
-    // Berfungsi pada halaman: List Customer Admin dan Add Customer Admin
+    // Code ini untuk: Menghubungkan Controller dengan AgentService agar bisa mengambil data statistik ringkasan (total user & agen ter-assign).
+    // Berfungsi pada halaman: List Customer Admin dan Add Customer Admin.
     public function __construct(AgentService $agentService)
     {
         $this->agentService = $agentService;
     }
 
-    // Code ini untuk: Menampilkan halaman utama manajemen user beserta tabel daftar customer
-    // Berfungsi pada halaman: List Customer Admin (saat admin membuka menu ini)
-    // Fitur: Menampilkan Data (Read) nama lengkap, username, email, dan nomor telepon
+    // Code ini untuk: Menampilkan halaman utama manajemen user beserta tabel daftar customer.
+    // Berfungsi pada halaman: List Customer Admin (Admin.users.users-admin).
+    // Dibagian fitur: Menampilkan data (Read) nama lengkap, username, email, dan nomor telepon seluruh customer.
     public function index()
     {
         $stats = $this->agentService->getCustomerManagementSummary();
@@ -34,9 +37,9 @@ class CustomerController extends Controller
         ]);
     }
 
-    // Code ini untuk: Menampilkan halaman formulir kosong untuk menambah data customer baru
-    // Berfungsi pada halaman: Form Add New User (saat admin klik tombol + Add New User)
-    // Fitur: Menampilkan Form Tambah User
+    // Code ini untuk: Menampilkan halaman formulir kosong untuk menambah data customer baru.
+    // Berfungsi pada halaman: Form Add New User (Admin.users.adduser-admin), saat admin klik tombol "+ Add New User".
+    // Dibagian fitur: Menampilkan form tambah user.
     public function create()
     {
         $stats = $this->agentService->getCustomerManagementSummary();
@@ -47,9 +50,9 @@ class CustomerController extends Controller
         ]);
     }
 
-    // Code ini untuk: Memproses validasi data inputan form dan menyimpannya ke database
-    // Berfungsi pada fitur: Tombol "Simpan / Tambah Akun" di halaman Add New User
-    // Fitur: Menambahkan Data Baru (Create)
+    // Code ini untuk: Memvalidasi data inputan form dan menyimpannya sebagai akun customer baru ke database.
+    // Berfungsi pada halaman: Form Add New User, bagian aksi tombol "Simpan / Tambah Akun".
+    // Dibagian fitur: Menambahkan data baru (Create).
     public function store(Request $request)
     {
         $request->validate([
@@ -57,7 +60,7 @@ class CustomerController extends Controller
             'name' => 'required',
             'username' => 'required|unique:users,username',
             'password' => 'required|min:6',
-            'no_telp' => 'required|numeric|unique:users,no_telp', 
+            'no_telp' => 'required|numeric|unique:users,no_telp',
         ]);
 
         User::create([
@@ -69,16 +72,16 @@ class CustomerController extends Controller
             'role' => 'customer',
         ]);
 
-        return redirect()->route('usersadmin')->with('success', 'Akun customer berhasil dibuat.');
+        return redirect()->route('usersadmin')->with('success', 'Customer account has been successfully added.');
     }
 
-    // Code ini untuk: Menghapus data akun customer tertentu dari database berdasarkan ID
-    // Berfungsi pada fitur: Tombol "Hapus" di dalam baris tabel daftar customer
-    // Fitur: Menghapus Data (Delete)
+    // Code ini untuk: Menghapus data akun customer tertentu dari database berdasarkan ID.
+    // Berfungsi pada halaman: List Customer Admin, bagian tombol "Hapus" di dalam baris tabel daftar customer.
+    // Dibagian fitur: Menghapus data (Delete).
     public function destroy($id)
     {
         User::where('role', 'customer')->findOrFail($id)->delete();
 
-        return redirect()->route('usersadmin')->with('success', 'Customer berhasil dihapus');
+        return redirect()->route('usersadmin')->with('success', 'Customer account has been successfully deleted.');
     }
 }

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Services\AgentService;
 use App\Services\AlertService;
 
+// Class ini untuk: Menangani tampilan halaman utama Dashboard Admin.
+// Berfungsi pada: Halaman Admin - Dashboard (halaman pertama yang dilihat admin setelah login).
+// Dibagian fitur: Statistik status agen, grafik log mingguan, dan ringkasan jumlah user/customer.
 class AdminDashboardController extends Controller
 {
     protected $agentService;
@@ -16,8 +19,8 @@ class AdminDashboardController extends Controller
         $this->alertService = $alertService;
     }
 
-    // Code ini untuk: Mengambil status agen, grafik log mingguan, dan summary user dari service.
-    // Berfungsi untuk: Menampilkan halaman utama Dashboard Admin.
+    // Code ini untuk: Mengambil status agen, grafik log mingguan, dan ringkasan jumlah user dari service.
+    // Berfungsi untuk: Menampilkan halaman utama Dashboard Admin (Admin.dashboard).
     public function index()
     {
         try {
@@ -39,8 +42,10 @@ class AdminDashboardController extends Controller
             ]);
 
         } catch (\Throwable $e) {
+            // FALLBACK JIKA WAZUH MATI / API OFFLINE
+            // Kirim data kosong/nol dan tandai 'wazuhOffline' => true agar view bisa memberi info server down
             return view('Admin.dashboard', [
-                'error' => 'Server monitoring sedang tidak tersedia',
+                'error' => 'Server monitoring is currently unavailable',
                 'agents' => [],
                 'active' => 0,
                 'disconnected' => 0,

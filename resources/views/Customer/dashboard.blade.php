@@ -50,43 +50,6 @@
             </h2>
         </div>
 
-        {{-- Password change alert - responsive positioning --}}
-        @if(!auth()->user()->password_changed)
-            <div id="pwd-alert"
-                class="alert-card
-                    w-full sm:w-72
-                    rounded-xl p-4 sm:p-5 z-20 animate-fade-in mb-4
-                    sm:absolute sm:top-6 sm:right-6 sm:mb-0">
-                <div class="flex items-center gap-2 mb-3">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style="background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2)">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-400" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                        </svg>
-                    </div>
-                    <p class="text-xs font-semibold text-amber-400 tracking-wide">Password Notice</p>
-                </div>
-                <p class="text-[12px] text-textMuted mb-4 sm:mb-5 leading-relaxed">
-                    You must change your current password for a new one
-                </p>
-                <div class="flex justify-end gap-2">
-                    <button onclick="dismissAlert()"
-                        class="px-4 py-1.5 rounded-lg text-xs transition duration-200 text-textMuted hover:text-textMain"
-                        style="background: rgba(255,255,255,0.04); border: 1px solid #262833;">
-                        Later
-                    </button>
-                    <a href="{{ route('profile-setting') }}"
-                        class="px-4 py-1.5 rounded-lg text-xs text-white transition duration-200"
-                        style="background: #6366f1; box-shadow: 0 0 14px rgba(99,102,241,0.35);"
-                        onmouseover="this.style.background='#4f46e5'" onmouseout="this.style.background='#6366f1'">
-                        Change Now
-                    </a>
-                </div>
-            </div>
-        @endif
-
         {{-- Wazuh offline banner --}}
         @if($wazuhOffline)
             <div class="offline-banner mb-4 sm:mb-5 px-3 sm:px-4 py-3 rounded-lg text-red-400 animate-fade-in">
@@ -124,17 +87,17 @@
 
             @forelse($widgets as $item)
                 @php
-                    $wKolom = $item->kolom ?? 6;
-                    $wBaris = $item->baris ?? 2;
-                    $wHeight = $wBaris * 85;
+    $wKolom = $item->kolom ?? 6;
+    $wBaris = $item->baris ?? 2;
+    $wHeight = $wBaris * 85;
 
-                    // Responsive column spans:
-                    // xs (4-col grid): always full width (col-span-4)
-                    // sm (6-col grid): half or full depending on original kolom
-                    // md (8-col grid): scale proportionally
-                    // lg (12-col grid): original value
-                    $smSpan = $wKolom <= 4 ? 3 : 6;   // half or full on sm
-                    $mdSpan = min(8, max(4, (int)round($wKolom * 8 / 12))); // scale to 8-col
+    // Responsive column spans:
+    // xs (4-col grid): always full width (col-span-4)
+    // sm (6-col grid): half or full depending on original kolom
+    // md (8-col grid): scale proportionally
+    // lg (12-col grid): original value
+    $smSpan = $wKolom <= 4 ? 3 : 6;   // half or full on sm
+    $mdSpan = min(8, max(4, (int) round($wKolom * 8 / 12))); // scale to 8-col
                 @endphp
 
                 <div class="col-span-4 sm:col-span-{{ $smSpan }} md:col-span-{{ $mdSpan }} lg:col-span-{{ $wKolom }} hover-scale animate-fade-in">
@@ -224,27 +187,33 @@
     @include('Customer.components.footer')
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+    
     <script>
         lucide.createIcons();
-
-        function dismissAlert() {
-            document.getElementById('pwd-alert').style.display = 'none';
-        }
 
         document.addEventListener("DOMContentLoaded", function () {
             const mapContainer = document.getElementById('attackMap');
 
             if (mapContainer) {
-                // Inisialisasi peta dunia
+                // FIX AMAN OVER-DRAG: Tentukan batasan koordinat bumi agar user tidak bisa menggeser ke area hitam kosong
+                const southWest = L.latLng(-85, -180);
+                const northEast = L.latLng(85, 180);
+                const bounds = L.latLngBounds(southWest, northEast);
+
+                // Inisialisasi peta dunia dengan pembatasan bounds ketat
                 const map = L.map('attackMap', {
                     worldCopyJump: true,
-                    // PERBAIKAN 2: Batasi zoom minimum agar tampilan tidak berulang aneh saat boksnya kecil
                     minZoom: 1,
+                    maxBounds: bounds,         // Kunci peta agar tidak bisa di-drag melewati batas benua atas/bawah
+                    maxBoundsViscosity: 1.0     // Efek karet 100% mencegah map memantul ke area kosong
                 }).setView([15, 10], 1);
 
+                // Simpan instance ke global window agar script di dalam file widget-geoip bisa memanggil re-render jika dibutuhkan
+                window.myMap = map;
+
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap'
+                    attribution: '&copy; OpenStreetMap',
+                    noWrap: false               // Biarkan horizontal looping berjalan, vertikal dikunci oleh maxBounds
                 }).addTo(map);
 
                 function getSeverityColor(severity) {
@@ -270,16 +239,15 @@
                     })
                         .addTo(map)
                         .bindPopup(`
-                            <div style="color: #121318; font-family: sans-serif; font-size: 11px;">
-                                <b>${item.country} - ${item.city}</b><br>
-                                <span style="color: #6366f1; font-weight: bold;">${item.attack}</span><br>
-                                <small>Severity: ${item.severity}</small>
-                            </div>
-                        `);
+                                <div style="color: #121318; font-family: sans-serif; font-size: 11px;">
+                                    <b>${item.country} - ${item.city}</b><br>
+                                    <span style="color: #6366f1; font-weight: bold;">${item.attack}</span><br>
+                                    <small>Severity: ${item.severity}</small>
+                                </div>
+                            `);
                 });
 
-                // PERBAIKAN 3: Timeout diperpanjang sedikit (450ms) untuk memastikan 
-                // engine browser selesai merender CSS Grid layout secara sempurna sebelum peta di-resize.
+                // Memaksa kalkulasi ulang dimensi container setelah render selesai
                 setTimeout(() => {
                     map.invalidateSize();
                 }, 450);

@@ -6,6 +6,9 @@ use App\Models\Agen;
 use App\Services\AgentService;
 use Illuminate\Http\Request;
 
+// Class ini untuk: Menangani seluruh aksi HTTP terkait manajemen agen dari sisi Admin.
+// Berfungsi pada: Halaman Admin - Agents List, Assign Agent, dan Detail Agent.
+// Dibagian fitur: Menampilkan daftar agen, mencocokkan kepemilikan customer, assign agen baru, dan detail monitoring agen.
 class AgentController extends Controller
 {
     protected $agentService;
@@ -17,7 +20,7 @@ class AgentController extends Controller
 
     // Code ini untuk: Menampilkan daftar seluruh agen dari server Wazuh sekaligus mencocokkannya dengan data kepemilikan customer di database lokal Laravel.
     // Berfungsi pada halaman: Halaman Panel Admin - Agents List (Admin.agents.agents-list).
-    // Dibagian fitur: Tabel Utama Daftar Agen, untuk memantau status operasional agen SIEM dan melihat akun customer mana yang menguasai mesin tersebut.
+    // Dibagian fitur: Tabel utama daftar agen, untuk memantau status operasional agen SIEM dan melihat akun customer mana yang menguasai mesin tersebut.
     public function agents()
     {
         $wazuhAgents = $this->agentService->getAgents();
@@ -42,16 +45,16 @@ class AgentController extends Controller
             return $agent;
         }, $wazuhAgents);
 
-        // 4. Kembalikan data yang sudah di-mapping ke View
+        // Kembalikan data yang sudah di-mapping ke View
         return view('Admin.agents.agents-list', [
-            'agents' => $agents, // Menggunakan array yang sudah lengkap dengan 'assigned_to'
+            'agents' => $agents, // Array agen Wazuh yang sudah dilengkapi info 'assigned_to'
             'totalUsers' => $stats['totalUsers'],
             'totalAgents' => count($agents),
             'totalAssignedAgents' => $stats['totalAssignedAgents'],
         ]);
     }
 
-    // Code ini untuk: Membuka formulir untuk memplot/menugaskan agen kosong ke user tertentu.
+    // Code ini untuk: Membuka formulir untuk memplot/menugaskan agen kosong (belum dimiliki) ke user tertentu.
     // Berfungsi untuk: Halaman Admin.agents.assignagent, bagian form pilihan pasang agen ke user.
     public function assignAgentPage()
     {
@@ -67,7 +70,7 @@ class AgentController extends Controller
         ]);
     }
 
-    // Code ini untuk: Validasi dan penyimpanan relasi kepemilikan agen dari database lokal Laravel.
+    // Code ini untuk: Validasi dan penyimpanan relasi kepemilikan agen (agen Wazuh ↔️ user customer) ke database lokal Laravel.
     // Berfungsi untuk: Halaman Form Assign Agent, bagian aksi tombol submit/save data.
     public function saveAssignAgent(Request $request)
     {
@@ -79,11 +82,11 @@ class AgentController extends Controller
         $agent = collect($this->agentService->getAgents())->firstWhere('id', $request->agent_id);
 
         if (!$agent) {
-            return back()->with('error', 'Agent tidak ditemukan');
+            return back()->with('error', 'Agent Cannot be found');
         }
 
         if (Agen::where('id_wazuh_agen', $request->agent_id)->exists()) {
-            return back()->with('error', 'Agent sudah diassign');
+            return back()->with('error', 'Agent Assigned to another user');
         }
 
         Agen::create([
@@ -94,20 +97,20 @@ class AgentController extends Controller
             'status' => 'aktif',
         ]);
 
-        return redirect()->route('assignagent')->with('success', 'Agent berhasil di-assign');
+        return redirect()->route('assignagent')->with('success', 'Agent has been successfully assigned to the user.');
     }
 
-    // Code ini untuk: Menarik metrik live telemetri hardware, jaringan, status service, dan log keamanan komputer.
+    // Code ini untuk: Menarik metrik live telemetri hardware, jaringan, status service, dan log keamanan satu komputer/agen.
     // Berfungsi untuk: Halaman Detail Agent khusus Admin, bagian pengisian data grafik serta tabel riwayat log aktivitas.
     public function showDetailAgent($id)
     {
         try {
-            // 1. Ambil data dasar agen dari global list Agen Wazuh
+            // 1. Ambil data dasar agen dari daftar global agen Wazuh
             $allAgents = collect($this->agentService->getAgents());
             $agentInfo = $allAgents->firstWhere('id', $id);
 
             if (!$agentInfo) {
-                return redirect()->back()->with('error', 'Komputer/Agent ini tidak terdaftar di server.');
+                return redirect()->back()->with('error', 'Agent not found or not registered');
             }
 
             // 2. Ambil data riil komponen sistem dari Wazuh API via AgentService
@@ -118,19 +121,20 @@ class AgentController extends Controller
             $services = $this->agentService->fetchServiceStatus($id);
             $network = $this->agentService->fetchNetworkTraffic($id);
 
-            // 3. Ambil data SCA (Security Configuration Assessment) riil dari API jika method tersedia
+            // 3. Ambil data SCA (Security Configuration Assessment) jika method-nya tersedia di service
+            // CATATAN: fetchScaScore() belum dibuat di AgentService, jadi nilai ini akan selalu 0 untuk saat ini (fitur belum lengkap, bukan bug).
             $scaScore = method_exists($this->agentService, 'fetchScaScore')
                 ? ($this->agentService->fetchScaScore($id)['score'] ?? 0)
-                : 0; // Menggunakan 0 (bukan 85) jika data murni tidak ditemukan
+                : 0;
 
-            // 4. Ambil statistik FIM (File Integrity Monitoring) Riil
+            // 4. Hitung statistik FIM (File Integrity Monitoring) riil dari data yang sudah diambil
             $fimLogsCollection = collect($fimLogs);
             $fimAdded = $fimLogsCollection->where('status', 'added')->count();
             $fimModified = $fimLogsCollection->where('status', 'modified')->count();
             $fimDeleted = $fimLogsCollection->where('status', 'deleted')->count();
 
-            // 5. Kerentanan & Alerts Riil (Hanya diisi jika ada data riil dari API, tidak ditebak-tebak)
-            // Catatan: Jika tim kamu sudah membuat method fetchVulnerabilities/fetchAlerts di service, silakan panggil di sini.
+            // 5. Kerentanan & Alerts — CATATAN: belum ada method fetchVulnerabilities/fetchAlerts di service,
+            // jadi nilainya sengaja dikosongkan (0/[]) agar tidak menampilkan data palsu, bukan bug tersembunyi.
             $vulnCritical = 0;
             $vulnHigh = 0;
             $vulnMedLow = 0;
@@ -138,10 +142,10 @@ class AgentController extends Controller
 
             return view('Admin.agents.detailAgent', [
                 'agentId' => $id,
-                'agentName' => $agentInfo['name'] ?? 'Nama Gak Diketahui',
+                'agentName' => $agentInfo['name'] ?? 'Unknown Agent',
                 'agentStatus' => $agentInfo['status'] ?? 'disconnected',
                 'agentIp' => $agentInfo['ip'] ?? '0.0.0.0',
-                'agentOs' => $agentInfo['os']['name'] ?? 'OS Gak Diketahui',
+                'agentOs' => $agentInfo['os']['name'] ?? 'Unknown OS',
                 'agentLastKeepAlive' => $agentInfo['lastKeepAlive'] ?? '-',
 
                 'scaScore' => $scaScore,

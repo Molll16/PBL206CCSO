@@ -98,22 +98,21 @@
                                 <tr class="hover:bg-page/40 transition-colors">
                                     <td class="py-3.5 px-5 font-semibold text-brand">{{ $agent['name'] }}</td>
                                     <td class="py-3.5 px-5 text-textMuted font-mono">{{ $agent['ip'] ?? '-' }}</td>
-
                                     <td class="py-3.5 px-5">
                                         @if($agent['status'] == 'active')
                                             <span
-                                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20">●
-                                                Active</span>
+                                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20 inline-flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Active
+                                            </span>
                                         @else
                                             <span
-                                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">●
-                                                Offline</span>
+                                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20 inline-flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 bg-red-400 rounded-full"></span> Offline
+                                            </span>
                                         @endif
                                     </td>
-
                                     <td class="py-3.5 px-5 text-textMuted">{{ $agent['os']['name'] ?? '-' }}</td>
                                     <td class="py-3.5 px-5 text-textMuted">{{ \Carbon\Carbon::parse($agent['dateAdd'])->format('d M Y H:i') }}</td>
-
                                     <td class="py-3.5 px-5 text-textMuted">
                                         @if(!empty($agent['assigned_to']))
                                             {{ $agent['assigned_to']['name'] }}
@@ -121,7 +120,6 @@
                                             <span class="text-red-400 font-semibold">Not Assigned</span>
                                         @endif
                                     </td>
-
                                     <td class="py-3.5 px-5 text-center">
                                         <div class="flex items-center justify-center">
                                             <a href="{{ route('admin.agent.show', $agent['id']) }}"

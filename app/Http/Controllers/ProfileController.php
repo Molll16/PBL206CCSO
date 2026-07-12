@@ -9,6 +9,9 @@ use App\Services\WazuhApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
+// Class ini untuk: Menangani seluruh halaman "Profile" baik untuk Admin maupun Customer.
+// Berfungsi pada: Halaman Profile Admin (Settings, Agent) dan Halaman Profile Customer (Settings, Server, Customize).
+// Dibagian fitur: Ganti password, lihat inventaris server/agen, kelola dashboard kustom, dan switch agen aktif.
 class ProfileController extends Controller
 {
     protected $agentService;
@@ -20,19 +23,19 @@ class ProfileController extends Controller
         $this->wazuhApi = $wazuhApi;
     }
 
-    // ==========================================
+    // =========================================================================
     // 1. ROUTE MANAGEMENT UNTUK ADMIN
-    // ==========================================
+    // =========================================================================
 
     // Code ini untuk: Menampilkan halaman pengaturan profil khusus Admin.
-    // Berfungsi untuk: Halaman Profile Admin (Tab utama).
+    // Berfungsi untuk: Halaman Profile Admin (Admin.profile.profileset-admin), tab utama.
     public function settings()
     {
         return view('Admin.profile.profileset-admin');
     }
 
     // Code ini untuk: Menampilkan data semua agen untuk kebutuhan Admin.
-    // Berfungsi untuk: Halaman Manajemen Agen di panel Admin.
+    // Berfungsi untuk: Halaman Manajemen Agen di panel Admin (Admin.profile.profile-agent).
     public function agent()
     {
         try {
@@ -53,12 +56,12 @@ class ProfileController extends Controller
         }
     }
 
-    // ==========================================
+    // =========================================================================
     // 2. METHOD KHUSUS HALAMAN CUSTOMER
-    // ==========================================
+    // =========================================================================
 
     // Code ini untuk: Menampilkan data profil milik Customer yang sedang login.
-    // Berfungsi untuk: Halaman Profile Customer, bagian tab "Profile Settings".
+    // Berfungsi untuk: Halaman Profile Customer (Customer.profile.profileset), tab "Profile Settings".
     public function customerAccountSettings()
     {
         return view('Customer.profile.profileset', [
@@ -67,7 +70,7 @@ class ProfileController extends Controller
     }
 
     // Code ini untuk: Menampilkan daftar server/agen yang ditugaskan ke Customer beserta status real-time.
-    // Berfungsi untuk: Halaman Profile Customer, bagian tab "Server" (Inventaris Perangkat).
+    // Berfungsi untuk: Halaman Profile Customer (Customer.profile.profileserver), tab "Server" (Inventaris Perangkat).
     public function customerServerSettings()
     {
         try {
@@ -92,8 +95,8 @@ class ProfileController extends Controller
 
             $agentsCollection = collect($agents);
             $agentsTotal = $agentsCollection->count();
-            $activeAgents = $agentsCollection->whereIn('status', ['Active', 'active', 'Disconnect', 'Active'])->count();
-            $disconnectAgents = $agentsCollection->whereIn('status', ['Disconnected', 'disconnected', 'Never_connected'])->count();
+            $activeAgents = $agentsCollection->whereIn('status', ['Active', 'active'])->count();
+            $disconnectAgents = $agentsCollection->whereIn('status', ['Disconnected', 'disconnected', 'Disconnect', 'Never_connected'])->count();
 
         } catch (\Throwable $e) {
             $agents = [];
@@ -111,29 +114,29 @@ class ProfileController extends Controller
     }
 
     // Code ini untuk: Menampilkan daftar layout kustomisasi dashboard milik Customer.
-    // Berfungsi untuk: Halaman Profile Customer, bagian tab "Customization Dashboard".
+    // Berfungsi untuk: Halaman Profile Customer (Customer.profile.profilecustom), tab "Customization Dashboard".
     public function customerCustomizeSettings()
     {
         $myDashboards = DasborKustom::where('user_id', auth()->id())->get();
         $totalDashboard = $myDashboards->count();
         $activeDashboard = $myDashboards->where('status_dasbor', 'aktif')->count();
 
-        // Mengambil baris data dashboard yang saat ini aktif digunakan
+        // Ambil baris data dashboard yang saat ini aktif digunakan
         $dashboardInUseItem = $myDashboards->where('status_dasbor', 'aktif')->first();
 
-        // 🛠️ PERBAIKAN: Ambil nama dasbor aslinya, jika tidak ada fallback ke 'Default'
+        // Ambil nama dasbor aslinya, kalau tidak ada fallback ke 'Default'
         $dashboardNameInUse = $dashboardInUseItem ? $dashboardInUseItem->nama_dasbor : 'Default';
 
         return view('Customer.profile.profilecustom', [
             'dashboards' => $myDashboards,
             'totalDashboard' => $totalDashboard,
             'activeDashboard' => $activeDashboard,
-            'dashboardNameInUse' => $dashboardNameInUse, // Dikirim ke view blade
+            'dashboardNameInUse' => $dashboardNameInUse,
         ]);
     }
 
     // Code ini untuk: Menghapus konfigurasi kustomisasi dashboard tertentu.
-    // Berfungsi untuk: Halaman Profile Customer, aksi tombol "Delete" di tabel kustomisasi.
+    // Berfungsi untuk: Halaman Profile Customer, tab Customize, aksi tombol "Delete" di tabel kustomisasi.
     public function destroyCustomize($id)
     {
         $dashboard = DasborKustom::where('user_id', auth()->id())->findOrFail($id);
@@ -142,35 +145,19 @@ class ProfileController extends Controller
         return back()->with('success', 'Dashboard kustom berhasil dihapus!');
     }
 
-    // ==========================================
-    // 3. LOGIC PROSES UPDATE (SHARED)
-    // ==========================================
+    // =========================================================================
+    // 3. LOGIC PROSES UPDATE (SHARED ADMIN & CUSTOMER)
+    // =========================================================================
 
-    // Code ini untuk: Memperbarui informasi nama, email, dan no telepon dengan proteksi role.
-    // Berfungsi untuk: Form "Edit Profile" (Admin bisa ubah semua, Customer dikunci/tidak disimpan).
+    // Code ini untuk: Menonaktifkan fitur edit profil (baik Admin maupun Customer tidak bisa mengubah data profil).
+    // Berfungsi untuk: Form "Edit Profile" di halaman Profile Admin & Customer.
     public function update(Request $request)
     {
-        $user = auth()->user();
-
-        // JIKA CUSTOMER: bypass langsung tanpa mengubah data, hindari error di frontend
-        if ($user->role === 'customer') {
-            return back()->with('success', 'Profile berhasil diupdate');
-        }
-
-        // JIKA ADMIN: jalankan validasi dan update seperti biasa
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email',
-            'no_telp' => 'required',
-        ]);
-
-        $user->update($request->only('name', 'email', 'no_telp'));
-
         return back()->with('success', 'Profile berhasil diupdate');
     }
 
-    // Code ini untuk: Mengubah password akun user (Shared Admin & Customer).
-    // Berfungsi untuk: Form "Change Password" di halaman profil Admin dan Customer.
+    // Code ini untuk: Mengubah password akun user (dipakai bersama oleh Admin & Customer).
+    // Berfungsi untuk: Form "Change Password" di halaman profil Admin maupun Customer.
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -194,9 +181,9 @@ class ProfileController extends Controller
             ->with('password_success', true);
     }
 
-    // ==========================================
+    // =========================================================================
     // 4. FITUR SWITCH AGENT LOGIC
-    // ==========================================
+    // =========================================================================
 
     // Code ini untuk: Mengubah session target ID agen yang aktif dipantau.
     // Berfungsi untuk: Komponen Dropdown "Switch Agent" di halaman Dashboard Customer.

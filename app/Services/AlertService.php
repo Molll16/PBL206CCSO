@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Models\Agen;
 
+// Class ini untuk: Mengelola seluruh logic bisnis terkait data log/alert keamanan dari Wazuh.
+// Berfungsi pada: Halaman Dashboard Admin, Dashboard Customer, dan halaman Logs/Analytics Customer.
+// Dibagian fitur: Ambil & bersihkan data mentah alert, filter per-agen milik user, hitung statistik ancaman, dan data grafik.
 class AlertService
 {
     protected $wazuh;
@@ -17,16 +20,16 @@ class AlertService
     // HELPER INTERNAL
     // =========================================================================
 
-    // Code ini untuk: Mengambil semua data log mentah dari server Wazuh.
-    // Berfungsi untuk: Sumber data internal (tidak terikat halaman spesifik).
+    // Code ini untuk: Mengambil semua data log mentah dari server Wazuh via WazuhApiService, lalu membersihkannya.
+    // Berfungsi untuk: Sumber data internal utama, dipakai oleh hampir semua method publik di class ini.
     public function getAlerts(): array
     {
         $raw = $this->wazuh->getRawAlerts();
         return empty($raw['error']) ? $this->mapAlerts($raw) : [];
     }
 
-    // Code ini untuk: Menyaring dokumen JSON Wazuh ke array sederhana.
-    // Berfungsi untuk: Pembersihan data internal.
+    // Code ini untuk: Menyaring dokumen JSON mentah dari Wazuh Indexer menjadi array sederhana (description, level, agent, time, user).
+    // Berfungsi untuk: Pembersihan data internal, dipanggil oleh getAlerts().
     private function mapAlerts($data): array
     {
         if (!isset($data['hits']['hits'])) {
@@ -37,6 +40,7 @@ class AlertService
         foreach ($data['hits']['hits'] as $item) {
             $source = $item['_source'] ?? [];
 
+            // Urutan prioritas pengambilan deskripsi event, karena tidak semua log Wazuh punya field yang sama
             $description = $source['rule']['description'] ??
                 $source['rule']['title'] ??
                 $source['data']['win']['eventdata']['targetUserName'] ??
@@ -48,7 +52,7 @@ class AlertService
                 'level' => (int) ($source['rule']['level'] ?? 0),
                 'agent' => [
                     'name' => $source['agent']['name'] ?? 'unknown',
-                    'id' => isset($source['agent']['id']) ? (string) intval($source['agent']['id']) : null // Pembersihan padding ID Wazuh
+                    'id' => isset($source['agent']['id']) ? (string) intval($source['agent']['id']) : null // Pembersihan padding ID Wazuh (mis. "007" jadi "7")
                 ],
                 'time' => $source['@timestamp'] ?? null,
                 'user' => $source['data']['srcuser'] ?? $source['data']['dstuser'] ?? 'unknown',
@@ -57,11 +61,13 @@ class AlertService
         return $results;
     }
 
-    // Code ini untuk: Mencari daftar ID agen milik user yang sedang login.
-    // Berfungsi untuk: Proteksi dan filter multi-tenant internal.
+    // Code ini untuk: Mencari daftar ID agen Wazuh milik user yang sedang login (mendukung single ID, array ID, atau opsi 'all').
+    // Berfungsi untuk: Proteksi & filter multi-tenant, dipanggil oleh semua method publik di bawah agar data tidak bocor antar customer.
+    // Catatan: Logic yang mirip juga ada di AgentService::getCustomerStats() dan beberapa Controller (AlertController, WidgetController, ProfileController).
+    // Kalau nanti mau disatukan jadi 1 tempat, kabari saja — sekarang dibiarkan terpisah sesuai kesepakatan.
     private function getMyAgentIds($agentId = null): array
     {
-        // Jika parameter berupa array (dari opsi 'all' di session)
+        // Jika parameter berupa array (dari opsi 'all' di session yang sudah di-resolve sebelumnya)
         if (is_array($agentId)) {
             return array_map(fn($id) => (string) intval($id), $agentId);
         }
@@ -73,7 +79,7 @@ class AlertService
 
         $currentUserId = auth()->user()->id ?? null;
 
-        // Mengambil semua ID agen milik user, dikonversi ke string angka murni (tanpa padding)
+        // Mengambil semua ID agen milik user, dikonversi ke string angka murni (tanpa padding nol di depan)
         return Agen::where('user_id', $currentUserId)
             ->pluck('id_wazuh_agen')
             ->map(fn($id) => (string) intval($id))
@@ -84,7 +90,7 @@ class AlertService
     // HALAMAN: DASHBOARD CUSTOMER
     // =========================================================================
 
-    // Code ini untuk: Mengambil 5 log keamanan terbaru.
+    // Code ini untuk: Mengambil 5 log keamanan terbaru milik agen user yang login.
     // Berfungsi untuk: Halaman Dashboard Customer, bagian widget "Alert Summary".
     public function getLatestAlerts(int $limit = 5, $agentId = null)
     {
@@ -95,7 +101,7 @@ class AlertService
             ->take($limit);
     }
 
-    // Code ini untuk: Menghitung status tingkat bahaya log dan top 5 kategori ancaman.
+    // Code ini untuk: Menghitung status tingkat bahaya log (active/pending/resolved) dan top 5 kategori ancaman.
     // Berfungsi untuk: Halaman Dashboard Customer, bagian widget "Threat Summary" (Donut Chart & List).
     public function getThreatSummary($agentId = null): array
     {
@@ -103,10 +109,12 @@ class AlertService
         $alerts = collect($this->getAlerts())->filter(fn($a) => in_array($a['agent']['id'] ?? null, $myAgents));
         $totalEvents = $alerts->count();
 
+        // Klasifikasi level bahaya: >=10 dianggap Active/High, 5-9 Pending/Medium, <5 Resolved/Low
         $activeCount = $alerts->where('level', '>=', 10)->count();
         $pendingCount = $alerts->whereBetween('level', [5, 9])->count();
         $resolvedCount = $alerts->where('level', '<', 5)->count();
 
+        // Kelompokkan berdasarkan nama ancaman (description), ambil 5 kategori dengan kemunculan terbanyak
         $categories = $totalEvents === 0 ? [] : $alerts->groupBy('description')->map(function ($items, $name) use ($totalEvents) {
             $maxLevel = $items->max('level') ?? 0;
             return [
@@ -125,7 +133,7 @@ class AlertService
         ];
     }
 
-    // Code ini untuk: Mencari 3 aturan keamanan yang paling sering terpicu.
+    // Code ini untuk: Mencari 3 aturan keamanan (rule) yang paling sering terpicu, lengkap dengan proporsi bar chart-nya.
     // Berfungsi untuk: Halaman Dashboard Customer, bagian widget "Most Active Rules" (Progress Bar).
     public function getMostActiveRules($agentId = null): array
     {
@@ -137,6 +145,7 @@ class AlertService
                 return [];
             }
 
+            // Kelompokkan per description, ambil 3 rule dengan jumlah kemunculan terbanyak
             $groupedRules = $alerts->groupBy('description')->map(function ($items, $description) {
                 return [
                     'desc' => $description,
@@ -147,6 +156,7 @@ class AlertService
 
             $maxCount = $groupedRules->first()['count'] ?? 1;
 
+            // Hitung lebar progress bar (%) relatif terhadap rule dengan jumlah terbanyak, plus warna sesuai level
             return $groupedRules->map(function ($rule) use ($maxCount) {
                 $color = $rule['level'] >= 10 ? 'bg-red-500' : ($rule['level'] < 5 ? 'bg-orange-500' : 'bg-amber-500');
                 return [
@@ -165,8 +175,8 @@ class AlertService
     // HALAMAN: LOGS / FILTER & ANALYTICS
     // =========================================================================
 
-    // Code ini untuk: Memfilter log berdasarkan agen, dan tingkat keparahan (severity).
-    // Berfungsi untuk: Halaman Alert Customer, bagian tabel utama "Daftar Log/Alerts".
+    // Code ini untuk: Memfilter log berdasarkan agen milik user dan tingkat keparahan (severity: critical/high/medium/low).
+    // Berfungsi untuk: Halaman Logs Customer, bagian tabel utama "Daftar Log/Alerts".
     public function getFilteredAlerts($agentId = null, ?string $severity = null)
     {
         $myAgents = $this->getMyAgentIds($agentId);
@@ -188,8 +198,8 @@ class AlertService
             ->values();
     }
 
-    // Code ini untuk: Menghitung total angka statistik log (Critical, High, Medium, Low).
-    // Berfungsi untuk: Halaman Logs/Analytics, bagian card "Card Statistik".
+    // Code ini untuk: Menghitung total angka statistik log berdasarkan tingkat keparahan (Critical, High, Medium, Low).
+    // Berfungsi untuk: Halaman Logs/Analytics Customer, bagian card "Card Statistik" di bagian atas tabel.
     public function getLogsAnalytics($agentId = null): array
     {
         $allAlerts = $this->getFilteredAlerts($agentId, null);
@@ -207,8 +217,9 @@ class AlertService
     // HALAMAN: DASHBOARD UTAMA ADMIN
     // =========================================================================
 
-    // Code ini untuk: Menghitung tren total volume log harian selama 7 hari terakhir.
-    // Berfungsi untuk: Halaman Dashboard Utama Admin, bagian grafik batang/area chart.
+    // Code ini untuk: Menghitung tren total volume log harian selama 7 hari terakhir (untuk grafik).
+    // Berfungsi untuk: Halaman Dashboard Utama Admin, bagian grafik batang/area chart mingguan.
+    // Catatan: Method ini TIDAK memfilter per-agen (menghitung log dari SEMUA agen), karena dipakai admin yang perlu lihat data global.
     public function getWeeklyChartData(): array
     {
         $alerts = $this->getAlerts();

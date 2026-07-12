@@ -87,9 +87,6 @@
           <a href="{{ route('profile-setting-admin') }}"
             class="block px-4 py-2.5 text-xs text-textMuted hover:bg-page hover:text-brand transition-colors">
             Profile Settings</a>
-          <a href="{{ route('usersadmin') }}"
-            class="block px-4 py-2.5 text-xs text-textMuted hover:bg-page hover:text-brand transition-colors">
-            Manage Users</a>
           <div class="h-px bg-borderSubtle my-1"></div>
           <a href="{{ route('login') }}"
             class="block px-4 py-2.5 text-xs text-red-400 font-semibold hover:bg-red-500/10 transition-colors">

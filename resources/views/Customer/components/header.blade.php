@@ -117,9 +117,7 @@
             <p class="text-[10px] text-textMuted truncate">{{ Auth::user()->username ?? 'customer@ccso.id' }}</p>
           </div>
           <a href="{{ route('profile-setting') }}"
-            class="block px-3 py-2 text-[11px] text-textMuted hover:bg-page hover:text-brand transition-colors">Profile</a>
-          <a href="{{ route('pilih-dasbor') }}"
-            class="block px-3 py-2 text-[11px] text-textMuted hover:bg-page hover:text-brand transition-colors">Custom Dashboard</a>
+            class="block px-3 py-2 text-[11px] text-textMuted hover:bg-page hover:text-brand transition-colors">Profile Settings</a>
           <div class="h-px bg-borderSubtle my-1"></div>
           <a href="{{ route('login') }}"
             class="block px-3 py-2 text-[11px] text-red-400 font-semibold hover:bg-red-500/10 transition-colors">Logout</a>
