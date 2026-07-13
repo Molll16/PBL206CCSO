@@ -61,23 +61,43 @@ class AlertService
     // Berfungsi untuk: Proteksi & filter multi-tenant, dipanggil oleh semua method publik di bawah agar data tidak bocor antar customer.
     private function getMyAgentIds($agentId = null): array
     {
-        // Jika parameter berupa array (dari opsi 'all' di session yang sudah di-resolve sebelumnya)
-        if (is_array($agentId)) {
-            return array_map(fn($id) => (string) intval($id), $agentId);
+        $currentUserId = auth()->id() ?? null;
+        if (!$currentUserId) {
+            return ['FORCE_EMPTY_VAL_NOT_FOUND'];
         }
 
-        // Jika single ID dan bukan 'all'
-        if ($agentId && $agentId !== 'all') {
-            return [(string) intval($agentId)];
-        }
-
-        $currentUserId = auth()->user()->id ?? null;
-
-        // Mengambil semua ID agen milik user, dikonversi ke string angka murni (tanpa padding nol di depan)
-        return Agen::where('user_id', $currentUserId)
+        // 1. Tarik daftar asli ID agen milik user yang sedang login dari DB sebagai Whitelist
+        $myRealAgentIds = Agen::where('user_id', $currentUserId)
             ->pluck('id_wazuh_agen')
             ->map(fn($id) => (string) intval($id))
             ->toArray();
+
+        // Jika user ternyata tidak punya agen sama sekali di DB
+        if (empty($myRealAgentIds)) {
+            return ['FORCE_EMPTY_VAL_NOT_FOUND'];
+        }
+
+        // 2. Jika parameter berupa array
+        if (is_array($agentId)) {
+            $cleanIds = array_map(fn($id) => (string) intval($id), $agentId);
+            // Hanya kembalikan ID yang beririsan (memang milik si user)
+            return array_intersect($cleanIds, $myRealAgentIds);
+        }
+
+        // 3. Jika single ID dan bukan 'all'
+        if ($agentId && $agentId !== 'all') {
+            $cleanTargetId = (string) intval($agentId);
+
+            // 🌟 VALIDASI MUTLAK: Cek apakah ID yang diminta ada di dalam Whitelist DB user
+            if (!in_array($cleanTargetId, $myRealAgentIds, true)) {
+                return ['FORCE_EMPTY_VAL_NOT_FOUND']; // Gagalkan total jika ID milik Customer B disusupkan
+            }
+
+            return [$cleanTargetId];
+        }
+
+        // 4. Jika 'all' atau null, kembalikan semua agen milik user ini saja
+        return $myRealAgentIds;
     }
 
     // =========================================================================

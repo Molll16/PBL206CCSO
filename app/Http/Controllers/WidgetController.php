@@ -6,6 +6,7 @@ use App\Services\AgentService;
 use App\Services\AlertService;
 use Illuminate\Http\Request;
 use App\Models\Agen;
+use Illuminate\Support\Facades\Cookie;
 
 // Controller buat endpoint API widget-widget di Dashboard Customer
 class WidgetController extends Controller
@@ -22,11 +23,30 @@ class WidgetController extends Controller
     // Ambil ID agen yang lagi aktif dipantau, kalau session kosong pakai agen pertama punya user
     private function getActiveAgentId(): ?string
     {
-        $selectedAgentId = session('active_wazuh_agent_id');
+        // 1. Ambil dari cookie
+        $selectedAgentId = request()->cookie('active_wazuh_agent_id');
+        $userId = auth()->id();
 
+        // validasi cookie: pastikan ID agen yang dipilih memang milik user yang sedang login
+        if ($selectedAgentId) {
+            $isValid = Agen::where('user_id', $userId)
+                ->where('id_wazuh_agen', $selectedAgentId)
+                ->exists();
+
+            if (!$isValid) {
+                $selectedAgentId = null; // Hancurkan nilai jika terdeteksi manipulasi (milik customer lain)
+            }
+        }
+
+        // 2. Fallback jika cookie kosong atau tidak valid
         if (!$selectedAgentId) {
-            $defaultAgent = Agen::where('user_id', auth()->id())->first();
+            $defaultAgent = Agen::where('user_id', $userId)->first();
             $selectedAgentId = $defaultAgent ? $defaultAgent->id_wazuh_agen : null;
+
+            // Pasang kembali cookie yang valid ke browser client
+            if ($selectedAgentId) {
+                Cookie::queue('active_wazuh_agent_id', $selectedAgentId, 60 * 24);
+            }
         }
 
         return $selectedAgentId;
