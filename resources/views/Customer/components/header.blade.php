@@ -91,12 +91,18 @@
       
           @if(isset($list_agen) && count($list_agen) > 0)
             @foreach($list_agen as $agen)
-              <option value="{{ $agen->id_wazuh_agen }}" {{ session('active_wazuh_agent_id') == $agen->id_wazuh_agen ? 'selected' : '' }}>
+              <option value="{{ $agen->id_wazuh_agen }}" {{ request()->cookie('active_wazuh_agent_id') == $agen->id_wazuh_agen ? 'selected' : '' }}>
                 🖥️ {{ $agen->nama_agen ?? $agen->id_wazuh_agen }}
               </option>
             @endforeach
           @else
-            <option value="">Server Offline</option>
+            @if(request()->cookie('active_wazuh_agent_id'))
+              <option value="{{ request()->cookie('active_wazuh_agent_id') }}" selected>
+                🖥️ {{ request()->cookie('active_wazuh_agent_id') }}
+              </option>
+            @else
+              <option value="">Server Offline</option>
+            @endif
           @endif
       
         </select>

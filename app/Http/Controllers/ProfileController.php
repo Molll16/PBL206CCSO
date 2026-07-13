@@ -8,6 +8,7 @@ use App\Services\AgentService;
 use App\Services\WazuhApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cookie;
 
 // Class ini untuk: Menangani seluruh halaman "Profile" baik untuk Admin maupun Customer.
 // Berfungsi pada: Halaman Profile Admin (Settings, Agent) dan Halaman Profile Customer (Settings, Server, Customize).
@@ -164,23 +165,32 @@ class ProfileController extends Controller
 
     // Code ini untuk: Mengubah session target ID agen yang aktif dipantau.
     // Berfungsi untuk: Komponen Dropdown "Switch Agent" di halaman Dashboard Customer.
+
     public function switchAgent(Request $request)
     {
         $request->validate([
             'agent_id' => 'required|string'
         ]);
 
+        // Hapus session lama jika masih ada biar tidak bentrok ke depannya
+        session()->forget('active_wazuh_agent_id');
+
+        // Skenario 1: Jika memilih 'all'
         if ($request->agent_id === 'all') {
-            session(['active_wazuh_agent_id' => 'all']);
+            // Simpan ke Cookie selama 24 jam (60 menit * 24)
+            Cookie::queue('active_wazuh_agent_id', 'all', 60 * 24);
             return back()->with('success', 'Berhasil beralih ke semua agen.');
         }
 
+        // Cek validasi kepemilikan agen di DB
         $isValidAgent = Agen::where('user_id', auth()->id())
             ->where('id_wazuh_agen', $request->agent_id)
             ->exists();
 
+        // Skenario 2: Jika agen valid dan sah milik user tersebut
         if ($isValidAgent) {
-            session(['active_wazuh_agent_id' => $request->agent_id]);
+            // Simpan ke Cookie selama 24 jam
+            Cookie::queue('active_wazuh_agent_id', $request->agent_id, 60 * 24);
             return back()->with('success', 'Berhasil beralih ke agen ' . $request->agent_id);
         }
 

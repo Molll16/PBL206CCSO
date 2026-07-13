@@ -6,10 +6,8 @@ use Illuminate\Http\Request;
 use App\Services\AlertService;
 use App\Models\Agen;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cookie;
 
-// Class ini untuk: Menangani seluruh aksi HTTP terkait tampilan log/alert keamanan di sisi Customer.
-// Berfungsi pada: Halaman Alert/Logs Customer, endpoint API internal, dan fitur ganti agen aktif (switch agent).
-// Dibagian fitur: Daftar log dengan filter & pagination, serta pengelolaan session agen yang sedang dipantau user.
 class AlertController extends Controller
 {
     protected $alertService;
@@ -19,36 +17,38 @@ class AlertController extends Controller
         $this->alertService = $alertService;
     }
 
-    // Code ini untuk: Mengambil ID agen Wazuh yang sedang aktif dipantau user (mendukung opsi 'all').
-    // Berfungsi untuk: Helper internal, dipakai oleh getAlerts() dan index() di class ini.
+    // 🌟 PERBAIKAN: Helper internal sekarang membaca dan memvalidasi COOKIE secara ketat
     private function getActiveAgentId()
     {
         $userId = auth()->id();
-        // Ambil semua agen milik user yang sedang login saat ini
         $myAgents = Agen::where('user_id', $userId)->get();
 
         if ($myAgents->isEmpty()) {
-            return null; // Jaga-jaga kalau user belum punya agen sama sekali
+            return null;
         }
 
         $myAgentIds = $myAgents->pluck('id_wazuh_agen')->toArray();
-        $lastViewedAgent = session('active_wazuh_agent_id');
 
-        // KUNCI PENGAMAN: session dipakai hanya jika ID tersebut memang milik user ini
-        if ($lastViewedAgent && in_array($lastViewedAgent, $myAgentIds)) {
-            return $lastViewedAgent; // Gunakan agen terakhir yang dia lihat
+        // Baca nilai dari COOKIE (bukan session)
+        $lastViewedAgent = request()->cookie('active_wazuh_agent_id');
+
+        // Dukung opsi 'all' jika ada di cookie
+        if ($lastViewedAgent === 'all') {
+            return 'all';
         }
 
-        // FALLBACK: jika ganti akun (session agen lama bukan milik user ini) atau session kosong
-        // Set session baru ke agen pertama milik user tersebut
+        // VALIDASI KEAMANAN: Cookie dipakai hanya jika ID tersebut memang terdaftar milik user ini
+        if ($lastViewedAgent && in_array($lastViewedAgent, $myAgentIds)) {
+            return $lastViewedAgent;
+        }
+
+        // FALLBACK: Jika cookie kosong atau dimanipulasi, paksa pakai agen pertama milik user
         $defaultAgent = $myAgents->first()->id_wazuh_agen;
-        session(['active_wazuh_agent_id' => $defaultAgent]);
+        Cookie::queue('active_wazuh_agent_id', $defaultAgent, 60 * 24);
 
         return $defaultAgent;
     }
 
-    // Code ini untuk: Mengambil 5 data log alert terbaru berdasarkan agen yang aktif.
-    // Berfungsi untuk: Endpoint API internal (dipanggil via AJAX/fetch dari frontend).
     public function getAlerts()
     {
         $activeAgentId = $this->getActiveAgentId();
@@ -56,23 +56,17 @@ class AlertController extends Controller
         return $this->alertService->getLatestAlerts(5, $activeAgentId);
     }
 
-    // Code ini untuk: Mengambil log terfilter, kalkulasi statistik card, dan memproses pagination.
-    // Berfungsi untuk: Menampilkan halaman utama menu "Alert page" di sisi Customer.
     public function index(Request $request)
     {
-        // 1. Ambil ID agen aktif dari session khusus milik user login
         $activeAgentId = $this->getActiveAgentId();
-
-        // 2. Menangkap parameter request filter dari form HTML di Blade
         $selectedSeverity = $request->input('severity');
 
-        // 3. Ambil data hitungan angka counter card statistik
-        $analyticsData = $this->alertService->getLogsAnalytics($activeAgentId);
+        // Ambil daftar semua agen milik user untuk dikirim ke select dropdown di Blade
+        $list_agen = Agen::where('user_id', auth()->id())->get();
 
-        // 4. Ambil data baris log yang sudah disaring berdasarkan severity
+        $analyticsData = $this->alertService->getLogsAnalytics($activeAgentId);
         $allFilteredAlerts = $this->alertService->getFilteredAlerts($activeAgentId, $selectedSeverity);
 
-        // 5. Membuat pagination manual dari data array (20 baris per halaman)
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $perPage = 20;
         $currentItems = $allFilteredAlerts->slice(($currentPage - 1) * $perPage, $perPage)->all();
@@ -85,33 +79,38 @@ class AlertController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        // 6. Mengirim data statistik dan hasil paginasi ke view Blade
+        // 🌟 Pastikan 'list_agen' turut dikirim agar layout header dropdown bisa merendernya
         return view('Customer.logs.daftarlog', array_merge($analyticsData, [
             'alerts' => $paginatedAlerts,
-            'selectedSeverity' => $selectedSeverity
+            'selectedSeverity' => $selectedSeverity,
+            'list_agen' => $list_agen,
+            'activeAgentId' => $activeAgentId
         ]));
     }
 
-    // Code ini untuk: Mengubah session target ID agen yang aktif dipantau (mendukung opsi single agen atau 'all').
-    // Berfungsi untuk: Komponen Dropdown "Switch Agent" di halaman Alert/Logs Customer.
+    // 🌟 PERBAIKAN: Fungsi switchAgent sekarang menyimpan ke COOKIE dan membuang sisa Session
     public function switchAgent(Request $request)
     {
         $request->validate([
             'agent_id' => 'required|string'
         ]);
 
+        // Bersihkan sisa session lama agar tidak terjadi konflik data
+        session()->forget('active_wazuh_agent_id');
+
+        // Skenario 1: Jika memilih melihat semua ('all')
         if ($request->agent_id === 'all') {
-            session(['active_wazuh_agent_id' => 'all']);
+            Cookie::queue('active_wazuh_agent_id', 'all', 60 * 24);
             return back()->with('success', 'Successfully switched to all agents.');
         }
 
-        // Validasi: agen yang dipilih harus benar-benar milik user yang sedang login
+        // Skenario 2: Validasi kepemilikan agen sebelum disimpan ke cookie browser
         $isValidAgent = Agen::where('user_id', auth()->id())
             ->where('id_wazuh_agen', $request->agent_id)
             ->exists();
 
         if ($isValidAgent) {
-            session(['active_wazuh_agent_id' => $request->agent_id]);
+            Cookie::queue('active_wazuh_agent_id', $request->agent_id, 60 * 24);
             return back()->with('success', 'Successfully switched to agent ' . $request->agent_id);
         }
 

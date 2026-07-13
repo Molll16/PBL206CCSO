@@ -91,11 +91,6 @@
     $wBaris = $item->baris ?? 2;
     $wHeight = $wBaris * 85;
 
-    // Responsive column spans:
-    // xs (4-col grid): always full width (col-span-4)
-    // sm (6-col grid): half or full depending on original kolom
-    // md (8-col grid): scale proportionally
-    // lg (12-col grid): original value
     $smSpan = $wKolom <= 4 ? 3 : 6;   // half or full on sm
     $mdSpan = min(8, max(4, (int) round($wKolom * 8 / 12))); // scale to 8-col
                 @endphp
