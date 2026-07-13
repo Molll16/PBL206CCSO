@@ -16,10 +16,6 @@ class AlertService
         $this->wazuh = $wazuh;
     }
 
-    // =========================================================================
-    // HELPER INTERNAL
-    // =========================================================================
-
     // Code ini untuk: Mengambil semua data log mentah dari server Wazuh via WazuhApiService, lalu membersihkannya.
     // Berfungsi untuk: Sumber data internal utama, dipakai oleh hampir semua method publik di class ini.
     public function getAlerts(): array
@@ -63,8 +59,6 @@ class AlertService
 
     // Code ini untuk: Mencari daftar ID agen Wazuh milik user yang sedang login (mendukung single ID, array ID, atau opsi 'all').
     // Berfungsi untuk: Proteksi & filter multi-tenant, dipanggil oleh semua method publik di bawah agar data tidak bocor antar customer.
-    // Catatan: Logic yang mirip juga ada di AgentService::getCustomerStats() dan beberapa Controller (AlertController, WidgetController, ProfileController).
-    // Kalau nanti mau disatukan jadi 1 tempat, kabari saja — sekarang dibiarkan terpisah sesuai kesepakatan.
     private function getMyAgentIds($agentId = null): array
     {
         // Jika parameter berupa array (dari opsi 'all' di session yang sudah di-resolve sebelumnya)
@@ -172,11 +166,11 @@ class AlertService
     }
 
     // =========================================================================
-    // HALAMAN: LOGS / FILTER & ANALYTICS
+    // HALAMAN: ALERTS DAN FILTERING ALERTS CUSTOMER
     // =========================================================================
 
     // Code ini untuk: Memfilter log berdasarkan agen milik user dan tingkat keparahan (severity: critical/high/medium/low).
-    // Berfungsi untuk: Halaman Logs Customer, bagian tabel utama "Daftar Log/Alerts".
+    // Berfungsi untuk: Halaman alerts Customer, bagian tabel utama "Daftar Log/Alerts".
     public function getFilteredAlerts($agentId = null, ?string $severity = null)
     {
         $myAgents = $this->getMyAgentIds($agentId);
@@ -199,7 +193,7 @@ class AlertService
     }
 
     // Code ini untuk: Menghitung total angka statistik log berdasarkan tingkat keparahan (Critical, High, Medium, Low).
-    // Berfungsi untuk: Halaman Logs/Analytics Customer, bagian card "Card Statistik" di bagian atas tabel.
+    // Berfungsi untuk: Halaman Alerts/Analytics Customer, bagian card "Card Statistik" di bagian atas tabel.
     public function getLogsAnalytics($agentId = null): array
     {
         $allAlerts = $this->getFilteredAlerts($agentId, null);
@@ -217,9 +211,8 @@ class AlertService
     // HALAMAN: DASHBOARD UTAMA ADMIN
     // =========================================================================
 
-    // Code ini untuk: Menghitung tren total volume log harian selama 7 hari terakhir (untuk grafik).
+    // Code ini untuk: Menghitung tren total volume log harian selama 7 hari terakhir (untuk grafik pada halaman admin).
     // Berfungsi untuk: Halaman Dashboard Utama Admin, bagian grafik batang/area chart mingguan.
-    // Catatan: Method ini TIDAK memfilter per-agen (menghitung log dari SEMUA agen), karena dipakai admin yang perlu lihat data global.
     public function getWeeklyChartData(): array
     {
         $alerts = $this->getAlerts();

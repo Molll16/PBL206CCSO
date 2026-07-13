@@ -74,9 +74,8 @@ class AuthController extends Controller
         return redirect('/login');
     }
 
-    // =========================================================================
+
     // FITUR: LOGIKA PROSES RESET PASSWORD (LUPA PASSWORD)
-    // =========================================================================
 
     // Code ini untuk: Memproses input email dari pop-up "Lupa Password" dan mengirimkan link reset ke Gmail user.
     // Berfungsi untuk: Halaman Login, bagian modal/pop-up "Forgot Password".

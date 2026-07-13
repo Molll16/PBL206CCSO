@@ -23,10 +23,6 @@ class ProfileController extends Controller
         $this->wazuhApi = $wazuhApi;
     }
 
-    // =========================================================================
-    // 1. ROUTE MANAGEMENT UNTUK ADMIN
-    // =========================================================================
-
     // Code ini untuk: Menampilkan halaman pengaturan profil khusus Admin.
     // Berfungsi untuk: Halaman Profile Admin (Admin.profile.profileset-admin), tab utama.
     public function settings()
@@ -55,10 +51,6 @@ class ProfileController extends Controller
             ]);
         }
     }
-
-    // =========================================================================
-    // 2. METHOD KHUSUS HALAMAN CUSTOMER
-    // =========================================================================
 
     // Code ini untuk: Menampilkan data profil milik Customer yang sedang login.
     // Berfungsi untuk: Halaman Profile Customer (Customer.profile.profileset), tab "Profile Settings".
@@ -145,17 +137,6 @@ class ProfileController extends Controller
         return back()->with('success', 'Dashboard kustom berhasil dihapus!');
     }
 
-    // =========================================================================
-    // 3. LOGIC PROSES UPDATE (SHARED ADMIN & CUSTOMER)
-    // =========================================================================
-
-    // Code ini untuk: Menonaktifkan fitur edit profil (baik Admin maupun Customer tidak bisa mengubah data profil).
-    // Berfungsi untuk: Form "Edit Profile" di halaman Profile Admin & Customer.
-    public function update(Request $request)
-    {
-        return back()->with('success', 'Profile berhasil diupdate');
-    }
-
     // Code ini untuk: Mengubah password akun user (dipakai bersama oleh Admin & Customer).
     // Berfungsi untuk: Form "Change Password" di halaman profil Admin maupun Customer.
     public function updatePassword(Request $request)
@@ -180,10 +161,6 @@ class ProfileController extends Controller
             ->with('success', 'Your password has been successfully updated!')
             ->with('password_success', true);
     }
-
-    // =========================================================================
-    // 4. FITUR SWITCH AGENT LOGIC
-    // =========================================================================
 
     // Code ini untuk: Mengubah session target ID agen yang aktif dipantau.
     // Berfungsi untuk: Komponen Dropdown "Switch Agent" di halaman Dashboard Customer.

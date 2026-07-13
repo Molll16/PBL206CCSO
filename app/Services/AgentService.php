@@ -53,7 +53,6 @@ class AgentService
 
     // Code ini untuk: Menghitung status online/offline agen spesifik milik satu customer yang sedang login.
     // Berfungsi untuk: Dashboard Utama Panel Customer.
-    // Catatan: Query "agen milik user login" ini mirip dengan AlertService::getMyAgentIds() — sengaja dibiarkan terpisah sesuai kesepakatan sebelumnya.
     public function getCustomerStats(): array
     {
         $myAgents = Agen::where('user_id', auth()->id())->pluck('id_wazuh_agen')->toArray();
@@ -338,8 +337,6 @@ class AgentService
 
     // Code ini untuk: Memantau keamanan firewall berdasarkan data log riil dari endpoint /manager/logs.
     // Berfungsi untuk: Widget Monitoring Firewall & Port Security.
-    // 🔧 DIPERBAIKI: sebelumnya parameter $agentId diterima tapi tidak dipakai sama sekali di query,
-    // sehingga semua customer melihat log manager Wazuh global (bukan milik agennya sendiri). Sekarang ditambahkan filter q=agent.id.
     public function fetchFirewallEvents($agentId): array
     {
         try {
@@ -389,7 +386,6 @@ class AgentService
 
     // Code ini untuk: Mengambil data koneksi aktif riil dari agen sistem (protokol TCP).
     // Berfungsi untuk: Widget Active Connections.
-    // 🔧 DIPERBAIKI: sama seperti fetchFirewallEvents(), sebelumnya $agentId tidak dipakai di query — sekarang ditambahkan filter agent.id.
     public function fetchActiveConnections($agentId): array
     {
         try {
@@ -441,7 +437,6 @@ class AgentService
 
     // Code ini untuk: Mengambil data serangan berbasis lokasi (GeoIP) riil dari log.
     // Berfungsi untuk: Widget GeoIP Attack Map.
-    // 🔧 DIPERBAIKI: sama seperti 2 method di atas, sebelumnya $agentId tidak dipakai di query — sekarang ditambahkan filter agent.id.
     public function fetchGeoAttacks($agentId): array
     {
         try {
